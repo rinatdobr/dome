@@ -1,0 +1,3 @@
+[submodule "3rdparty/td"]
+	path = 3rdparty/td
+	url = https://github.com/tdlib/td.git
