@@ -15,6 +15,18 @@ target_link_libraries(dome_service PUBLIC
     Qt5::DBus
 )
 
+install(TARGETS dome_service
+        RUNTIME DESTINATION /usr/bin
+)
+
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ru.dome.conf
-        DESTINATION /usr/share/dbus-1/system.d/
+        DESTINATION /usr/share/dbus-1/system.d
+)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ru.dome.service
+        DESTINATION /usr/share/dbus-1/system-services/
+)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome.service
+        DESTINATION /usr/lib/systemd/system/
 )

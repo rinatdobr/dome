@@ -1,0 +1,9 @@
+[Unit]
+Description=Dome service
+
+[Service]
+Type=dbus
+BusName=ru.dome
+User=root
+Group=root
+ExecStart=/usr/bin/dome_service
