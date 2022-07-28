@@ -7,7 +7,9 @@
 
 #include "dome.h"
 
+#define OBJECT_PATH    "/"
 #define SERVICE_NAME    "ru.dome"
+#define INTERFACE_NAME    "ru.dome"
 
 int main(int argc, char **argv)
 {
@@ -27,7 +29,7 @@ int main(int argc, char **argv)
     }
 
     Dome dome;
-    QDBusConnection::systemBus().registerObject("/", &dome, QDBusConnection::ExportAllSlots);
+    QDBusConnection::systemBus().registerObject(OBJECT_PATH, INTERFACE_NAME, &dome, QDBusConnection::ExportAllSlots);
 
     app.exec();
     return 0;
