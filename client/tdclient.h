@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "executor.h"
+
 class TdClient {
 public:
     TdClient(int logLevel = 0);
@@ -45,6 +47,8 @@ private:
     void onAuthorizationStateUpdate();
     void checkAuthenticationError(Object object);
     td::ClientManager::RequestId nextQueryId();
+
+    Executor m_executor;
 };
 
 #endif

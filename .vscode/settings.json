@@ -56,6 +56,9 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "qvariantmap": "cpp"
+        "qvariantmap": "cpp",
+        "list": "cpp",
+        "future": "cpp",
+        "variant": "cpp"
     }
 }
