@@ -15,6 +15,7 @@ find_package(Td PATHS ${CMAKE_SOURCE_DIR}/3rdparty/td/build/root/lib/cmake 1.8.4
 set(SOURCE_FILES
     main.cpp
     tdclient.cpp
+    executor.cpp
 )
 
 add_executable(dome ${SOURCE_FILES})
