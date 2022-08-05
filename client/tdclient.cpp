@@ -1,5 +1,7 @@
 #include "tdclient.h"
 
+#include "commandor.h"
+
 // overloaded
 namespace detail {
 template <class... Fs>
@@ -187,6 +189,21 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                           << "]" << std::endl;
                 if (chatId == CHAT_ID) {
                     std::cout << "DOME" << std::endl;
+                    Result result = Commandor::Run(text);
+                    if (result.isValid()) {
+                        std::cout << "Sending message to chat " << chatId << "..." << std::endl;
+                        auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
+                        send_message->chat_id_ = chatId;
+                        auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
+                        message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
+                        message_content->text_->text_ = std::move(result.toString());
+                        send_message->input_message_content_ = std::move(message_content);
+
+                        sendQuery(std::move(send_message), {});
+                    }
+                    else {
+                        std::cout << "Result is invalid" << std::endl;
+                    }
                 }
             },
             [](auto &update) {

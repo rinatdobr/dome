@@ -6,10 +6,7 @@
 #include <QtDBus/QtDBus>
 
 #include "dome.h"
-
-#define OBJECT_PATH    "/"
-#define SERVICE_NAME    "ru.dome"
-#define INTERFACE_NAME    "ru.dome"
+#include "dbusservice.h"
 
 int main(int argc, char **argv)
 {
@@ -22,14 +19,19 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (!QDBusConnection::systemBus().registerService(SERVICE_NAME)) {
+    if (!QDBusConnection::systemBus().registerService(QString::fromStdString(dbus_dome::Service))) {
         fprintf(stderr, "%s\n",
                 qPrintable(QDBusConnection::systemBus().lastError().message()));
         exit(1);
     }
 
     Dome dome;
-    QDBusConnection::systemBus().registerObject(OBJECT_PATH, INTERFACE_NAME, &dome, QDBusConnection::ExportAllSlots);
+    QDBusConnection::systemBus().registerObject(
+        QString::fromStdString(dbus_dome::Path),
+        QString::fromStdString(dbus_dome::Interface),
+        &dome,
+        QDBusConnection::ExportAllSlots
+    );
 
     app.exec();
     return 0;

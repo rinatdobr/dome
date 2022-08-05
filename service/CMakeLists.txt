@@ -10,6 +10,7 @@ set(SOURCE_FILES
 )
 
 add_executable(dome_service ${SOURCE_FILES})
+target_include_directories(dome_service PRIVATE ../common)
 target_link_libraries(dome_service PUBLIC
     Qt5::Core
     Qt5::DBus
