@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "dome",
+            "includePath": [
+                "3rdparty/json/build/root/include",
+                "3rdparty/td/build/root/include",
+                "${default}"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
+}

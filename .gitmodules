@@ -1,3 +1,6 @@
 [submodule "3rdparty/td"]
 	path = 3rdparty/td
 	url = https://github.com/tdlib/td.git
+[submodule "3rdparty/json"]
+	path = 3rdparty/json
+	url = https://github.com/nlohmann/json.git
