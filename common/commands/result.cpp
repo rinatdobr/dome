@@ -1,5 +1,7 @@
 #include "result.h"
 
+namespace command {
+
 Result::Result()
  : m_isValid(false)
  , m_type(Type::Undefined)
@@ -33,4 +35,6 @@ const std::string &Result::toString() const
 bool Result::isValid() const
 {
     return m_isValid;
+}
+
 }

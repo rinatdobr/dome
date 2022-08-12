@@ -189,7 +189,7 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                           << "]" << std::endl;
                 if (chatId == CHAT_ID) {
                     std::cout << "DOME" << std::endl;
-                    Result result = Commandor::Run(text);
+                    command::Result result = Commandor::Run(text);
                     if (result.isValid()) {
                         std::cout << "Sending message to chat " << chatId << "..." << std::endl;
                         auto send_message = td::td_api::make_object<td::td_api::sendMessage>();

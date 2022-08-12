@@ -5,14 +5,33 @@ find_package(nlohmann_json PATHS ${CMAKE_SOURCE_DIR}/3rdparty/json/build/root/sh
 find_package(Qt5 REQUIRED COMPONENTS Core DBus)
 set(CMAKE_AUTOMOC ON)
 
+find_package(SQLite3 REQUIRED)
+
 set(SOURCE_FILES
     main.cpp
     config.cpp
     command.cpp
     runner.cpp
+    writers/writer.cpp
+    writers/dbwriter.cpp
 )
 
-add_executable(dome_statistic ${SOURCE_FILES} ${COMMANDS_SOURCE_FILES})
+set(COMMON_SOURCE_FILES
+    ../common/commands/command.cpp
+    ../common/commands/systeminfo.cpp
+    ../common/commands/systemsensors.cpp
+    ../common/commands/parser.cpp
+    ../common/commands/result.cpp
+)
+
+add_executable(dome_statistic ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
 target_include_directories(dome_statistic PRIVATE . ../common)
 target_link_libraries(dome_statistic PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(dome_statistic PUBLIC
+    Qt5::Core
+    Qt5::DBus
+)
+target_link_libraries(dome_statistic PRIVATE
+    SQLite::SQLite3
+)
 set_property(TARGET dome_statistic PROPERTY CXX_STANDARD 17)

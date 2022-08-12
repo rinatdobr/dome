@@ -1,4 +1,4 @@
-#include "systeminfo.h"
+#include "systemsensors.h"
 
 #include <QtDBus/QtDBus>
 #include <sstream>
@@ -19,13 +19,18 @@ std::string ProcessSystemSensorsReply(const QVariantMap &reply)
     return stream.str();
 }
 
-SystemInfo::SystemInfo(const std::vector<std::string> &args)
-    : Command(SystemInfoCommandId, args)
+SystemSensors::SystemSensors(const std::vector<std::string> &args)
+    : Command(SystemSensorsCommandId, args)
 {
 
 }
 
-Result SystemInfo::execute()
+std::string SystemSensors::name() const
+{
+    return SystemSensorsName;
+}
+
+Result SystemSensors::execute()
 {
     std::cout << "execute()" << std::endl;
 

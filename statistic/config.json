@@ -1,23 +1,14 @@
 {
+    "database": {
+        "env": "DOME_DATABASE",
+        "name": "dome.db"
+    },
     "commands": [
         {
-            "system_info1": {
-                "period": "1sec"
-            }
-        },
-            {
-            "system_info10": {
-                "period": "10sec"
-            }
-        },
-        {
-            "system_info15": {
-                "period": "15sec"
-            }
-        },
-        {
-            "system_info30": {
-                "period": "30sec"
+            "system_sensors": {
+                "args": "",
+                "period": "1sec",
+                "output_type": "db"
             }
         }
     ]

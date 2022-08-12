@@ -24,15 +24,17 @@ set(SOURCE_FILES
     main.cpp
     tdclient.cpp
     commandor.cpp
-    command.cpp
-    result.cpp
 )
 
-set(COMMANDS_SOURCE_FILES
-    commands/systeminfo.cpp
+set(COMMON_SOURCE_FILES
+    ../common/commands/parser.cpp
+    ../common/commands/command.cpp
+    ../common/commands/systeminfo.cpp
+    ../common/commands/systemsensors.cpp
+    ../common/commands/result.cpp
 )
 
-add_executable(dome ${SOURCE_FILES} ${COMMANDS_SOURCE_FILES})
+add_executable(dome ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
 target_include_directories(dome PRIVATE . ../common)
 target_link_libraries(dome PRIVATE Td::TdStatic)
 target_link_libraries(dome PUBLIC

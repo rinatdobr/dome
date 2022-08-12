@@ -5,6 +5,7 @@
             "includePath": [
                 "3rdparty/json/build/root/include",
                 "3rdparty/td/build/root/include",
+                "common",
                 "${default}"
             ],
             "intelliSenseMode": "linux-gcc-x64",

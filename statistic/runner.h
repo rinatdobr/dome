@@ -10,19 +10,21 @@
 class Runner
 {
 public:
-    Runner(const std::vector<Command> &commands);
+    Runner(
+        std::vector<std::unique_ptr<Command>> &&commands
+    );
 
     void run();
 
 private:
-    std::vector<Command> m_commands;
+    std::vector<std::unique_ptr<Command>> m_commands;
     std::chrono::seconds m_startTime;
     std::chrono::seconds m_lastExecutionTime;
     uint m_index;
     // std::chrono::time_point<std::chrono::system_clock> m_startTime;
 
     void setupSchedule();
-    Command &nextCommand();
+    std::unique_ptr<Command> &nextCommand();
 };
 
 #endif

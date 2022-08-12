@@ -1,8 +1,9 @@
-#ifndef RESULT_H
-#define RESULT_H
+#ifndef COMMANDS_RESULT_H
+#define COMMANDS_RESULT_H
 
 #include <string>
 
+namespace command {
 
 class Result
 {
@@ -27,5 +28,7 @@ protected:
 
     std::string m_string;
 };
+
+}
 
 #endif

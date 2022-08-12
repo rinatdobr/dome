@@ -5,23 +5,14 @@
 #include <vector>
 #include <memory>
 
-#include "command.h"
-
-class Parser
-{
-public:
-    static std::unique_ptr<Command> Parse(const std::string &line);
-
-private:
-    Parser();
-};
+#include <commands/command.h>
 
 class Commandor
 {
 public:
     Commandor();
 
-    static Result Run(const std::string &commandLine);
+    static command::Result Run(const std::string &commandLine);
 private:
 };
 
