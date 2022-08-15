@@ -1,24 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <string>
-#include <vector>
-#include <memory>
+#include <config/commands.h>
+#include <config/db.h>
 
-#include "command.h"
-
-class Config
+class Config : public dome::config::Db, public dome::config::Commands
 {
 public:
-    explicit Config(const std::string &path);
-
-    std::vector<std::unique_ptr<Command>> &&commands();
-
-private:
-    std::string m_path;
-    std::vector<std::unique_ptr<Command>> m_commands;
-
-    void parse(const std::string &configData);
+    Config(const std::string &dbConfigPath, const std::string &commandsConfigPath);
 };
 
 #endif

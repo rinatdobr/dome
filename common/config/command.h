@@ -1,18 +1,20 @@
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef CONFIG_COMMAND_H
+#define CONFIG_COMMAND_H
 
 #include <string>
 #include <memory>
 
 #include <commands/command.h>
+#include <io/io.h>
 
-#include "writers/writer.h"
+namespace dome {
+namespace config {
 
 class Command
 {
 public:
 
-enum class Type
+enum class IoType
 {
     Invalid,
     Db,
@@ -22,10 +24,10 @@ enum class Type
     Command(
         std::unique_ptr<command::Command> &&command,
         uint period,
-        const std::string &type
+        const std::string &ioType
     );
 
-    const std::unique_ptr<command::Command> &getCommand() const;
+    IoType ioType();
 
     uint getPeriodSec() const;
     void setPeriodSec(uint periodSec);
@@ -33,19 +35,20 @@ enum class Type
     uint nextTimeFrameSec() const;
     void setNextTimeFrameSec(uint nextTimeFrameSec = 0);
 
-    Type getType();
+    std::shared_ptr<dome::io::Io> io();
+    void setIo(std::shared_ptr<dome::io::Io> io);
 
-    std::shared_ptr<Writer> getWriter();
-    void setWriter(std::shared_ptr<Writer> writer);
-
-    command::Result execute();
+    const std::unique_ptr<command::Command> &command() const;
 
 private:
     std::unique_ptr<command::Command> m_command;
-    std::shared_ptr<Writer> m_writer;
+    std::shared_ptr<dome::io::Io> m_io;
     uint m_periodSec;
     uint m_nextTimeFrameSec;
-    Type m_type;
+    IoType m_ioType;
 };
+
+}
+}
 
 #endif

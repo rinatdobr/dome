@@ -1,4 +1,4 @@
-#include "systemsensors.h"
+#include "cputemperature.h"
 
 #include <QtDBus/QtDBus>
 #include <sstream>
@@ -8,29 +8,25 @@
 
 namespace command {
 
-std::string ProcessSystemSensorsReply(const QVariantMap &reply)
+std::string ProcessCpuTemperatureReply(const double &reply)
 {
     std::ostringstream stream;
-    auto i = reply.constBegin();
-    while (i != reply.constEnd()) {
-        stream << i.key().toStdString() << ": " << i.value().toString().toStdString() << '\n';
-        ++i;
-    }
+    stream << reply;
     return stream.str();
 }
 
-SystemSensors::SystemSensors(const std::vector<std::string> &args)
-    : Command(SystemSensorsCommandId, args)
+CpuTemperature::CpuTemperature(const std::vector<std::string> &args)
+    : Command(CpuTemperatureCommandId, args)
 {
 
 }
 
-std::string SystemSensors::name() const
+std::string CpuTemperature::name() const
 {
-    return SystemSensorsName;
+    return CpuTemperatureName;
 }
 
-Result SystemSensors::execute()
+Result CpuTemperature::execute()
 {
     std::cout << "execute()" << std::endl;
 
@@ -42,9 +38,9 @@ Result SystemSensors::execute()
     );
 
     if (iface.isValid()) {
-        QDBusReply<QVariantMap> reply = iface.call(QString::fromStdString(dbus_dome::MethodSystemSensors));
+        QDBusReply<double> reply = iface.call(QString::fromStdString(dbus_dome::MethodCpuTemperature));
         if (reply.isValid()) {
-            Result result(ProcessSystemSensorsReply(reply.value()));
+            Result result(this, ProcessCpuTemperatureReply(reply.value()));
             std::cout << "Reply was: " << result.toString() << std::endl;
             return result;
         }

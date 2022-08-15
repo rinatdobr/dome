@@ -1,0 +1,11 @@
+{
+    "commands": [
+        {
+            "cpu_temperature": {
+                "args": "",
+                "period": "60sec",
+                "output_type": "db"
+            }
+        }
+    ]
+}

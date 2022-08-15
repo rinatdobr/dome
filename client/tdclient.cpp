@@ -2,6 +2,9 @@
 
 #include "commandor.h"
 
+#include <chrono>
+#include <thread>
+
 // overloaded
 namespace detail {
 template <class... Fs>
@@ -43,6 +46,8 @@ TdClient::TdClient(int logLevel)
 }
 
 void TdClient::run() {
+    bool updating = false;
+
 	while (true) {
 		if (!m_isAuthenticated) {
 			processResponse(m_clientManager->receive(10));
@@ -50,13 +55,22 @@ void TdClient::run() {
 			std::cout << "Enter action [q] quit [u] check for updates and request results [c] show chats [m <chatId> "
 				"<text>] send message [me] show self [l] logout: "
 				<< std::endl;
-			std::string line;
-			std::getline(std::cin, line);
-			std::istringstream ss(line);
 			std::string action;
-			if (!(ss >> action)) {
-				continue;
-			}
+            if (!updating) {
+                std::string line;
+                std::getline(std::cin, line);
+                std::istringstream ss(line);
+                if (!(ss >> action)) {
+                    std::cout << "cont" << std::endl;
+                    continue;
+                }
+            }
+            else {
+                action = "u";
+				std::cout << "Sleeping..." << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(5));
+				std::cout << "Sleeping... Done." << std::endl;
+            }
 			if (action == "q") {
 				return;
 			}
@@ -70,6 +84,7 @@ void TdClient::run() {
 						break;
 					}
 				}
+                updating = true;
 			} else if (action == "close") {
 				std::cout << "Closing..." << std::endl;
 				sendQuery(td::td_api::make_object<td::td_api::close>(), {});
@@ -81,10 +96,10 @@ void TdClient::run() {
 				sendQuery(td::td_api::make_object<td::td_api::logOut>(), {});
 			} else if (action == "m") {
 				std::int64_t chatId;
-				ss >> chatId;
-				ss.get();
+				// ss >> chatId;
+				// ss.get();
 				std::string text;
-				std::getline(ss, text);
+				// std::getline(ss, text);
 
 				std::cout << "Sending message to chat " << chatId << "..." << std::endl;
 				auto send_message = td::td_api::make_object<td::td_api::sendMessage>();

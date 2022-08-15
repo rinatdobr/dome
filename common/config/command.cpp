@@ -2,35 +2,38 @@
 
 #include <iostream>
 
-Command::Type StrToType(const std::string &type)
+namespace dome {
+namespace config {
+
+Command::IoType StrToIoType(const std::string &ioType)
 {
-    if (type == "db") {
-        return Command::Type::Db;
+    if (ioType == "db") {
+        return Command::IoType::Db;
     }
-    else if (type == "file") {
-        return Command::Type::File;
+    else if (ioType == "file") {
+        return Command::IoType::File;
     }
     else {
-        return Command::Type::Invalid;
+        return Command::IoType::Invalid;
     }
 }
 
 Command::Command(
     std::unique_ptr<command::Command> &&command,
     uint period,
-    const std::string &type
+    const std::string &ioType
 )
     : m_command(std::move(command))
     , m_periodSec(period)
     , m_nextTimeFrameSec(0)
-    , m_type(StrToType(type))
+    , m_ioType(StrToIoType(ioType))
 {
 
 }
 
-const std::unique_ptr<command::Command> &Command::getCommand() const
+Command::IoType Command::ioType()
 {
-    return m_command;
+    return m_ioType;
 }
 
 uint Command::getPeriodSec() const
@@ -58,22 +61,21 @@ void Command::setNextTimeFrameSec(uint nextTimeFrameSec)
     }
 }
 
-Command::Type Command::getType()
+
+std::shared_ptr<dome::io::Io> Command::io()
 {
-    return m_type;
+    return m_io;
 }
 
-std::shared_ptr<Writer> Command::getWriter()
+void Command::setIo(std::shared_ptr<dome::io::Io> io)
 {
-    return m_writer;
+    m_io = io;
 }
 
-void Command::setWriter(std::shared_ptr<Writer> writer)
+const std::unique_ptr<command::Command> &Command::command() const
 {
-    m_writer = writer;
+    return m_command;
 }
 
-command::Result Command::execute()
-{
-    return m_command->execute();
+}
 }

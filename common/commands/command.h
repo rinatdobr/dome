@@ -10,6 +10,8 @@ namespace command {
 
 using CommandId = std::string;
 
+const std::string UndefinedName("undefined");
+
 class Command
 {
 public:

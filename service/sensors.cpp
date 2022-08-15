@@ -3,7 +3,7 @@
 #include <QProcess>
 #include <QString>
 
-double Sensors::cpuTemparture() const
+double Sensors::cpuTemperature() const
 {
     QString program = "/usr/bin/sensors";
 

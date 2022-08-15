@@ -10,18 +10,21 @@ find_package(SQLite3 REQUIRED)
 set(SOURCE_FILES
     main.cpp
     config.cpp
-    command.cpp
     runner.cpp
-    writers/writer.cpp
-    writers/dbwriter.cpp
 )
 
 set(COMMON_SOURCE_FILES
     ../common/commands/command.cpp
-    ../common/commands/systeminfo.cpp
-    ../common/commands/systemsensors.cpp
+    ../common/commands/cputemperature.cpp
     ../common/commands/parser.cpp
     ../common/commands/result.cpp
+    ../common/commands/statistic.cpp
+    ../common/config/command.cpp
+    ../common/config/commands.cpp
+    ../common/config/config.cpp
+    ../common/config/db.cpp
+    ../common/io/db.cpp
+    ../common/io/io.cpp
 )
 
 add_executable(dome_statistic ${SOURCE_FILES} ${COMMON_SOURCE_FILES})

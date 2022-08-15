@@ -5,26 +5,25 @@
 #include <chrono>
 #include <map>
 
-#include "command.h"
+#include <config/command.h>
 
 class Runner
 {
 public:
     Runner(
-        std::vector<std::unique_ptr<Command>> &&commands
+        std::vector<std::unique_ptr<dome::config::Command>> &&configCommands
     );
 
     void run();
 
 private:
-    std::vector<std::unique_ptr<Command>> m_commands;
+    std::vector<std::unique_ptr<dome::config::Command>> m_configCommands;
     std::chrono::seconds m_startTime;
     std::chrono::seconds m_lastExecutionTime;
     uint m_index;
-    // std::chrono::time_point<std::chrono::system_clock> m_startTime;
 
     void setupSchedule();
-    std::unique_ptr<Command> &nextCommand();
+    std::unique_ptr<dome::config::Command> &nextConfigCommand();
 };
 
 #endif

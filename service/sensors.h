@@ -7,7 +7,7 @@
 class Sensors
 {
 public:
-    double cpuTemparture() const;
+    double cpuTemperature() const;
 };
 
 #endif

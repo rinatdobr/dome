@@ -5,9 +5,9 @@ Dome::~Dome()
 
 }
 
-QVariantMap Dome::systemSensors()
+double Dome::cpuTemperature()
 {
-    double cpuTemp = m_sensors.cpuTemparture();
+    double cpuTemp = m_sensors.cpuTemperature();
 
-    return QVariantMap{{"CpuTemperature", cpuTemp}};
+    return cpuTemp;
 }

@@ -13,7 +13,7 @@ public:
     virtual ~Dome();
 
 public slots:
-    Q_SCRIPTABLE QVariantMap systemSensors();
+    Q_SCRIPTABLE double cpuTemperature();
 
 private:
     Sensors m_sensors;

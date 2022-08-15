@@ -5,6 +5,8 @@
 
 namespace command {
 
+class Command;
+
 class Result
 {
 public:
@@ -15,18 +17,20 @@ public:
     };
 
     Result();
-    explicit Result(const std::string &result);
+    explicit Result(const Command *command, const std::string &result);
     ~Result();
 
     Type type() const;
     const std::string &toString() const;
     bool isValid() const;
+    const Command *command() const; 
 
 protected:
     bool m_isValid;
     Type m_type;
 
     std::string m_string;
+    const Command *m_command;
 };
 
 }

@@ -5,14 +5,16 @@ namespace command {
 Result::Result()
  : m_isValid(false)
  , m_type(Type::Undefined)
+ , m_command(nullptr)
 {
 
 }
 
-Result::Result(const std::string &result)
+Result::Result(const Command *command, const std::string &result)
  : m_isValid(true)
  , m_type(Type::String)
  , m_string(result)
+ , m_command(command)
 {
 
 }
@@ -35,6 +37,11 @@ const std::string &Result::toString() const
 bool Result::isValid() const
 {
     return m_isValid;
+}
+
+const Command *Result::command() const
+{
+    return m_command;
 }
 
 }

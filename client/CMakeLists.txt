@@ -15,6 +15,8 @@ IF (NOT DEFINED CHAT_ID)
 ENDIF()
 ADD_DEFINITIONS(-DCHAT_ID=${CHAT_ID})
 
+find_package(nlohmann_json PATHS ${CMAKE_SOURCE_DIR}/3rdparty/json/build/root/share/cmake 3.11.1 REQUIRED)
+
 find_package(Td PATHS ${CMAKE_SOURCE_DIR}/3rdparty/td/build/root/lib/cmake 1.8.4 REQUIRED)
 
 find_package(Qt5 REQUIRED COMPONENTS Core DBus)
@@ -27,16 +29,23 @@ set(SOURCE_FILES
 )
 
 set(COMMON_SOURCE_FILES
-    ../common/commands/parser.cpp
     ../common/commands/command.cpp
-    ../common/commands/systeminfo.cpp
-    ../common/commands/systemsensors.cpp
+    ../common/commands/cputemperature.cpp
+    ../common/commands/parser.cpp
     ../common/commands/result.cpp
+    ../common/commands/statistic.cpp
+    ../common/config/command.cpp
+    ../common/config/commands.cpp
+    ../common/config/config.cpp
+    ../common/config/db.cpp
+    ../common/io/db.cpp
+    ../common/io/io.cpp
 )
 
 add_executable(dome ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
 target_include_directories(dome PRIVATE . ../common)
 target_link_libraries(dome PRIVATE Td::TdStatic)
+target_link_libraries(dome PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome PUBLIC
     Qt5::Core
     Qt5::DBus

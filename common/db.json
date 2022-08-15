@@ -1,0 +1,6 @@
+{
+    "database": {
+        "env": "DOME_DATABASE",
+        "name": "dome.db"
+    }
+}
