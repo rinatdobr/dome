@@ -1,16 +1,16 @@
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "runner.h"
 #include "config.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        std::cerr << "No config file to read" << std::endl;
-    }
+    spdlog::set_level(spdlog::level::debug);
 
-    Config config(argv[1], argv[2]);
+    spdlog::info("Start dome_statistic");
+
+    Config config;
     Runner runner(std::move(config.commands()));
     runner.run();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

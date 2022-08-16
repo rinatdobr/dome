@@ -2,7 +2,7 @@
 
 #include <QtDBus/QtDBus>
 #include <sstream>
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "dbusservice.h"
 
@@ -10,6 +10,8 @@ namespace command {
 
 std::string ProcessCpuTemperatureReply(const double &reply)
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     std::ostringstream stream;
     stream << reply;
     return stream.str();
@@ -18,17 +20,19 @@ std::string ProcessCpuTemperatureReply(const double &reply)
 CpuTemperature::CpuTemperature(const std::vector<std::string> &args)
     : Command(CpuTemperatureCommandId, args)
 {
-
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
 std::string CpuTemperature::name() const
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     return CpuTemperatureName;
 }
 
 Result CpuTemperature::execute()
 {
-    std::cout << "execute()" << std::endl;
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     QDBusInterface iface(
         QString::fromStdString(dbus_dome::Service),
@@ -40,16 +44,16 @@ Result CpuTemperature::execute()
     if (iface.isValid()) {
         QDBusReply<double> reply = iface.call(QString::fromStdString(dbus_dome::MethodCpuTemperature));
         if (reply.isValid()) {
+            spdlog::info("Executing {}... Done", name());
             Result result(this, ProcessCpuTemperatureReply(reply.value()));
-            std::cout << "Reply was: " << result.toString() << std::endl;
             return result;
         }
 
-        std::cerr << "Method call failed: " << reply.error().name().toStdString() << ":" << reply.error().message().toStdString() << std::endl;
+        spdlog::error("command::CpuTemperature: Method call failed: {}:{}", reply.error().name().toStdString(), reply.error().message().toStdString());
         return {};
     }
 
-    std::cerr << "Iface not valid: " << iface.lastError().name().toStdString() << ":" << iface.lastError().message().toStdString() << std::endl;
+    spdlog::error("command::CpuTemperature: Iface not valid: {}:{}", iface.lastError().name().toStdString(), iface.lastError().message().toStdString());
     return {};
 }
 

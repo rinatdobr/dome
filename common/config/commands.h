@@ -5,8 +5,6 @@
 #include <vector>
 #include <memory>
 
-#include <io/io.h>
-
 #include "config.h"
 #include "command.h"
 

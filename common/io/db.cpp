@@ -1,8 +1,8 @@
 #include "db.h"
 
-#include <iostream>
 #include <sstream>
 #include <sqlite3.h>
+#include <spdlog/spdlog.h>
 
 namespace {
 
@@ -39,8 +39,10 @@ Db::Db(const std::string path)
     , m_isValid(false)
     , m_dbHandler(nullptr)
 {
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+
     if (sqlite3_open(path.c_str(), &m_dbHandler) != SQLITE_OK) {
-        std::cout << "sqlite3_open error" << std::endl;
+        spdlog::error("Can't open DB: {}", sqlite3_errmsg(m_dbHandler));
         return;
     }
 
@@ -49,50 +51,53 @@ Db::Db(const std::string path)
 
 Db::~Db()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     if (!m_isValid) {
-        std::cout << "Io is not valid" << std::endl;
         return;
     }
 
     if (sqlite3_close(m_dbHandler) != SQLITE_OK) {
-        std::cout << "sqlite3_close: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("Can't close DB: {}", sqlite3_errmsg(m_dbHandler));
     }
 }
 
 void Db::write(const command::Result &result)
 {
+    spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result.isValid());
+
     if (!m_isValid) {
-        std::cout << "Io is not valid" << std::endl;
+        spdlog::error("DB is not valid to write");
         return;
     }
 
     if (!result.isValid()) {
-        std::cout << "No need to write not valid result" << std::endl;
+        spdlog::warn("No need to write not valid result");
         return;
     }
 
     const std::string tableName(result.command()->name());
     if (!checkIfTableExists(tableName) &&
         !createTable(tableName)) {
-        std::cout << "No table to write value" << std::endl;
+        spdlog::error("No table to write result");
         return;
     }
 
     writeValue(tableName, result.toString());
-
-    std::cout << "write" << std::endl;
 }
 
 std::string Db::readLastForSec(const command::Command &command, uint seconds)
 {
+    spdlog::trace("{}:{} {} command={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, command.name(), seconds);
+
     if (!m_isValid) {
-        std::cout << "Io is not valid" << std::endl;
+        spdlog::error("DB is not valid to read");
         return {};
     }
 
     const std::string tableName(command.name());
     if (!checkIfTableExists(tableName)) {
-        std::cout << "No table to write value" << std::endl;
+        spdlog::error("No table to read result");
         return {};
     }
 
@@ -101,17 +106,19 @@ std::string Db::readLastForSec(const command::Command &command, uint seconds)
 
 bool Db::checkIfTableExists(const std::string &tableName)
 {
+    spdlog::trace("{}:{} {} tableName={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName);
+
     sqlite3_stmt *sqlRequest;
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, CheckIfTableExists.c_str(), -1, &sqlRequest, NULL);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlite3_prepare_v2: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_prepare_v2: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return false;
     }
 
     sqlCode = sqlite3_bind_text(sqlRequest, 1, tableName.c_str(), -1, SQLITE_TRANSIENT);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlCode: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_bind_text: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return false;
     }
@@ -126,7 +133,7 @@ bool Db::checkIfTableExists(const std::string &tableName)
         return false;
     }
     else {
-        std::cout << "sqlite3_step: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_step: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return false;
     }
@@ -134,16 +141,16 @@ bool Db::checkIfTableExists(const std::string &tableName)
 
 bool Db::createTable(const std::string &tableName)
 {
+    spdlog::trace("{}:{} {} tableName={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName);
+
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");
     std::string createTable(CreateTable);
     createTable.replace(createTable.find(tableNameToReplace), tableNameToReplace.length(), tableName);
 
-    std::cout << createTable << std::endl;
-
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, createTable.c_str(), -1, &sqlRequest, NULL);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlite3_prepare_v2: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_prepare_v2: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return false;
     }
@@ -154,7 +161,7 @@ bool Db::createTable(const std::string &tableName)
         return true;
     }
     else {
-        std::cout << "sqlite3_step: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_step: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return false;
     }
@@ -162,23 +169,23 @@ bool Db::createTable(const std::string &tableName)
 
 void Db::writeValue(const std::string &tableName, const std::string &value)
 {
+    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
+
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");
     std::string insertToTable(InsertToTable);
     insertToTable.replace(insertToTable.find(tableNameToReplace), tableNameToReplace.length(), tableName);
 
-    std::cout << insertToTable << std::endl;
-
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, insertToTable.c_str(), -1, &sqlRequest, NULL);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlite3_prepare_v2: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_prepare_v2: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return;
     }
 
     sqlCode = sqlite3_bind_text(sqlRequest, 1, value.c_str(), -1, SQLITE_TRANSIENT);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlCode: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_bind_text: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return;
     }
@@ -189,7 +196,7 @@ void Db::writeValue(const std::string &tableName, const std::string &value)
         return;
     }
     else {
-        std::cout << "sqlite3_step: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_step: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return;
     }
@@ -197,6 +204,8 @@ void Db::writeValue(const std::string &tableName, const std::string &value)
 
 std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds)
 {
+    spdlog::trace("{}:{} {} tableName={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, seconds);
+
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");
     std::string secondsValueToReplace("seconds_value");
@@ -204,23 +213,18 @@ std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds)
     readFromTable.replace(readFromTable.find(tableNameToReplace), tableNameToReplace.length(), tableName);
     readFromTable.replace(readFromTable.find(secondsValueToReplace), secondsValueToReplace.length(), std::to_string(seconds));
 
-    std::cout << readFromTable << std::endl;
-
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, readFromTable.c_str(), -1, &sqlRequest, NULL);
     if (sqlCode != SQLITE_OK) {
-        std::cout << "sqlite3_prepare_v2: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_prepare_v2: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return {};
     }
 
     // sqlCode = sqlite3_bind_int64(sqlRequest, 1, seconds);
     // if (sqlCode != SQLITE_OK) {
-    //     std::cout << "sqlCode: " << sqlite3_errmsg(m_dbHandler) << std::endl;
     //     sqlite3_finalize(sqlRequest);
     //     return {};
     // }
-
-    // std::cout << sqlite3_sql(sqlRequest) << std::endl;
 
     std::ostringstream result;
     while ((sqlCode = sqlite3_step(sqlRequest)) == SQLITE_ROW) {
@@ -231,7 +235,7 @@ std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds)
         return result.str();
     }
     else {
-        std::cout << "sqlite3_step: " << sqlite3_errmsg(m_dbHandler) << std::endl;
+        spdlog::error("sqlite3_step: {}", sqlite3_errmsg(m_dbHandler));
         sqlite3_finalize(sqlRequest);
         return {};
     }

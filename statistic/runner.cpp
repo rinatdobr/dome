@@ -1,17 +1,17 @@
 #include "runner.h"
 
-#include <iostream>
 #include <algorithm>
 #include <thread>
+#include <spdlog/spdlog.h>
 
-Runner::Runner(
-    std::vector<std::unique_ptr<dome::config::Command>> &&configCommands
-)
+Runner::Runner(std::vector<std::unique_ptr<dome::config::Command>> &&configCommands)
     : m_configCommands(std::move(configCommands))
     , m_index(0)
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     if (m_configCommands.size() == 0) {
-        std::cerr << "No command to schedule" << std::endl;
+        spdlog::error("No command to run");
         return;
     }
 
@@ -20,22 +20,22 @@ Runner::Runner(
 
 void Runner::run()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     int i = 0;
     while (true) {
         std::unique_ptr<dome::config::Command> &currentConfigCommand = nextConfigCommand();
-        std::cout << "==" << std::endl;
         auto diff = std::chrono::seconds(currentConfigCommand->nextTimeFrameSec()) - m_lastExecutionTime;
 
         if (diff.count() > 0) {
-            std::cout << "Sleeping for " << diff.count() << " seconds..." << std::endl;
+            spdlog::info("Sleeping for {} seconds...", diff.count());
             std::this_thread::sleep_for(diff);
         }
 
-        std::cout << "Executing command " << currentConfigCommand->command()->name() << " ..." << std::endl;
 
+        spdlog::debug("Executing command {}...", currentConfigCommand->command()->name());
         auto result = currentConfigCommand->command()->execute();
-
-        std::cout << "result " << result.toString() << std::endl;
+        spdlog::debug("Result={}", result.isValid());
 
         currentConfigCommand->io()->write(result);
 
@@ -49,19 +49,21 @@ void Runner::run()
 
 void Runner::setupSchedule()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     m_startTime = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
     m_lastExecutionTime = m_startTime;
-    std::cout << m_startTime.count() << std::endl;
     for (auto &command : m_configCommands) {
         command->setNextTimeFrameSec(
             m_startTime.count() + command->getPeriodSec()
         );
-        std::cout << command->command()->name() << " " << command->getPeriodSec() << " " << command->nextTimeFrameSec() << std::endl;
     }
 }
 
 std::unique_ptr<dome::config::Command> &Runner::nextConfigCommand()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     auto minIt = std::min_element(
         m_configCommands.begin(),
         m_configCommands.end(),

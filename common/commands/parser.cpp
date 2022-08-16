@@ -1,44 +1,52 @@
 #include "parser.h"
 
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "cputemperature.h"
 #include "statistic.h"
 
 namespace command {
 
-std::unique_ptr<Command> Parser::Parse(const std::string &line)
+std::vector<std::string> ParseArgs(const std::string &args)
 {
-    std::size_t delimetr = line.find(' ');
-    std::string command(line, 0, delimetr);
+    if (args.size() == 0) {
+        return {};
+    }
 
-    std::vector<std::string> args;
-    std::size_t start = delimetr + 1;
+    std::vector<std::string> result;
+
+    std::size_t start = 0;
     int i = 0;
     while (start != std::string::npos) {
-        std::size_t end = line.find(' ', start);
+        std::size_t end = args.find(' ', start);
         if (end != std::string::npos) {
-            args.push_back(std::string(line, start, end - start));
-            // std::cout << std::string(line) << std::endl;
-            // std::cout << start << std::endl;
-            // std::cout << end << std::endl;
-            // std::cout << std::string(line, start, end - start) << std::endl;
-            std::cout << "arg[" << i++ << "] is " << args.back() << std::endl;
+            result.push_back(std::string(args, start, end - start));
+            spdlog::debug("arg[{}]={}", i++, result.back());
         }
         else {
-            args.push_back(std::string(line, start));
-            std::cout << std::string(line, start) << std::endl;
-            std::cout << "arg[" << i++ << "] is " << args.back() << std::endl;
+            result.push_back(std::string(args, start));
+            spdlog::debug("arg[{}]={}", i++, result.back());
             break;
         }
         start = end + 1;
     }
 
+    return result;
+}
+
+std::unique_ptr<Command> Parser::Parse(const std::string &line)
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    std::size_t delimetr = line.find(' ');
+    std::string command(line, 0, delimetr);
+
+    spdlog::debug("command={}", command);
     if (command == command::CpuTemperatureName) {
-        return std::make_unique<command::CpuTemperature>(args);
+        return std::make_unique<command::CpuTemperature>(ParseArgs(std::string(line, delimetr + 1)));
     }
     else if (command == command::StatisticName) {
-        return std::make_unique<command::Statistic>(args);
+        return std::make_unique<command::Statistic>(ParseArgs(std::string(line, delimetr + 1)));
     }
 
     return nullptr;

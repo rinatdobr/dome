@@ -17,6 +17,8 @@ ADD_DEFINITIONS(-DCHAT_ID=${CHAT_ID})
 
 find_package(nlohmann_json PATHS ${CMAKE_SOURCE_DIR}/3rdparty/json/build/root/share/cmake 3.11.1 REQUIRED)
 
+find_package(spdlog REQUIRED)
+
 find_package(Td PATHS ${CMAKE_SOURCE_DIR}/3rdparty/td/build/root/lib/cmake 1.8.4 REQUIRED)
 
 find_package(Qt5 REQUIRED COMPONENTS Core DBus)
@@ -50,4 +52,5 @@ target_link_libraries(dome PUBLIC
     Qt5::Core
     Qt5::DBus
 )
+target_link_libraries(dome PRIVATE spdlog::spdlog_header_only)
 set_property(TARGET dome PROPERTY CXX_STANDARD 14)

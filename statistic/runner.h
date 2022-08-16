@@ -10,9 +10,7 @@
 class Runner
 {
 public:
-    Runner(
-        std::vector<std::unique_ptr<dome::config::Command>> &&configCommands
-    );
+    Runner(std::vector<std::unique_ptr<dome::config::Command>> &&configCommands);
 
     void run();
 

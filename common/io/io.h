@@ -1,8 +1,7 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include <fstream>
-#include <memory>
+#include <string>
 
 #include <commands/command.h>
 #include <commands/result.h>

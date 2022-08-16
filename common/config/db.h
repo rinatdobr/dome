@@ -2,7 +2,6 @@
 #define CONFIG_DB_H
 
 #include <string>
-#include <vector>
 #include <memory>
 
 #include <io/io.h>

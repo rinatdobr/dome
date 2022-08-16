@@ -1,6 +1,6 @@
 #include "commands.h"
 
-#include <iostream>
+#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
 #include <commands/parser.h>
@@ -9,7 +9,7 @@ namespace {
     
 uint ParsePeriod(const std::string &period)
 {
-    std::cout << "period: " << period << std::endl;
+    spdlog::trace("{}:{} {} period={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, period);
 
     if (period.rfind("sec") != std::string::npos) {
         // nothing to do
@@ -19,7 +19,7 @@ uint ParsePeriod(const std::string &period)
     unsigned int result;
     parser >> result;
 
-    std::cout << "result: " << result << std::endl;
+    spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result);
 
     return result;
 }
@@ -32,33 +32,39 @@ namespace config {
 Commands::Commands(const std::string &configPath)
     : Config(configPath)
 {
+    spdlog::trace("{}:{} {} configPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configPath);
+
     parseConfig();
 }
 
 std::vector<std::unique_ptr<Command>> &Commands::commands()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     return m_commands;
 }
 
 void Commands::parseConfig()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     auto configData = readConfigFile();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
 
     auto jCommands = jConfig["commands"];
     for(const auto &jCommand : jCommands) {
         if (jCommand.size() != 1) {
-            std::cerr << "Invalid command notation (size)" << std::endl;
+            spdlog::error("Invalid command format: \" {} \"", jCommand.dump());
             continue;
         }
 
         for(const auto &jCommandItem : jCommand.items()) {
-            std::cout << jCommandItem.key() << " : " << jCommandItem.value() << std::endl;
             auto props = jCommandItem.value();
             std::string commandName = jCommandItem.key();
             std::string period = props["period"].get<std::string>();
             std::string args = props["args"].get<std::string>();
             std::string outputType = props["output_type"].get<std::string>();
+            spdlog::info("Config command: name={} period={} args={} outputType={}", commandName, period, args, outputType);
 
             auto parsedCommand = command::Parser::Parse(commandName + ' ' + args);
             if (!parsedCommand) {

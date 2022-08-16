@@ -2,7 +2,7 @@
 
 #include <QtDBus/QtDBus>
 #include <sstream>
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "dbusservice.h"
 
@@ -41,29 +41,33 @@ public:
 Statistic::Statistic(const std::vector<std::string> &args)
     : Command(StatisticCommandId, args)
 {
-
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
 std::string Statistic::name() const
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     return StatisticName;
 }
 
 Result Statistic::execute()
 {
-    std::cout << "execute()" << std::endl;
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     if (m_args.size() < 2) {
-        std::cout << "Not enought args" << std::endl;
+        spdlog::error("command::Statistic: Not enought args");
         return {};
     }
 
     for (auto &configCommand : Config::getInstance().commands()) {
         if (configCommand->command()->name() == m_args[0]) {
+            spdlog::info("Executing {}... Done", name());
             return Result(this, configCommand->io()->readLastForSec(*configCommand->command(), std::stoul(m_args[1])));
         }
     }
 
+    spdlog::error("command::Statistic: Invalid command");
     return {};
 }
 

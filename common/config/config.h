@@ -2,8 +2,6 @@
 #define CONFIG_CONFIG_H
 
 #include <string>
-#include <vector>
-#include <memory>
 
 namespace dome {
 namespace config {

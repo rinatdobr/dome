@@ -7,6 +7,8 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(SQLite3 REQUIRED)
 
+find_package(spdlog REQUIRED)
+
 set(SOURCE_FILES
     main.cpp
     config.cpp
@@ -34,7 +36,6 @@ target_link_libraries(dome_statistic PUBLIC
     Qt5::Core
     Qt5::DBus
 )
-target_link_libraries(dome_statistic PRIVATE
-    SQLite::SQLite3
-)
+target_link_libraries(dome_statistic PRIVATE SQLite::SQLite3)
+target_link_libraries(dome_statistic PRIVATE spdlog::spdlog_header_only)
 set_property(TARGET dome_statistic PROPERTY CXX_STANDARD 17)
