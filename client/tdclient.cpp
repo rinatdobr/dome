@@ -59,6 +59,7 @@ void TdClient::run() {
 				"<text>] send message [me] show self [l] logout: "
 				<< std::endl;
 			std::string action;
+            updating = true;
             if (!updating) {
                 std::string line;
                 std::getline(std::cin, line);

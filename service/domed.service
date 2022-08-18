@@ -1,9 +1,9 @@
 [Unit]
-Description=Dome service
+Description=Dome daemon
 
 [Service]
 Type=dbus
 BusName=ru.dome
 User=root
 Group=root
-ExecStart=/usr/bin/dome_service
+ExecStart=/usr/bin/domed

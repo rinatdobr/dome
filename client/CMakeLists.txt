@@ -54,16 +54,16 @@ set(COMMON_SOURCE_FILES
     ../common/io/io.cpp
 )
 
-add_executable(dome ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
-target_include_directories(dome PRIVATE . ../common)
-target_link_libraries(dome PRIVATE Td::TdStatic)
-target_link_libraries(dome PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(dome PUBLIC
+add_executable(dome_client ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
+target_include_directories(dome_client PRIVATE . ../common)
+target_link_libraries(dome_client PRIVATE Td::TdStatic)
+target_link_libraries(dome_client PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(dome_client PUBLIC
     Qt5::Core
     Qt5::DBus
 )
-target_link_libraries(dome PRIVATE spdlog::spdlog_header_only)
-set_property(TARGET dome PROPERTY CXX_STANDARD 14)
+target_link_libraries(dome_client PRIVATE spdlog::spdlog_header_only)
+set_property(TARGET dome_client PROPERTY CXX_STANDARD 14)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_client.service
         DESTINATION /usr/lib/systemd/user/

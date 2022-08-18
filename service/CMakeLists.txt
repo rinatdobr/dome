@@ -9,14 +9,14 @@ set(SOURCE_FILES
     main.cpp
 )
 
-add_executable(dome_service ${SOURCE_FILES})
-target_include_directories(dome_service PRIVATE ../common)
-target_link_libraries(dome_service PUBLIC
+add_executable(domed ${SOURCE_FILES})
+target_include_directories(domed PRIVATE ../common)
+target_link_libraries(domed PUBLIC
     Qt5::Core
     Qt5::DBus
 )
 
-install(TARGETS dome_service
+install(TARGETS domed
         RUNTIME DESTINATION /usr/bin
 )
 
@@ -28,6 +28,6 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ru.dome.service
         DESTINATION /usr/share/dbus-1/system-services/
 )
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome.service
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/domed.service
         DESTINATION /usr/lib/systemd/system/
 )
