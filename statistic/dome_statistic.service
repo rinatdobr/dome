@@ -1,0 +1,9 @@
+[Unit]
+Description=Dome statistic
+
+[Service]
+Type=simple
+Environment="DOME_DB_CONFIG=/home/rinatdobr/workspace/dome/common/db.json"
+Environment="DOME_COMMANDS_CONFIG=/home/rinatdobr/workspace/dome/common/commands.json"
+Environment="DOME_DATABASE=/home/rinatdobr/workspace/dome/build"
+ExecStart=/home/rinatdobr/workspace/dome/build/statistic/dome_statistic

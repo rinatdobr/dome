@@ -31,8 +31,11 @@ auto overloaded(F... f) {
   return detail::overload<F...>(f...);
 }
 
-TdClient::TdClient(int logLevel)
+TdClient::TdClient(int logLevel, uint refreshSec, const std::string &login, const std::string &pass)
     : m_clientId(0)
+    , m_refreshSec(refreshSec)
+    , m_login(login)
+    , m_pass(pass)
 	, m_isAuthenticated(false)
     , m_currentQueryId(0)
     , m_authenticationQueryId(0)
@@ -61,14 +64,13 @@ void TdClient::run() {
                 std::getline(std::cin, line);
                 std::istringstream ss(line);
                 if (!(ss >> action)) {
-                    std::cout << "cont" << std::endl;
                     continue;
                 }
             }
             else {
                 action = "u";
 				std::cout << "Sleeping..." << std::endl;
-                std::this_thread::sleep_for(std::chrono::seconds(5));
+                std::this_thread::sleep_for(std::chrono::seconds(m_refreshSec));
 				std::cout << "Sleeping... Done." << std::endl;
             }
 			if (action == "q") {

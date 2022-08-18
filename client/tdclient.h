@@ -16,11 +16,15 @@
 
 class TdClient {
 public:
-    TdClient(int logLevel = 0);
+    TdClient(int logLevel = 0, uint refreshSec = 5, const std::string &login = "", const std::string &pass = "");
 
     void run();
 
 private:
+    uint m_refreshSec;
+    std::string m_login;
+    std::string m_pass;
+
     std::unique_ptr<td::ClientManager> m_clientManager;
     td::ClientManager::ClientId m_clientId;
 

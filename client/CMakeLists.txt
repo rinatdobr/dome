@@ -15,6 +15,16 @@ IF (NOT DEFINED CHAT_ID)
 ENDIF()
 ADD_DEFINITIONS(-DCHAT_ID=${CHAT_ID})
 
+IF (NOT DEFINED LOGIN)
+    SET(LOGIN 0)
+ENDIF()
+ADD_DEFINITIONS(-DLOGIN=${LOGIN})
+
+IF (NOT DEFINED PASS)
+    SET(PASS 0)
+ENDIF()
+ADD_DEFINITIONS(-DPASS=${PASS})
+
 find_package(nlohmann_json PATHS ${CMAKE_SOURCE_DIR}/3rdparty/json/build/root/share/cmake 3.11.1 REQUIRED)
 
 find_package(spdlog REQUIRED)
@@ -54,3 +64,7 @@ target_link_libraries(dome PUBLIC
 )
 target_link_libraries(dome PRIVATE spdlog::spdlog_header_only)
 set_property(TARGET dome PROPERTY CXX_STANDARD 14)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_client.service
+        DESTINATION /usr/lib/systemd/user/
+)

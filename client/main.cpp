@@ -7,6 +7,6 @@ int main() {
 
     spdlog::info("Start dome_client");
 
-    TdClient client(1);
+    TdClient client(1, 5, LOGIN, PASS);
     client.run();
 }

@@ -39,3 +39,7 @@ target_link_libraries(dome_statistic PUBLIC
 target_link_libraries(dome_statistic PRIVATE SQLite::SQLite3)
 target_link_libraries(dome_statistic PRIVATE spdlog::spdlog_header_only)
 set_property(TARGET dome_statistic PROPERTY CXX_STANDARD 17)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_statistic.service
+        DESTINATION /usr/lib/systemd/user/
+)
