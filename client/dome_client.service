@@ -3,6 +3,7 @@ Description=Dome client
 
 [Service]
 Type=simple
+WorkingDirectory=%h/workspace/dome/build
 Environment="DOME_DB_CONFIG=%h/workspace/dome/common/db.json"
 Environment="DOME_COMMANDS_CONFIG=%h/workspace/dome/common/commands.json"
 Environment="DOME_DATABASE=%h/workspace/dome/build"
