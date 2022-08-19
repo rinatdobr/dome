@@ -20,6 +20,7 @@ set(COMMON_SOURCE_FILES
     ../common/commands/cputemperature.cpp
     ../common/commands/parser.cpp
     ../common/commands/result.cpp
+    ../common/commands/roomtemperature.cpp
     ../common/commands/statistic.cpp
     ../common/config/command.cpp
     ../common/config/commands.cpp

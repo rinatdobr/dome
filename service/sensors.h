@@ -8,6 +8,7 @@ class Sensors
 {
 public:
     double cpuTemperature() const;
+    double roomTemperature() const;
 };
 
 #endif

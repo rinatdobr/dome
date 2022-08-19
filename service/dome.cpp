@@ -11,3 +11,10 @@ double Dome::cpuTemperature()
 
     return cpuTemp;
 }
+
+double Dome::roomTemperature()
+{
+    double roomTemp = m_sensors.roomTemperature();
+
+    return roomTemp;
+}

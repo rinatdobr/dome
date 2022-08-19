@@ -8,6 +8,7 @@ namespace dbus_dome {
     const std::string Service("ru.dome");
     const std::string Interface("ru.dome");
     const std::string MethodCpuTemperature("cpuTemperature");
+    const std::string MethodRoomTemperature("roomTemperature");
 }
 
 #endif

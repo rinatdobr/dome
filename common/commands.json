@@ -3,7 +3,21 @@
         {
             "cpu_temperature": {
                 "args": "",
-                "period": "60sec",
+                "period": "600sec",
+                "output_type": "db"
+            }
+        },
+        {
+            "room_temperature": {
+                "args": "",
+                "period": "600sec",
+                "output_type": "db"
+            }
+        },
+        {
+            "room_humidity": {
+                "args": "",
+                "period": "600sec",
                 "output_type": "db"
             }
         }

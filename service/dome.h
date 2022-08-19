@@ -14,6 +14,7 @@ public:
 
 public slots:
     Q_SCRIPTABLE double cpuTemperature();
+    Q_SCRIPTABLE double roomTemperature();
 
 private:
     Sensors m_sensors;
