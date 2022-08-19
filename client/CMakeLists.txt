@@ -40,7 +40,7 @@ set(SOURCE_FILES
     commandor.cpp
 )
 
-add_executable(dome_client ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
+add_executable(dome_client ${SOURCE_FILES})
 target_include_directories(dome_client PRIVATE . ../lib)
 target_link_libraries(dome_client PRIVATE dome)
 target_link_libraries(dome_client PUBLIC Qt5::Core Qt5::DBus)

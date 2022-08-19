@@ -3,18 +3,23 @@ cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 find_package(Qt5 REQUIRED COMPONENTS Core DBus)
 set(CMAKE_AUTOMOC ON)
 
+find_package(pigpio PATHS ${CMAKE_SOURCE_DIR}/3rdparty/pigpio/build/root/lib/cmake/pigpio 0.71 REQUIRED)
+
 set(SOURCE_FILES
     dome.cpp
     sensors.cpp
     main.cpp
 )
 
-add_executable(domed ${SOURCE_FILES})
-target_include_directories(domed PRIVATE ../common)
-target_link_libraries(domed PUBLIC
-    Qt5::Core
-    Qt5::DBus
+set(DHTXXD_SOURCE_FILES
+    ../3rdparty/DHTXXD/DHTXXD.c
 )
+set_source_files_properties(${DHTXXD_SOURCE_FILES} PROPERTIES LANGUAGE CXX)
+
+add_executable(domed ${SOURCE_FILES} ${DHTXXD_SOURCE_FILES})
+target_include_directories(domed PRIVATE ../common ../3rdparty/DHTXXD)
+target_link_libraries(domed PUBLIC Qt5::Core Qt5::DBus)
+target_link_libraries(domed PRIVATE pigpio::pigpiod_if2)
 
 install(TARGETS domed
         RUNTIME DESTINATION /usr/bin

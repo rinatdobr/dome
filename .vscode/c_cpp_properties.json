@@ -5,6 +5,8 @@
             "includePath": [
                 "3rdparty/json/build/root/include",
                 "3rdparty/td/build/root/include",
+                "3rdparty/pigpio/build/root/include",
+                "3rdparty/DHTXXD",
                 "common",
                 "${default}"
             ],

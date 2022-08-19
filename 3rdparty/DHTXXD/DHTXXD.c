@@ -168,7 +168,7 @@ static void _cb(
    int pi, unsigned gpio, unsigned level, uint32_t tick, void *user)
 {
 
-   DHTXXD_t *self=user;
+   DHTXXD_t *self=(DHTXXD_t*)user;
    int edge_len;
 
    edge_len = tick - self->_last_edge_tick;
@@ -222,7 +222,7 @@ static void _trigger(DHTXXD_t *self)
 
 static void *pthTriggerThread(void *x)
 {
-   DHTXXD_t *self=x;
+   DHTXXD_t *self=(DHTXXD_t*)x;
    float seconds;
 
    seconds = self->seconds;
@@ -254,7 +254,7 @@ DHTXXD_t *DHTXXD(int pi, int gpio, int model, DHTXXD_CB_t cb_func)
 {
    DHTXXD_t *self;
 
-   self = malloc(sizeof(DHTXXD_t));
+   self = (DHTXXD_t*)malloc(sizeof(DHTXXD_t));
 
    if (!self) return NULL;
 
