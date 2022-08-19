@@ -25,14 +25,14 @@ IF (NOT DEFINED PASS)
 ENDIF()
 ADD_DEFINITIONS(-DPASS=${PASS})
 
+find_package(Qt5 REQUIRED COMPONENTS Core DBus)
+set(CMAKE_AUTOMOC ON)
+
 find_package(nlohmann_json PATHS ${CMAKE_SOURCE_DIR}/3rdparty/json/build/root/share/cmake 3.11.1 REQUIRED)
 
 find_package(spdlog REQUIRED)
 
 find_package(Td PATHS ${CMAKE_SOURCE_DIR}/3rdparty/td/build/root/lib/cmake 1.8.4 REQUIRED)
-
-find_package(Qt5 REQUIRED COMPONENTS Core DBus)
-set(CMAKE_AUTOMOC ON)
 
 set(SOURCE_FILES
     main.cpp
@@ -40,30 +40,13 @@ set(SOURCE_FILES
     commandor.cpp
 )
 
-set(COMMON_SOURCE_FILES
-    ../common/commands/command.cpp
-    ../common/commands/cputemperature.cpp
-    ../common/commands/parser.cpp
-    ../common/commands/result.cpp
-    ../common/commands/roomtemperature.cpp
-    ../common/commands/statistic.cpp
-    ../common/config/command.cpp
-    ../common/config/commands.cpp
-    ../common/config/config.cpp
-    ../common/config/db.cpp
-    ../common/io/db.cpp
-    ../common/io/io.cpp
-)
-
 add_executable(dome_client ${SOURCE_FILES} ${COMMON_SOURCE_FILES})
-target_include_directories(dome_client PRIVATE . ../common)
-target_link_libraries(dome_client PRIVATE Td::TdStatic)
+target_include_directories(dome_client PRIVATE . ../lib)
+target_link_libraries(dome_client PRIVATE dome)
+target_link_libraries(dome_client PUBLIC Qt5::Core Qt5::DBus)
 target_link_libraries(dome_client PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(dome_client PUBLIC
-    Qt5::Core
-    Qt5::DBus
-)
 target_link_libraries(dome_client PRIVATE spdlog::spdlog_header_only)
+target_link_libraries(dome_client PRIVATE Td::TdStatic)
 set_property(TARGET dome_client PROPERTY CXX_STANDARD 14)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_client.service
