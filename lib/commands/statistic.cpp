@@ -8,6 +8,7 @@
 
 #include <config/db.h>
 #include <config/commands.h>
+#include <utils.h>
 
 namespace command {
 
@@ -63,7 +64,7 @@ Result Statistic::execute()
     for (auto &configCommand : Config::getInstance().commands()) {
         if (configCommand->command()->name() == m_args[0]) {
             spdlog::info("Executing {}... Done", name());
-            return Result(this, configCommand->io()->readLastForSec(*configCommand->command(), std::stoul(m_args[1])));
+            return Result(this, configCommand->io()->readLastForSec(*configCommand->command(), PeriodToSeconds(m_args[1])));
         }
     }
 

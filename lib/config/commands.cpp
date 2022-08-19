@@ -4,27 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include <commands/parser.h>
-
-namespace {
-    
-uint ParsePeriod(const std::string &period)
-{
-    spdlog::trace("{}:{} {} period={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, period);
-
-    if (period.rfind("sec") != std::string::npos) {
-        // nothing to do
-    }
-
-    std::istringstream parser(period);
-    unsigned int result;
-    parser >> result;
-
-    spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result);
-
-    return result;
-}
-
-}
+#include <utils.h>
 
 namespace dome {
 namespace config {
@@ -73,7 +53,7 @@ void Commands::parseConfig()
             
             auto command = std::make_unique<Command>(
                 std::move(parsedCommand),
-                ParsePeriod(period),
+                PeriodToSeconds(period),
                 outputType
             );
 

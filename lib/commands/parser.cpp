@@ -4,6 +4,8 @@
 
 #include "cputemperature.h"
 #include "statistic.h"
+#include "roomhumidity.h"
+#include "roomtemperature.h"
 
 namespace command {
 
@@ -47,6 +49,12 @@ std::unique_ptr<Command> Parser::Parse(const std::string &line)
     }
     else if (command == command::StatisticName) {
         return std::make_unique<command::Statistic>(ParseArgs(std::string(line, delimetr + 1)));
+    }
+    else if (command == command::RoomTemperatureName) {
+        return std::make_unique<command::RoomTemperature>(ParseArgs(std::string(line, delimetr + 1)));
+    }
+    else if (command == command::RoomHumidityName) {
+        return std::make_unique<command::RoomHumidity>(ParseArgs(std::string(line, delimetr + 1)));
     }
 
     return nullptr;

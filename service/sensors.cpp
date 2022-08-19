@@ -3,13 +3,15 @@
 #include <QProcess>
 #include <QString>
 #include <QStringRef>
+#include <QDebug>
 
 #include <pigpiod_if2.h>
 
 Sensors::Sensors()
 {
-    m_pi = pigpio_start(nullptr, "8888");
+    m_pi = pigpio_start(nullptr, nullptr);
     if (m_pi < 0) {
+        qCritical() << "Can't start pigpio";
         return;
     }
 
@@ -46,6 +48,23 @@ double Sensors::roomTemperature() const
     DHTXXD_data_t data = DHTXXD_data(m_dht.get());
     if (data.status == DHT_GOOD) {
         return data.temperature;
+    }
+    else {
+        qCritical() << "dht22 status:" << data.status;
+    }
+
+    return -1;
+}
+
+double Sensors::roomHumidity() const
+{
+    DHTXXD_manual_read(m_dht.get());
+    DHTXXD_data_t data = DHTXXD_data(m_dht.get());
+    if (data.status == DHT_GOOD) {
+        return data.humidity;
+    }
+    else {
+        qCritical() << "dht22 status:" << data.status;
     }
 
     return -1;

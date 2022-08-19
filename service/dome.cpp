@@ -18,3 +18,10 @@ double Dome::roomTemperature()
 
     return roomTemp;
 }
+
+double Dome::roomHumidity()
+{
+    double roomHumidity = m_sensors.roomHumidity();
+
+    return roomHumidity;
+}

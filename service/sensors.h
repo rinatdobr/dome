@@ -13,6 +13,7 @@ public:
 
     double cpuTemperature() const;
     double roomTemperature() const;
+    double roomHumidity() const;
 
 private:
     int m_pi;

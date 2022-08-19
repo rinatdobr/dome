@@ -14,6 +14,7 @@ set(SOURCE_FILES
     commands/cputemperature.cpp
     commands/parser.cpp
     commands/result.cpp
+    commands/roomhumidity.cpp
     commands/roomtemperature.cpp
     commands/statistic.cpp
     config/command.cpp
@@ -22,6 +23,7 @@ set(SOURCE_FILES
     config/db.cpp
     io/db.cpp
     io/io.cpp
+    utils.cpp
 )
 
 add_library(dome SHARED ${SOURCE_FILES})
