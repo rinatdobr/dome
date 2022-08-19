@@ -4,3 +4,6 @@
 [submodule "3rdparty/json"]
 	path = 3rdparty/json
 	url = https://github.com/nlohmann/json.git
+[submodule "3rdparty/pigpio"]
+	path = 3rdparty/pigpio
+	url = https://github.com/joan2937/pigpio.git
