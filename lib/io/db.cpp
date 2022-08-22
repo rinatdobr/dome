@@ -25,7 +25,7 @@ const std::string InsertToTable("\
 );
 
 const std::string ReadFromTableForSec("\
-    select strftime('%Y/%m/%d %H:%M:%S',timestamp), value from table_name \
+    select strftime('%Y/%m/%d %H:%M:%S',timestamp,'localtime'), value from table_name \
     where timestamp >= (select DATETIME('now', '-seconds_value second'))"
 );
 
