@@ -10,12 +10,15 @@ Command::IoType StrToIoType(const std::string &ioType)
     spdlog::trace("{}:{} {} ioType={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, ioType);
 
     if (ioType == "db") {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::Db);
         return Command::IoType::Db;
     }
     else if (ioType == "file") {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::File);
         return Command::IoType::File;
     }
     else {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::Invalid);
         return Command::IoType::Invalid;
     }
 }
@@ -37,6 +40,7 @@ Command::IoType Command::ioType()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    spdlog::debug("{}:{}", __PRETTY_FUNCTION__, m_ioType);
     return m_ioType;
 }
 
@@ -44,6 +48,7 @@ uint Command::getPeriodSec() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    spdlog::debug("{}:{}", __PRETTY_FUNCTION__, m_periodSec);
     return m_periodSec;
 }
 
@@ -58,6 +63,7 @@ uint Command::nextTimeFrameSec() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    spdlog::debug("{}:{}", __PRETTY_FUNCTION__, m_nextTimeFrameSec);
     return m_nextTimeFrameSec;
 }
 

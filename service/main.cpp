@@ -5,30 +5,34 @@
 #include <QtCore/QTimer>
 #include <QtDBus/QtDBus>
 
+#include <spdlog/spdlog.h>
+
 #include "dome.h"
 #include "dbusservice.h"
+#include "config.h"
 
 int main(int argc, char **argv)
 {
+    spdlog::set_level(spdlog::level::trace);
+    spdlog::info("Start domed");
+
     QCoreApplication app(argc, argv);
 
     if (!QDBusConnection::systemBus().isConnected()) {
-        fprintf(stderr, "Cannot connect to the D-Bus system bus.\n"
-                "To start it, run:\n"
-                "\teval `dbus-launch --auto-syntax`\n");
-        return 1;
+        spdlog::error("Cannot connect to the D-Bus system bus");
+        return EXIT_FAILURE;
     }
 
-    if (!QDBusConnection::systemBus().registerService(QString::fromStdString(dbus_dome::Service))) {
-        fprintf(stderr, "%s\n",
-                qPrintable(QDBusConnection::systemBus().lastError().message()));
-        exit(1);
+    if (!QDBusConnection::systemBus().registerService(QString::fromStdString(dome::dbus::Service))) {
+        spdlog::error("Can't register service: {}", qPrintable(QDBusConnection::systemBus().lastError().message()));
+        return EXIT_FAILURE;
     }
 
-    Dome dome;
+    Config config;
+    Dome dome(config.ipCameraConfig());
     QDBusConnection::systemBus().registerObject(
-        QString::fromStdString(dbus_dome::Path),
-        QString::fromStdString(dbus_dome::Interface),
+        QString::fromStdString(dome::dbus::Path),
+        QString::fromStdString(dome::dbus::Interface),
         &dome,
         QDBusConnection::ExportAllSlots
     );

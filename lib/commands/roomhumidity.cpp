@@ -10,7 +10,7 @@ namespace command {
 
 std::string ProcessRoomHumidityReply(const double &reply)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} reply={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, reply);
 
     std::ostringstream stream;
     stream << reply;
@@ -20,7 +20,7 @@ std::string ProcessRoomHumidityReply(const double &reply)
 RoomHumidity::RoomHumidity(const std::vector<std::string> &args)
     : Command(RoomHumidityCommandId, args)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} args.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, args.size());
 }
 
 std::string RoomHumidity::name() const
@@ -35,17 +35,17 @@ Result RoomHumidity::execute()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     QDBusInterface iface(
-        QString::fromStdString(dbus_dome::Service),
-        QString::fromStdString(dbus_dome::Path),
-        QString::fromStdString(dbus_dome::Interface),
+        QString::fromStdString(dome::dbus::Service),
+        QString::fromStdString(dome::dbus::Path),
+        QString::fromStdString(dome::dbus::Interface),
         QDBusConnection::systemBus()
     );
 
     if (iface.isValid()) {
-        QDBusReply<double> reply = iface.call(QString::fromStdString(dbus_dome::MethodRoomHumidity));
+        QDBusReply<double> reply = iface.call(QString::fromStdString(dome::dbus::MethodRoomHumidity));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, ProcessRoomHumidityReply(reply.value()));
+            Result result(this, Result::Type::String, ProcessRoomHumidityReply(reply.value()));
             return result;
         }
 

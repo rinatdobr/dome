@@ -8,7 +8,7 @@ Runner::Runner(std::vector<std::unique_ptr<dome::config::Command>> &&configComma
     : m_configCommands(std::move(configCommands))
     , m_index(0)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} configCommands.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configCommands.size());
 
     if (m_configCommands.size() == 0) {
         spdlog::error("No command to run");

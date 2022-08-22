@@ -36,7 +36,7 @@ void Db::parseConfig()
     std::string dbEnv = std::getenv(jDatabase["env"].get<std::string>().c_str());
     std::string fullDbPath = dbEnv + "/" + dbName;
 
-    spdlog::info("Database IO: name={}, env={}, fullPath={}", dbName, dbEnv, fullDbPath);
+    spdlog::info("Database IO config: name={}, env={}, fullPath={}", dbName, dbEnv, fullDbPath);
 
     m_dbWriter = std::make_shared<dome::io::Db>(fullDbPath);
 }

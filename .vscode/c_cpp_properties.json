@@ -7,6 +7,7 @@
                 "3rdparty/td/build/root/include",
                 "3rdparty/pigpio/build/root/include",
                 "3rdparty/DHTXXD",
+                "lib",
                 "common",
                 "${default}"
             ],

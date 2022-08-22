@@ -3,15 +3,18 @@
 #include <QProcess>
 #include <QString>
 #include <QStringRef>
-#include <QDebug>
+
+#include <spdlog/spdlog.h>
 
 #include <pigpiod_if2.h>
 
 Sensors::Sensors()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     m_pi = pigpio_start(nullptr, nullptr);
     if (m_pi < 0) {
-        qCritical() << "Can't start pigpio";
+        spdlog::error("Can't start pgpio");
         return;
     }
 
@@ -20,37 +23,48 @@ Sensors::Sensors()
 
 double Sensors::cpuTemperature() const
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     QString program = "/usr/bin/vcgencmd";
 
     QProcess sensors;
     sensors.start(program, QStringList{"measure_temp"});
     if (sensors.waitForFinished()) {
         int exitCode = sensors.exitCode();
+        spdlog::debug("vcgencmd exit code={}", exitCode);
         if (exitCode != 0) {
+            spdlog::error("vcgencmd error {}", QString(sensors.readAllStandardError()).toStdString());
             return -1;
         }
+
         QString output(sensors.readAllStandardOutput());
         if (output.startsWith("temp=")) {
             int position = output.indexOf("'");
             QStringRef tempStr(&output, 5, output.size() - (output.size() - position) - 5);
+            spdlog::debug("{}:{}", __PRETTY_FUNCTION__, tempStr.toDouble());
             return tempStr.toDouble();
         }
 
+        spdlog::error("Can't parse temperature from '{}'", output.toStdString());
         return -1;
     }
 
+    spdlog::error("vcgencmd was not finished");
     return -1;
 }
 
 double Sensors::roomTemperature() const
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     DHTXXD_manual_read(m_dht.get());
     DHTXXD_data_t data = DHTXXD_data(m_dht.get());
     if (data.status == DHT_GOOD) {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, data.temperature);
         return data.temperature;
     }
     else {
-        qCritical() << "dht22 status:" << data.status;
+        spdlog::error("Can't get temperature: {}", data.status);
     }
 
     return -1;
@@ -58,13 +72,16 @@ double Sensors::roomTemperature() const
 
 double Sensors::roomHumidity() const
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     DHTXXD_manual_read(m_dht.get());
     DHTXXD_data_t data = DHTXXD_data(m_dht.get());
     if (data.status == DHT_GOOD) {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, data.humidity);
         return data.humidity;
     }
     else {
-        qCritical() << "dht22 status:" << data.status;
+        spdlog::error("Can't get humidity: {}", data.status);
     }
 
     return -1;

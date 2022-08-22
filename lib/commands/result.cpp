@@ -12,13 +12,22 @@ Result::Result()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-Result::Result(const Command *command, const std::string &result)
+Result::Result(const Command *command, Type type, const std::string &result)
  : m_isValid(true)
- , m_type(Type::String)
+ , m_type(type)
  , m_string(result)
  , m_command(command)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} type={} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, type, result);
+
+    switch (m_type) {
+        case Type::String:
+            // nothing
+        break;
+        case Type::RawImage:
+            // nothing?
+        break;
+    }
 }
 
 Result::~Result()

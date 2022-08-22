@@ -12,6 +12,7 @@ find_package(spdlog REQUIRED)
 set(SOURCE_FILES
     commands/command.cpp
     commands/cputemperature.cpp
+    commands/ipcamera.cpp
     commands/parser.cpp
     commands/result.cpp
     commands/roomhumidity.cpp
@@ -21,6 +22,7 @@ set(SOURCE_FILES
     config/commands.cpp
     config/config.cpp
     config/db.cpp
+    config/ipcamera.cpp
     io/db.cpp
     io/io.cpp
     utils.cpp
@@ -35,5 +37,5 @@ target_link_libraries(dome PRIVATE spdlog::spdlog_header_only)
 set_property(TARGET dome PROPERTY CXX_STANDARD 17)
 
 install(TARGETS dome
-        LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+        LIBRARY DESTINATION /lib
 )

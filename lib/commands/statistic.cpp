@@ -42,7 +42,7 @@ public:
 Statistic::Statistic(const std::vector<std::string> &args)
     : Command(StatisticCommandId, args)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} args.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, args.size());
 }
 
 std::string Statistic::name() const
@@ -64,7 +64,7 @@ Result Statistic::execute()
     for (auto &configCommand : Config::getInstance().commands()) {
         if (configCommand->command()->name() == m_args[0]) {
             spdlog::info("Executing {}... Done", name());
-            return Result(this, configCommand->io()->readLastForSec(*configCommand->command(), PeriodToSeconds(m_args[1])));
+            return Result(this, Result::Type::String, configCommand->io()->readLastForSec(*configCommand->command(), PeriodToSeconds(m_args[1])));
         }
     }
 

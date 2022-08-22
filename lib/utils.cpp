@@ -24,7 +24,7 @@ uint PeriodToSeconds(const std::string &period)
         result *= 86400;
     }
 
-    spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result);
+    spdlog::debug("{}:{}", __PRETTY_FUNCTION__, result);
 
     return result;
 }

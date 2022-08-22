@@ -8,7 +8,7 @@ Command::Command(const CommandId &commandId, const std::vector<std::string> &arg
     : m_commandId(commandId)
     , m_args(args)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} commandId={} args.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, commandId, args.size());
 }
 
 Command::~Command()

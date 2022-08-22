@@ -13,11 +13,12 @@ public:
     enum class Type
     {
         Undefined,
-        String
+        String,
+        RawImage
     };
 
     Result();
-    explicit Result(const Command *command, const std::string &result);
+    Result(const Command *command, Type type, const std::string &result);
     ~Result();
 
     Type type() const;

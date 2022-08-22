@@ -6,6 +6,7 @@
 #include "statistic.h"
 #include "roomhumidity.h"
 #include "roomtemperature.h"
+#include "ipcamera.h"
 
 namespace command {
 
@@ -55,6 +56,9 @@ std::unique_ptr<Command> Parser::Parse(const std::string &line)
     }
     else if (command == command::RoomHumidityName) {
         return std::make_unique<command::RoomHumidity>(ParseArgs(std::string(line, delimetr + 1)));
+    }
+    else if (command == command::IpCameraName) {
+        return std::make_unique<command::IpCamera>(ParseArgs(std::string(line, delimetr + 1)));
     }
 
     return nullptr;

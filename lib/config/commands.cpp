@@ -44,7 +44,7 @@ void Commands::parseConfig()
             std::string period = props["period"].get<std::string>();
             std::string args = props["args"].get<std::string>();
             std::string outputType = props["output_type"].get<std::string>();
-            spdlog::info("Config command: name={} period={} args={} outputType={}", commandName, period, args, outputType);
+            spdlog::info("Command config: name={} period={} args={} outputType={}", commandName, period, args, outputType);
 
             auto parsedCommand = command::Parser::Parse(commandName + ' ' + args);
             if (!parsedCommand) {

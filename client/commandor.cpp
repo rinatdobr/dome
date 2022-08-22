@@ -11,7 +11,7 @@ Commandor::Commandor()
 
 command::Result Commandor::Run(const std::string &commandLine)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} commandLine={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, commandLine);
 
     auto command = command::Parser::Parse(commandLine);
     if (command) {
@@ -19,5 +19,6 @@ command::Result Commandor::Run(const std::string &commandLine)
         return command->execute();
     }
 
+    spdlog::info("No command to run");
     return {};
 }

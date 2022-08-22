@@ -1,0 +1,11 @@
+{
+    "ip_cameras": [
+        {
+            "name": "exampleName",
+            "login": "exampleLogin",
+            "pass": "examplePass",
+            "ip": "exampleIp",
+            "port": "examplePort"
+        }
+    ]
+}
