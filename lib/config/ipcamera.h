@@ -4,21 +4,21 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
+#include "file.h"
 
 namespace dome {
 namespace config {
 
-class IpCamera : public Config
+class IpCamera : public File
 {
 public:
-struct Raw
+struct Config
 {
-    Raw(const std::string &name,
-        const std::string &login,
-        const std::string &pass,
-        const std::string &ip,
-        const std::string &port);
+    Config(const std::string &name,
+           const std::string &login,
+           const std::string &pass,
+           const std::string &ip,
+           const std::string &port);
 
     std::string m_name;
     std::string m_login;
@@ -29,12 +29,12 @@ struct Raw
 
     explicit IpCamera(const std::string &configPath);
 
-    const std::vector<Raw> ipCameraConfig() const;
+    const std::vector<Config> ipCameraConfig() const;
 
 private:
-    void parseConfig() override;
+    void parse() override;
 
-    std::vector<Raw> m_ipCameras;
+    std::vector<Config> m_ipCameras;
 };
 
 }

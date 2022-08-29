@@ -10,8 +10,9 @@ find_package(SQLite3 REQUIRED)
 find_package(spdlog REQUIRED)
 
 set(SOURCE_FILES
-    main.cpp
     config.cpp
+    command.cpp
+    main.cpp
     runner.cpp
 )
 

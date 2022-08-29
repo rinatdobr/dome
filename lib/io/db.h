@@ -4,7 +4,7 @@
 #include <memory>
 #include <sqlite3.h>
 
-#include <commands/command.h>
+#include <config/db.h>
 #include <commands/result.h>
 
 #include "io.h"
@@ -15,13 +15,17 @@ namespace io {
 class Db : public Io
 {
 public:
-    Db(const std::string path);
+    static std::map<std::string, std::shared_ptr<Db>> Create(const std::map<std::string, dome::config::Db::Config> &dbConfig);
+
+    Db(const std::string &name, const std::string &path);
     ~Db();
 
+    std::string name() const;
     void write(const command::Result &result) override;
-    std::string readLastForSec(const command::Command &command, uint seconds) override;
+    std::string readLastForSec(const std::string &name, uint seconds) override;
 
 private:
+    std::string m_name;
     std::string m_path;
     bool m_isValid;
     sqlite3 *m_dbHandler;

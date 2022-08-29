@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
-Dome::Dome(const std::vector<dome::config::IpCamera::Raw> &ipCameraConfig)
+Dome::Dome(const std::vector<dome::config::IpCamera::Config> &ipCameraConfig)
     : m_ipCameras(IpCamera::Create(ipCameraConfig))
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -18,7 +18,7 @@ double Dome::cpuTemperature()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
     spdlog::info("Got cpu temperature request");
 
-    double cpuTemp = m_sensors.cpuTemperature();
+    double cpuTemp = m_system.cpuTemperature();
     spdlog::debug("{}:{}", __PRETTY_FUNCTION__, cpuTemp);
 
     return cpuTemp;

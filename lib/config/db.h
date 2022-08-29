@@ -2,26 +2,34 @@
 #define CONFIG_DB_H
 
 #include <string>
-#include <memory>
+#include <map>
 
 #include <io/io.h>
 
-#include "config.h"
+#include "file.h"
 
 namespace dome {
 namespace config {
 
-class Db : public Config
+class Db : public File
 {
 public:
+struct Config
+{
+    Config(const std::string &name, const std::string &path);
+
+    std::string m_name;
+    std::string m_path;
+};
+
     explicit Db(const std::string &configPath);
 
-    std::shared_ptr<dome::io::Io> io();
+    const std::map<std::string, Config> dbConfig() const;
 
 private:
-    std::shared_ptr<dome::io::Io> m_dbWriter;
+    void parse() override;
 
-    void parseConfig() override;
+    std::map<std::string, Config> m_dbs;
 };
 
 }

@@ -13,7 +13,7 @@ class Io
 {
 public:
     virtual void write(const command::Result &result) = 0;
-    virtual std::string readLastForSec(const command::Command &command, uint seconds) = 0;
+    virtual std::string readLastForSec(const std::string &name, uint seconds) = 0;
 };
 
 }

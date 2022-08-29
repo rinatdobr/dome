@@ -1,0 +1,25 @@
+{
+    "commands": [
+        {
+            "name": "cpu_temperature",
+            "args": "",
+            "period": "30m",
+            "output_type": "db",
+            "output_name": "main"
+        },
+        {
+            "name": "room_temperature",
+            "args": "",
+            "period": "30m",
+            "output_type": "db",
+            "output_name": "main"
+        },
+        {
+            "name": "room_humidity",
+            "args": "",
+            "period": "30m",
+            "output_type": "db",
+            "output_name": "main"
+        }
+    ]
+}

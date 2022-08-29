@@ -3,7 +3,6 @@ Description=Dome statistic
 
 [Service]
 Type=simple
-Environment="DOME_DB_CONFIG=%h/workspace/dome/config/db.json"
-Environment="DOME_COMMANDS_CONFIG=%h/workspace/dome/config/commands.json"
-Environment="DOME_DATABASE=%h/dome"
+Environment="DOME_DB_CONFIG=%h/dome/db.json"
+Environment="DOME_STATISTIC_CONFIG=%h/dome/statistic.json"
 ExecStart=%h/workspace/dome/build/statistic/dome_statistic

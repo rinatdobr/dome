@@ -9,36 +9,51 @@
 namespace dome {
 namespace config {
 
+Db::Config::Config(const std::string &name,
+                   const std::string &path)
+    : m_name(name)
+    , m_path(path)
+{
+    spdlog::trace("{}:{} {} name={} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, path);
+}
+
 Db::Db(const std::string &configPath)
-    : Config(configPath)
+    : File(configPath)
 {
     spdlog::trace("{}:{} {} configPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configPath);
 
-    parseConfig();
+    parse();
 }
 
-std::shared_ptr<dome::io::Io> Db::io()
+const std::map<std::string, Db::Config> Db::dbConfig() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_dbWriter;
+    return m_dbs;
 }
 
-void Db::parseConfig()
+void Db::parse()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    auto configData = readConfigFile();
+    auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
 
-    auto jDatabase = jConfig["database"];
-    std::string dbName =  jDatabase["name"].get<std::string>();
-    std::string dbEnv = std::getenv(jDatabase["env"].get<std::string>().c_str());
-    std::string fullDbPath = dbEnv + "/" + dbName;
+    auto jDbs = jConfig["databases"];
+    for(const auto &jDb : jDbs) {
+        if (jDb.size() != 2) {
+            spdlog::error("Invalid database format: \" {} \"", jDb.dump());
+            continue;
+        }
 
-    spdlog::info("Database IO config: name={}, env={}, fullPath={}", dbName, dbEnv, fullDbPath);
+        std::string name = jDb["name"].get<std::string>();
+        std::string path = jDb["path"].get<std::string>();
 
-    m_dbWriter = std::make_shared<dome::io::Db>(fullDbPath);
+        spdlog::info("Database config: name={} path={}",
+            name, path);
+
+        m_dbs.insert(std::make_pair(name, Db::Config(name, path)));
+    }
 }
 
 }

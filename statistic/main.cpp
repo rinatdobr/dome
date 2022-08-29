@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     spdlog::info("Start dome_statistic");
 
     Config config;
-    Runner runner(std::move(config.commands()));
+    Runner runner(config.dbConfig(), config.statisticConfig());
     runner.run();
 
     return EXIT_SUCCESS;

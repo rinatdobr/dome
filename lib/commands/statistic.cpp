@@ -6,13 +6,14 @@
 
 #include "dbusservice.h"
 
+#include <io/db.h>
 #include <config/db.h>
-#include <config/commands.h>
+#include <config/statistic.h>
 #include <utils.h>
 
 namespace command {
 
-class Config : public dome::config::Db, public dome::config::Commands
+class Config : public dome::config::Db, public dome::config::Statistic
 {
 public:
     static Config& getInstance()
@@ -21,23 +22,19 @@ public:
         return instance;
     }
 
+    std::map<std::string, std::shared_ptr<dome::io::Db>> m_dbs;
 private:
     Config()
         : dome::config::Db(std::getenv("DOME_DB_CONFIG"))
-        , dome::config::Commands(std::getenv("DOME_COMMANDS_CONFIG"))
+        , dome::config::Statistic(std::getenv("DOME_STATISTIC_CONFIG"))
+        , m_dbs(dome::io::Db::Create(dbConfig()))
     {
-        for (auto &command : commands()) {
-            if (command->ioType() == dome::config::Command::IoType::Db) {
-                command->setIo(io());
-            }
-        }
     }
 
 public:
     Config(Config const&)           = delete;
     void operator=(Config const&)   = delete;
 };
-
 
 Statistic::Statistic(const std::vector<std::string> &args)
     : Command(StatisticCommandId, args)
@@ -61,10 +58,10 @@ Result Statistic::execute()
         return {};
     }
 
-    for (auto &configCommand : Config::getInstance().commands()) {
-        if (configCommand->command()->name() == m_args[0]) {
+    for (auto &configCommand : Config::getInstance().statisticConfig()) {
+        if (configCommand.m_name == m_args[0]) {
             spdlog::info("Executing {}... Done", name());
-            return Result(this, Result::Type::String, configCommand->io()->readLastForSec(*configCommand->command(), PeriodToSeconds(m_args[1])));
+            return Result(this, Result::Type::String, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1])));
         }
     }
 

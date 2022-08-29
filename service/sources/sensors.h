@@ -11,7 +11,6 @@ class Sensors
 public:
     Sensors();
 
-    double cpuTemperature() const;
     double roomTemperature() const;
     double roomHumidity() const;
 

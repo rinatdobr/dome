@@ -18,10 +18,9 @@ set(SOURCE_FILES
     commands/roomhumidity.cpp
     commands/roomtemperature.cpp
     commands/statistic.cpp
-    config/command.cpp
-    config/commands.cpp
-    config/config.cpp
+    config/statistic.cpp
     config/db.cpp
+    config/file.cpp
     config/ipcamera.cpp
     io/db.cpp
     io/io.cpp

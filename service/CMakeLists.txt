@@ -8,11 +8,12 @@ find_package(pigpio PATHS ${CMAKE_SOURCE_DIR}/3rdparty/pigpio/build/root/lib/cma
 find_package(spdlog REQUIRED)
 
 set(SOURCE_FILES
+    sources/ipcamera.cpp
+    sources/sensors.cpp
+    sources/system.cpp
     config.cpp
     dome.cpp
-    ipcamera.cpp
     main.cpp
-    sensors.cpp
 )
 
 set(DHTXXD_SOURCE_FILES

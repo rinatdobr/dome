@@ -15,7 +15,7 @@ IpCamera::IpCamera(const std::string &name,
                    const std::string &login,
                    const std::string &pass,
                    const std::string &ip,
-                   const std::string &port)
+                   const uint port)
     : m_name(name)
     , m_login(login)
     , m_pass(pass)
@@ -25,17 +25,17 @@ IpCamera::IpCamera(const std::string &name,
     spdlog::trace("{}:{} {} name={} login={} pass={} ip={} port={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, login, pass, ip, port);
 }
 
-std::map<std::string, std::unique_ptr<IpCamera>> IpCamera::Create(const std::vector<dome::config::IpCamera::Raw> &ipCameraConfig)
+std::map<std::string, std::unique_ptr<IpCamera>> IpCamera::Create(const std::vector<dome::config::IpCamera::Config> &ipCameraConfig)
 {
     spdlog::trace("{}:{} {} ipCameraConfig.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, ipCameraConfig.size());
 
     std::map<std::string, std::unique_ptr<IpCamera>> result;
 
     for (const auto &config : ipCameraConfig) {
-        result.insert(std::make_pair(config.m_name, std::make_unique<IpCamera>(config.m_name, config.m_login, config.m_pass, config.m_ip, config.m_port)));
+        result.insert(std::make_pair(config.m_name, std::make_unique<IpCamera>(config.m_name, config.m_login, config.m_pass, config.m_ip, std::strtoul(config.m_port.c_str(), nullptr, 10))));
     }
 
-    spdlog::trace("Total {} IP Cameras", result.size());
+    spdlog::debug("Total IP Cameras: {}", result.size());
 
     return result;
 }
@@ -65,7 +65,7 @@ std::string IpCamera::photo()
         .arg(QString::fromStdString(m_login))
         .arg(QString::fromStdString(m_pass))
         .arg(QString::fromStdString(m_ip))
-        .arg(QString::fromStdString(m_port))));
+        .arg(m_port)));
     args.append(QStringLiteral("-f"));
     args.append(QStringLiteral("image2"));
     args.append(QStringLiteral("-vframes"));

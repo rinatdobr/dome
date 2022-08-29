@@ -1,4 +1,4 @@
-#include "config.h"
+#include "file.h"
 
 #include <sstream>
 #include <fstream>
@@ -7,19 +7,19 @@
 namespace dome {
 namespace config {
 
-Config::Config(const std::string &configPath)
-    : m_configPath(configPath)
+File::File(const std::string &path)
+    : m_path(path)
 {
-    spdlog::trace("{}:{} {} configPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configPath);
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
 }
 
-std::string Config::readConfigFile()
+std::string File::read()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    std::ifstream configFile(m_configPath);
+    std::ifstream configFile(m_path);
     if (!configFile.is_open()) {
-        spdlog::error("Can't open config file {}", m_configPath);
+        spdlog::error("Can't open config file {}", m_path);
         return {};
     }
 

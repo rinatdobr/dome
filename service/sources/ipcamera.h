@@ -13,10 +13,10 @@ public:
              const std::string &login,
              const std::string &pass,
              const std::string &ip,
-             const std::string &port
+             const uint port
     );
 
-    static std::map<std::string, std::unique_ptr<IpCamera>> Create(const std::vector<dome::config::IpCamera::Raw> &ipCameraConfig);
+    static std::map<std::string, std::unique_ptr<IpCamera>> Create(const std::vector<dome::config::IpCamera::Config> &ipCameraConfig);
     std::string photo();
 
 private:
@@ -24,7 +24,7 @@ private:
     std::string m_login;
     std::string m_pass;
     std::string m_ip;
-    std::string m_port;
+    uint m_port;
 };
 
 #endif

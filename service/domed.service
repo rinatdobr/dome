@@ -6,5 +6,5 @@ Type=dbus
 BusName=ru.dome
 User=root
 Group=root
-Environment="DOME_IP_CAMERAS_CONFIG=/home/pi/dome/ipcamera.json"
+Environment="DOME_IP_CAMERA_CONFIG=/home/pi/dome/ipcamera.json"
 ExecStart=/usr/bin/domed

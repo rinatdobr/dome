@@ -4,11 +4,9 @@
 #include <string>
 #include <memory>
 
+#include <config/statistic.h>
 #include <commands/command.h>
 #include <io/io.h>
-
-namespace dome {
-namespace config {
 
 class Command
 {
@@ -20,14 +18,15 @@ enum class IoType
     Db,
     File
 };
+    static std::vector<std::unique_ptr<Command>> Create(const std::vector<dome::config::Statistic::Config> &statisticConfig);
 
-    Command(
-        std::unique_ptr<command::Command> &&command,
-        uint period,
-        const std::string &ioType
-    );
+    Command(std::unique_ptr<command::Command> &&command,
+            uint period,
+            const std::string &ioType,
+            const std::string &ioName);
 
-    IoType ioType();
+    std::string ioName() const;
+    IoType ioType() const;
 
     uint getPeriodSec() const;
     void setPeriodSec(uint periodSec);
@@ -45,10 +44,8 @@ private:
     std::shared_ptr<dome::io::Io> m_io;
     uint m_periodSec;
     uint m_nextTimeFrameSec;
+    std::string m_ioName;
     IoType m_ioType;
 };
-
-}
-}
 
 #endif

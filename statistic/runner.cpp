@@ -4,15 +4,18 @@
 #include <thread>
 #include <spdlog/spdlog.h>
 
-Runner::Runner(std::vector<std::unique_ptr<dome::config::Command>> &&configCommands)
-    : m_configCommands(std::move(configCommands))
+Runner::Runner(const std::map<std::string, dome::config::Db::Config> &dbConfig,
+               const std::vector<dome::config::Statistic::Config> &statisticConfig)
+    : m_dbs(dome::io::Db::Create(dbConfig))
+    , m_commands(Command::Create(statisticConfig))
     , m_index(0)
 {
-    spdlog::trace("{}:{} {} configCommands.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configCommands.size());
+    spdlog::trace("{}:{} {} statisticConfig.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, statisticConfig.size());
 
-    if (m_configCommands.size() == 0) {
-        spdlog::error("No command to run");
-        return;
+    for (auto &command : m_commands) {
+        if (command->ioType() == Command::IoType::Db) {
+            command->setIo(m_dbs[command->ioName()]);
+        }
     }
 
     setupSchedule();
@@ -24,26 +27,25 @@ void Runner::run()
 
     int i = 0;
     while (true) {
-        std::unique_ptr<dome::config::Command> &currentConfigCommand = nextConfigCommand();
-        auto diff = std::chrono::seconds(currentConfigCommand->nextTimeFrameSec()) - m_lastExecutionTime;
+        std::unique_ptr<Command> &currentCommand = nextCommand();
+        auto diff = std::chrono::seconds(currentCommand->nextTimeFrameSec()) - m_lastExecutionTime;
 
         if (diff.count() > 0) {
             spdlog::info("Sleeping for {} seconds...", diff.count());
             std::this_thread::sleep_for(diff);
         }
 
-
-        spdlog::debug("Executing command {}...", currentConfigCommand->command()->name());
-        auto result = currentConfigCommand->command()->execute();
+        spdlog::debug("Executing command {}...", currentCommand->command()->name());
+        auto result = currentCommand->command()->execute();
         spdlog::debug("Result={}", result.isValid());
 
-        currentConfigCommand->io()->write(result);
+        currentCommand->io()->write(result);
 
         if (diff.count() > 0) {
             m_lastExecutionTime = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
         }
 
-        currentConfigCommand->setNextTimeFrameSec();
+        currentCommand->setNextTimeFrameSec();
     }
 }
 
@@ -53,21 +55,21 @@ void Runner::setupSchedule()
 
     m_startTime = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
     m_lastExecutionTime = m_startTime;
-    for (auto &command : m_configCommands) {
+    for (auto &command : m_commands) {
         command->setNextTimeFrameSec(
             m_startTime.count() + command->getPeriodSec()
         );
     }
 }
 
-std::unique_ptr<dome::config::Command> &Runner::nextConfigCommand()
+std::unique_ptr<Command> &Runner::nextCommand()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     auto minIt = std::min_element(
-        m_configCommands.begin(),
-        m_configCommands.end(),
-        [this](const std::unique_ptr<dome::config::Command> &c1, const std::unique_ptr<dome::config::Command> &c2) {
+        m_commands.begin(),
+        m_commands.end(),
+        [this](const std::unique_ptr<Command> &c1, const std::unique_ptr<Command> &c2) {
         return
             (std::chrono::seconds(c1->nextTimeFrameSec()) - m_lastExecutionTime)
             <

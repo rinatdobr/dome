@@ -6,11 +6,11 @@
 namespace dome {
 namespace config {
 
-IpCamera::Raw::Raw(const std::string &name,
-                   const std::string &login,
-                   const std::string &pass,
-                   const std::string &ip,
-                   const std::string &port)
+IpCamera::Config::Config(const std::string &name,
+                         const std::string &login,
+                         const std::string &pass,
+                         const std::string &ip,
+                         const std::string &port)
     : m_name(name)
     , m_login(login)
     , m_pass(pass)
@@ -21,26 +21,25 @@ IpCamera::Raw::Raw(const std::string &name,
 }
 
 IpCamera::IpCamera(const std::string &configPath)
-    : Config(configPath)
+    : File(configPath)
 {
     spdlog::trace("{}:{} {} configPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, configPath);
 
-    parseConfig();
+    parse();
 }
 
-const std::vector<IpCamera::Raw> IpCamera::ipCameraConfig() const
+const std::vector<IpCamera::Config> IpCamera::ipCameraConfig() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_ipCameras;
 }
 
-
-void IpCamera::parseConfig()
+void IpCamera::parse()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    auto configData = readConfigFile();
+    auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
 
     auto jIpCameras = jConfig["ip_cameras"];
@@ -60,7 +59,7 @@ void IpCamera::parseConfig()
             name, login, pass, ip, port);
 
         m_ipCameras.push_back(
-            Raw(name, login, pass, ip, port)
+            Config(name, login, pass, ip, port)
         );
     }
 }

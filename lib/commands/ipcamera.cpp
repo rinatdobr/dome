@@ -7,7 +7,6 @@
 #include "dbusservice.h"
 
 #include <config/db.h>
-#include <config/commands.h>
 #include <utils.h>
 
 namespace command {

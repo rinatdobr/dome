@@ -34,12 +34,26 @@ const std::string ReadFromTableForSec("\
 namespace dome {
 namespace io {
 
-Db::Db(const std::string path)
-    : m_path(path)
+std::map<std::string, std::shared_ptr<Db>> Db::Create(const std::map<std::string, dome::config::Db::Config> &dbConfig)
+{
+    std::map<std::string, std::shared_ptr<Db>> result;
+
+    for (const auto &[name, config] : dbConfig) {
+        result.insert(std::make_pair(name, std::make_shared<Db>(config.m_name, config.m_path)));
+    }
+
+    spdlog::debug("Total databases: {}", result.size());
+
+    return result;
+}
+
+Db::Db(const std::string &name, const std::string &path)
+    : m_name(name)
+    , m_path(path)
     , m_isValid(false)
     , m_dbHandler(nullptr)
 {
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} name={} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, path);
 
     if (sqlite3_open(path.c_str(), &m_dbHandler) != SQLITE_OK) {
         spdlog::error("Can't open DB: {}", sqlite3_errmsg(m_dbHandler));
@@ -60,6 +74,14 @@ Db::~Db()
     if (sqlite3_close(m_dbHandler) != SQLITE_OK) {
         spdlog::error("Can't close DB: {}", sqlite3_errmsg(m_dbHandler));
     }
+}
+
+std::string Db::name() const
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    spdlog::debug("{}:{}", __PRETTY_FUNCTION__, m_name);
+    return m_name;
 }
 
 void Db::write(const command::Result &result)
@@ -86,22 +108,21 @@ void Db::write(const command::Result &result)
     writeValue(tableName, result.toString());
 }
 
-std::string Db::readLastForSec(const command::Command &command, uint seconds)
+std::string Db::readLastForSec(const std::string &name, uint seconds)
 {
-    spdlog::trace("{}:{} {} command={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, command.name(), seconds);
+    spdlog::trace("{}:{} {} name={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, seconds);
 
     if (!m_isValid) {
         spdlog::error("DB is not valid to read");
         return {};
     }
 
-    const std::string tableName(command.name());
-    if (!checkIfTableExists(tableName)) {
+    if (!checkIfTableExists(name)) {
         spdlog::error("No table to read result");
         return {};
     }
 
-    return readLastValuesForSec(tableName, seconds);
+    return readLastValuesForSec(name, seconds);
 }
 
 bool Db::checkIfTableExists(const std::string &tableName)

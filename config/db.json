@@ -1,6 +1,8 @@
 {
-    "database": {
-        "env": "DOME_DATABASE",
-        "name": "dome.db"
-    }
+    "databases": [
+        {
+            "name": "main",
+            "path": "db_path"
+        }
+    ]
 }
