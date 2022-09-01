@@ -12,6 +12,7 @@ namespace dbus {
     const std::string MethodRoomTemperature("roomTemperature");
     const std::string MethodRoomHumidity("roomHumidity");
     const std::string MethodIpCameraPhoto("ipCameraPhoto");
+    const std::string MethodIpCameraImage("ipCameraImage");
 }
 }
 

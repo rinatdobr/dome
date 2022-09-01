@@ -42,14 +42,20 @@ Result IpCamera::execute()
 
     if (iface.isValid()) {
         std::string methodName;
+        Result::Type resultType;
         if (m_args[0] == "photo") {
             methodName = dome::dbus::MethodIpCameraPhoto;
+            resultType = Result::Type::Photo;
+        }
+        else if (m_args[0] == "image") {
+            methodName = dome::dbus::MethodIpCameraPhoto;
+            resultType = Result::Type::Document;
         }
 
         QDBusReply<QString> reply = iface.call(QString::fromStdString(methodName), QVariant(QString::fromStdString(m_args[1])));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, Result::Type::RawImage, reply.value().toStdString());
+            Result result(this, resultType, reply.value().toStdString());
             return result;
         }
 

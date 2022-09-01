@@ -24,7 +24,7 @@ Result::Result(const Command *command, Type type, const std::string &result)
         case Type::String:
             // nothing
         break;
-        case Type::RawImage:
+        case Type::Photo:
             // nothing?
         break;
     }

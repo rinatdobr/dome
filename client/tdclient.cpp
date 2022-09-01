@@ -232,12 +232,21 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                                 send_message->input_message_content_ = std::move(message_content);
                             }
                             break;
-                            case command::Result::Type::RawImage: {
+                            case command::Result::Type::Photo: {
                                 auto message_content = td::td_api::make_object<td::td_api::inputMessagePhoto>();
                                 message_content->photo_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
                                 message_content->thumbnail_ = nullptr;
                                 message_content->width_ = 1920;
                                 message_content->height_ = 1080;
+                                message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
+                                message_content->caption_->text_ = std::move(result.toString());
+                                send_message->input_message_content_ = std::move(message_content);
+                            }
+                            break;
+                            case command::Result::Type::Document: {
+                                auto message_content = td::td_api::make_object<td::td_api::inputMessageDocument>();
+                                message_content->document_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
+                                message_content->thumbnail_ = nullptr;
                                 message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
                                 message_content->caption_->text_ = std::move(result.toString());
                                 send_message->input_message_content_ = std::move(message_content);

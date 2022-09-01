@@ -14,7 +14,8 @@ public:
     {
         Undefined,
         String,
-        RawImage
+        Photo,
+        Document
     };
 
     Result();
