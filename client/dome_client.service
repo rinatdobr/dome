@@ -4,6 +4,7 @@ Description=Dome client
 [Service]
 Type=simple
 WorkingDirectory=%h/dome
+Environment="DOME_TELEGRAM_CONFIG=%h/dome/telegram.json"
 Environment="DOME_DB_CONFIG=%h/dome/db.json"
 Environment="DOME_STATISTIC_CONFIG=%h/dome/statistic.json"
-ExecStart=%h/workspace/dome/build/client/dome_client
+ExecStart=/usr/bin/dome_client

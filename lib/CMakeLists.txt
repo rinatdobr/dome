@@ -22,6 +22,7 @@ set(SOURCE_FILES
     config/db.cpp
     config/file.cpp
     config/ipcamera.cpp
+    config/telegram.cpp
     io/db.cpp
     io/io.cpp
     utils.cpp

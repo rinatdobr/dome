@@ -31,16 +31,19 @@ auto overloaded(F... f) {
   return detail::overload<F...>(f...);
 }
 
-TdClient::TdClient(int logLevel, uint refreshSec, const std::string &login, const std::string &pass)
+TdClient::TdClient(const dome::config::Telegram::Config &telegramConfig)
     : m_clientId(0)
-    , m_refreshSec(refreshSec)
-    , m_login(login)
-    , m_pass(pass)
+    , m_refreshSec(telegramConfig.m_refreshPeriodSec)
+    , m_login(telegramConfig.m_login)
+    , m_pass(telegramConfig.m_pass)
+    , m_appId(telegramConfig.m_appId)
+    , m_appHash(telegramConfig.m_appHash)
+    , m_chatIds(telegramConfig.m_chatIds)
 	, m_isAuthenticated(false)
     , m_currentQueryId(0)
     , m_authenticationQueryId(0)
 {
-    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(logLevel));
+    td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(2));
 
     m_clientManager = std::make_unique<td::ClientManager>();
     m_clientId = m_clientManager->create_client_id();
@@ -205,7 +208,16 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                 }
                 std::cout << "Got message: [chatId:" << chatId << "] [from:" << senderName << "] [" << text
                           << "]" << std::endl;
-                if (chatId == CHAT_ID) {
+
+                bool isFound = false;
+                for (const auto &id : m_chatIds) {
+                    if (chatId == id) {
+                        isFound = true;
+                        break;
+                    }
+                }
+
+                if (isFound) {
                     std::cout << "DOME" << std::endl;
                     command::Result result = Commandor::Run(text);
                     if (result.isValid()) {
@@ -309,8 +321,8 @@ void TdClient::onAuthorizationStateUpdate() {
 				parameters->database_directory_ = "tdlib";
 				parameters->use_message_database_ = true;
 				parameters->use_secret_chats_ = true;
-				parameters->api_id_ = APP_ID;
-				parameters->api_hash_ = APP_HASH;
+				parameters->api_id_ = m_appId;
+				parameters->api_hash_ = m_appHash;
 				parameters->system_language_code_ = "en";
 				parameters->device_model_ = "Desktop";
 				parameters->application_version_ = "1.0";

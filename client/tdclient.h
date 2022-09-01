@@ -14,9 +14,11 @@
 #include <string>
 #include <vector>
 
+#include <config/telegram.h>
+
 class TdClient {
 public:
-    TdClient(int logLevel = 0, uint refreshSec = 5, const std::string &login = "", const std::string &pass = "");
+    TdClient(const dome::config::Telegram::Config &telegramConfig);
 
     void run();
 
@@ -24,6 +26,9 @@ private:
     uint m_refreshSec;
     std::string m_login;
     std::string m_pass;
+    td::td_api::int32 m_appId;
+    std::string m_appHash;
+    std::vector<int64_t> m_chatIds;
 
     std::unique_ptr<td::ClientManager> m_clientManager;
     td::ClientManager::ClientId m_clientId;
