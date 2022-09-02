@@ -54,13 +54,15 @@ void Statistic::parse()
 
         std::string name = jCommand["name"].get<std::string>();
         std::string period = jCommand["period"].get<std::string>();
-        std::string args = jCommand["args"].get<std::string>();
+        std::string argsStr = jCommand["args"].get<std::string>();
         std::string outputType = jCommand["output_type"].get<std::string>();
         std::string outputName = jCommand["output_name"].get<std::string>();
-        spdlog::info("Statistic command config: name={} period={} args={} outputType={} outputName={}", name, period, args, outputType, outputName);
+        spdlog::info("Statistic command config: name={} period={} argsStr={} outputType={} outputName={}", name, period, argsStr, outputType, outputName);
+
+        std::vector<std::string> args = ParseArgs(argsStr);
 
         m_statistic.push_back(
-            Config(name, period, {}, outputType, outputName)
+            Config(name, period, args, outputType, outputName)
         );
     }
 }

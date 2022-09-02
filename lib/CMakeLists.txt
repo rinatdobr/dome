@@ -20,10 +20,12 @@ set(SOURCE_FILES
     commands/statistic.cpp
     config/statistic.cpp
     config/db.cpp
+    config/dir.cpp
     config/file.cpp
     config/ipcamera.cpp
     config/telegram.cpp
     io/db.cpp
+    io/dir.cpp
     io/io.cpp
     utils.cpp
 )

@@ -5,16 +5,22 @@
 #include <spdlog/spdlog.h>
 
 Runner::Runner(const std::map<std::string, dome::config::Db::Config> &dbConfig,
+               const std::map<std::string, dome::config::Dir::Config> &dirConfig,
                const std::vector<dome::config::Statistic::Config> &statisticConfig)
     : m_dbs(dome::io::Db::Create(dbConfig))
+    , m_dirs(dome::io::Dir::Create(dirConfig))
     , m_commands(Command::Create(statisticConfig))
     , m_index(0)
 {
-    spdlog::trace("{}:{} {} statisticConfig.size()={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, statisticConfig.size());
+    spdlog::trace("{}:{} {} dbConfig.size()={} dirConfig.size()={} statisticConfig.size()={}",
+        __FILE__, __LINE__, __PRETTY_FUNCTION__, dbConfig.size(), dirConfig.size(), statisticConfig.size());
 
     for (auto &command : m_commands) {
         if (command->ioType() == Command::IoType::Db) {
             command->setIo(m_dbs[command->ioName()]);
+        }
+        else if (command->ioType() == Command::IoType::Dir) {
+            command->setIo(m_dirs[command->ioName()]);
         }
     }
 
@@ -57,7 +63,7 @@ void Runner::setupSchedule()
     m_lastExecutionTime = m_startTime;
     for (auto &command : m_commands) {
         command->setNextTimeFrameSec(
-            m_startTime.count() + command->getPeriodSec()
+            m_startTime.count() + 10
         );
     }
 }

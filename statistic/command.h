@@ -16,7 +16,7 @@ enum class IoType
 {
     Invalid,
     Db,
-    File
+    Dir
 };
     static std::vector<std::unique_ptr<Command>> Create(const std::vector<dome::config::Statistic::Config> &statisticConfig);
 

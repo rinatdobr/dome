@@ -15,9 +15,9 @@ Command::IoType StrToIoType(const std::string &ioType)
         spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::Db);
         return Command::IoType::Db;
     }
-    else if (ioType == "file") {
-        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::File);
-        return Command::IoType::File;
+    else if (ioType == "dir") {
+        spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::Dir);
+        return Command::IoType::Dir;
     }
     else {
         spdlog::debug("{}:{}", __PRETTY_FUNCTION__, Command::IoType::Invalid);

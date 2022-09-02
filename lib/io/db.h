@@ -1,5 +1,5 @@
-#ifndef DB_WRITER_H
-#define DB_WRITER_H
+#ifndef IO_DB_H
+#define IO_DB_H
 
 #include <memory>
 #include <sqlite3.h>

@@ -1,5 +1,5 @@
-#ifndef WRITER_H
-#define WRITER_H
+#ifndef IO_IO_H
+#define IO_IO_H
 
 #include <string>
 
@@ -13,7 +13,8 @@ class Io
 {
 public:
     virtual void write(const command::Result &result) = 0;
-    virtual std::string readLastForSec(const std::string &name, uint seconds) = 0;
+    virtual std::string readLastForSec(uint seconds);
+    virtual std::string readLastForSec(const std::string &name, uint seconds);
 };
 
 }
