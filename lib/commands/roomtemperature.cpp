@@ -45,7 +45,7 @@ Result RoomTemperature::execute()
         QDBusReply<double> reply = iface.call(QString::fromStdString(dome::dbus::MethodRoomTemperature));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, Result::Type::String, ProcessRoomTemperatureReply(reply.value()));
+            Result result(this, ProcessRoomTemperatureReply(reply.value()));
             return result;
         }
 

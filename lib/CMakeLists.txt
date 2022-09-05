@@ -36,9 +36,8 @@ target_include_directories(dome PRIVATE . ../common)
 target_link_libraries(dome PUBLIC Qt5::Core Qt5::DBus)
 target_link_libraries(dome PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome PRIVATE SQLite::SQLite3)
-target_link_libraries(dome PRIVATE spdlog::spdlog_header_only)
+target_link_libraries(dome PRIVATE boost_iostreams boost_system boost_filesystem)
 set_property(TARGET dome PROPERTY CXX_STANDARD 17)
-
 install(TARGETS dome
         LIBRARY DESTINATION /lib
 )

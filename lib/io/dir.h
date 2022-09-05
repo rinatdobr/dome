@@ -22,7 +22,6 @@ public:
 
     std::string name() const;
     void write(const command::Result &result) override;
-    std::string readLastForSec(uint seconds) override;
 
 private:
     std::string m_name;
@@ -32,7 +31,6 @@ private:
     bool checkIfExists();
     bool create();
     void writeValue(const std::string &value);
-    std::string readLastValuesForSec(uint seconds);
 };
 
 }

@@ -12,22 +12,23 @@ Result::Result()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-Result::Result(const Command *command, Type type, const std::string &result)
+Result::Result(const Command *command, const std::string &result)
  : m_isValid(true)
- , m_type(type)
+ , m_type(Type::String)
  , m_string(result)
  , m_command(command)
 {
-    spdlog::trace("{}:{} {} type={} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, type, result);
+    spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result);
+}
 
-    switch (m_type) {
-        case Type::String:
-            // nothing
-        break;
-        case Type::Photo:
-            // nothing?
-        break;
-    }
+Result::Result(const Command *command, const std::filesystem::path &result, FileType fileType)
+ : m_isValid(true)
+ , m_type(Type::File)
+ , m_fileType(fileType)
+ , m_string(result)
+ , m_command(command)
+{
+    spdlog::trace("{}:{} {} result={} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result.string(), fileType);
 }
 
 Result::~Result()
@@ -40,6 +41,13 @@ Result::Type Result::type() const
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_type;
+}
+
+Result::FileType Result::fileType() const
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return m_fileType;
 }
 
 const std::string &Result::toString() const

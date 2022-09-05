@@ -53,15 +53,27 @@ Result Statistic::execute()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (m_args.size() < 2) {
+    // 0 - command name
+    // 1 - period
+    // 2 - type
+    if (m_args.size() < 3) {
         spdlog::error("command::Statistic: Not enought args");
         return {};
     }
 
+    dome::io::Io::Type ioType = dome::io::Io::StrToType(m_args[2]);
+
     for (auto &configCommand : Config::getInstance().statisticConfig()) {
         if (configCommand.m_name == m_args[0]) {
             spdlog::info("Executing {}... Done", name());
-            return Result(this, Result::Type::String, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1])));
+            switch (ioType) {
+                case dome::io::Io::Type::Data:
+                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType));
+                break;
+                case dome::io::Io::Type::Chart:
+                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType), Result::FileType::Photo);
+                break;
+            }
         }
     }
 

@@ -45,7 +45,7 @@ Result RoomHumidity::execute()
         QDBusReply<double> reply = iface.call(QString::fromStdString(dome::dbus::MethodRoomHumidity));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, Result::Type::String, ProcessRoomHumidityReply(reply.value()));
+            Result result(this, ProcessRoomHumidityReply(reply.value()));
             return result;
         }
 

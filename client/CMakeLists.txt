@@ -23,7 +23,7 @@ target_link_libraries(dome_client PUBLIC Qt5::Core Qt5::DBus)
 target_link_libraries(dome_client PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome_client PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(dome_client PRIVATE Td::TdStatic)
-set_property(TARGET dome_client PROPERTY CXX_STANDARD 14)
+set_property(TARGET dome_client PROPERTY CXX_STANDARD 17)
 
 install(TARGETS dome_client
         RUNTIME DESTINATION /usr/bin

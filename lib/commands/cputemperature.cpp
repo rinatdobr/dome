@@ -45,7 +45,7 @@ Result CpuTemperature::execute()
         QDBusReply<double> reply = iface.call(QString::fromStdString(dome::dbus::MethodCpuTemperature));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, Result::Type::String, ProcessCpuTemperatureReply(reply.value()));
+            Result result(this, ProcessCpuTemperatureReply(reply.value()));
             return result;
         }
 

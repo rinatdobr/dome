@@ -71,18 +71,6 @@ void Dir::write(const command::Result &result)
     writeValue(result.toString());
 }
 
-std::string Dir::readLastForSec(uint seconds)
-{
-    spdlog::trace("{}:{} {} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, seconds);
-
-    if (!m_isValid) {
-        spdlog::error("Dir is not valid to write");
-        return {};
-    }
-
-    return readLastValuesForSec(seconds);
-}
-
 bool Dir::checkIfExists()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -113,15 +101,6 @@ void Dir::writeValue(const std::string &value)
     spdlog::debug("{}: copy from '{}' to '{}'", __PRETTY_FUNCTION__, srcFile.string(), destFile.string());
 
     std::filesystem::copy(srcFile, destFile, ec);
-}
-
-std::string Dir::readLastValuesForSec(uint seconds)
-{
-    spdlog::trace("{}:{} {} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, seconds);
-
-    spdlog::warn("{} not implemented", __PRETTY_FUNCTION__);
-
-    return {};
 }
 
 }

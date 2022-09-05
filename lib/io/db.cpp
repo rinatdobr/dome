@@ -1,8 +1,12 @@
 #include "db.h"
 
 #include <sstream>
+#include <limits>
 #include <sqlite3.h>
 #include <spdlog/spdlog.h>
+
+#include <gnuplot-iostream.h>
+#include <boost/tuple/tuple.hpp>
 
 namespace {
 
@@ -24,8 +28,13 @@ const std::string InsertToTable("\
     values (?)"
 );
 
-const std::string ReadFromTableForSec("\
+const std::string ReadFromTableForSecForData("\
     select strftime('%Y/%m/%d %H:%M:%S',timestamp,'localtime'), value from table_name \
+    where timestamp >= (select DATETIME('now', '-seconds_value second'))"
+);
+
+const std::string ReadFromTableForSecForChart("\
+    select strftime('%m.%d|%H:%M',timestamp,'localtime'), value from table_name \
     where timestamp >= (select DATETIME('now', '-seconds_value second'))"
 );
 
@@ -108,9 +117,9 @@ void Db::write(const command::Result &result)
     writeValue(tableName, result.toString());
 }
 
-std::string Db::readLastForSec(const std::string &name, uint seconds)
+std::string Db::readLastForSec(const std::string &name, uint seconds, Type type)
 {
-    spdlog::trace("{}:{} {} name={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, seconds);
+    spdlog::trace("{}:{} {} name={} seconds={} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name, seconds, type);
 
     if (!m_isValid) {
         spdlog::error("DB is not valid to read");
@@ -122,7 +131,7 @@ std::string Db::readLastForSec(const std::string &name, uint seconds)
         return {};
     }
 
-    return readLastValuesForSec(name, seconds);
+    return readLastValuesForSec(name, seconds, type);
 }
 
 bool Db::checkIfTableExists(const std::string &tableName)
@@ -223,14 +232,24 @@ void Db::writeValue(const std::string &tableName, const std::string &value)
     }
 }
 
-std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds)
+std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds, Type type)
+{
+    spdlog::trace("{}:{} {} tableName={} seconds={} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, seconds, type);
+
+    switch (type) {
+        case Type::Chart:   return readLastValuesForSecChart(tableName, seconds);
+        case Type::Data:    return readLastValuesForSecData(tableName, seconds);
+    }
+}
+
+std::string Db::readLastValuesForSecChart(const std::string &tableName, uint seconds)
 {
     spdlog::trace("{}:{} {} tableName={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, seconds);
 
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");
     std::string secondsValueToReplace("seconds_value");
-    std::string readFromTable(ReadFromTableForSec);
+    std::string readFromTable(ReadFromTableForSecForChart);
     readFromTable.replace(readFromTable.find(tableNameToReplace), tableNameToReplace.length(), tableName);
     readFromTable.replace(readFromTable.find(secondsValueToReplace), secondsValueToReplace.length(), std::to_string(seconds));
 
@@ -241,16 +260,64 @@ std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds)
         return {};
     }
 
-    // sqlCode = sqlite3_bind_int64(sqlRequest, 1, seconds);
-    // if (sqlCode != SQLITE_OK) {
-    //     sqlite3_finalize(sqlRequest);
-    //     return {};
-    // }
+    std::vector<std::pair<std::string, double>> xy;
+    double min = std::numeric_limits<double>::max(), max = 0;
+
+    while ((sqlCode = sqlite3_step(sqlRequest)) == SQLITE_ROW) {
+        double value = sqlite3_column_double(sqlRequest, 1);
+        xy.push_back(std::make_pair(reinterpret_cast<const char *>(sqlite3_column_text(sqlRequest, 0)), value));
+        min = std::min(value, min);
+        max = std::max(value, max);
+    }
+
+    if (sqlCode == SQLITE_DONE) {
+        sqlite3_finalize(sqlRequest);
+    }
+    else {
+        spdlog::error("sqlite3_step: {}", sqlite3_errmsg(m_dbHandler));
+        sqlite3_finalize(sqlRequest);
+        return {};
+    }
+
+    min -= 2;
+    max += 2;
+
+    int stepWidth = xy.size() / 12;
+    std::string outputImage(tableName + ".png");
+
+    Gnuplot gp;
+    gp << "set terminal png size 1280,960\n";
+    gp << "set style line 1 linecolor rgb '#0060ad' linetype 1 linewidth 2 pointtype 7 pointsize 1.5\n";
+    gp << "set output '" << outputImage << "' \n";
+    gp << "set yrange [" << min << ":" << max << "]\n";
+    gp << "plot" << gp.file1d(xy) << "using 2:xtic(int($0)%" << stepWidth << " == 0 ? stringcolumn(1) : '') title '" << tableName << "' with linespoints linestyle 1 smooth csplines" << std::endl;
+
+    return outputImage;
+}
+
+std::string Db::readLastValuesForSecData(const std::string &tableName, uint seconds)
+{
+    spdlog::trace("{}:{} {} tableName={} seconds={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, seconds);
+
+    sqlite3_stmt *sqlRequest;
+    std::string tableNameToReplace("table_name");
+    std::string secondsValueToReplace("seconds_value");
+    std::string readFromTable(ReadFromTableForSecForData);
+    readFromTable.replace(readFromTable.find(tableNameToReplace), tableNameToReplace.length(), tableName);
+    readFromTable.replace(readFromTable.find(secondsValueToReplace), secondsValueToReplace.length(), std::to_string(seconds));
+
+    int sqlCode = sqlite3_prepare_v2(m_dbHandler, readFromTable.c_str(), -1, &sqlRequest, NULL);
+    if (sqlCode != SQLITE_OK) {
+        spdlog::error("sqlite3_prepare_v2: {}", sqlite3_errmsg(m_dbHandler));
+        sqlite3_finalize(sqlRequest);
+        return {};
+    }
 
     std::ostringstream result;
     while ((sqlCode = sqlite3_step(sqlRequest)) == SQLITE_ROW) {
         result << sqlite3_column_text(sqlRequest, 0) << " | " << sqlite3_column_text(sqlRequest, 1) << "\n";
     }
+
     if (sqlCode == SQLITE_DONE) {
         sqlite3_finalize(sqlRequest);
         return result.str();
