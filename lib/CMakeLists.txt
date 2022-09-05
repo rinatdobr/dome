@@ -12,6 +12,7 @@ find_package(spdlog REQUIRED)
 set(SOURCE_FILES
     commands/command.cpp
     commands/cputemperature.cpp
+    commands/info.cpp
     commands/ipcamera.cpp
     commands/parser.cpp
     commands/result.cpp
