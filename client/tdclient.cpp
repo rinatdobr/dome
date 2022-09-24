@@ -225,6 +225,13 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                         auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
                         send_message->chat_id_ = chatId;
                         switch (result.type()) {
+                            case command::Result::Type::Error: {
+                                auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
+                                message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
+                                message_content->text_->text_ = std::move(result.errorMessage());
+                                send_message->input_message_content_ = std::move(message_content);
+                            }
+                            break;
                             case command::Result::Type::String: {
                                 auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
                                 message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();

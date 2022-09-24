@@ -239,6 +239,7 @@ std::string Db::readLastValuesForSec(const std::string &tableName, uint seconds,
     switch (type) {
         case Type::Chart:   return readLastValuesForSecChart(tableName, seconds);
         case Type::Data:    return readLastValuesForSecData(tableName, seconds);
+        default:            return "No data";
     }
 }
 

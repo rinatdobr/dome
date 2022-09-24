@@ -1,34 +1,37 @@
 #include "result.h"
+#include "command.h"
 
 #include <spdlog/spdlog.h>
+#include <sstream>
 
 namespace command {
 
-Result::Result()
- : m_isValid(false)
- , m_type(Type::Undefined)
- , m_command(nullptr)
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-}
-
-Result::Result(const Command *command, const std::string &result)
+Result::Result(const std::string &result)
  : m_isValid(true)
- , m_type(Type::String)
+ , m_type(Type::Error)
  , m_string(result)
- , m_command(command)
+ , m_command(nullptr)
 {
     spdlog::trace("{}:{} {} result={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result);
 }
 
-Result::Result(const Command *command, const std::filesystem::path &result, FileType fileType)
+Result::Result(const Command *command, const std::string &result, Status status)
  : m_isValid(true)
- , m_type(Type::File)
+ , m_type(status == Status::Success ? Type::String : Type::Error)
+ , m_string(result)
+ , m_command(command)
+{
+    spdlog::trace("{}:{} {} result={} status={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result, status);
+}
+
+Result::Result(const Command *command, const std::filesystem::path &result, FileType fileType, Status status)
+ : m_isValid(true)
+ , m_type(status == Status::Success ? Type::File : Type::Error)
  , m_fileType(fileType)
  , m_string(result)
  , m_command(command)
 {
-    spdlog::trace("{}:{} {} result={} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result.string(), fileType);
+    spdlog::trace("{}:{} {} result={} type={} status={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, result.string(), fileType, status);
 }
 
 Result::~Result()
@@ -70,5 +73,20 @@ const Command *Result::command() const
 
     return m_command;
 }
+
+std::string Result::errorMessage() const
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    if (m_command) {
+        std::ostringstream stream;
+        stream << m_command->name() << " : " << m_string;
+        return stream.str();
+    }
+    else {
+        return m_string;
+    }
+}
+
 
 }

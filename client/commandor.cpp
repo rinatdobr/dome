@@ -20,5 +20,5 @@ command::Result Commandor::Run(const std::string &commandLine)
     }
 
     spdlog::info("No command to run");
-    return {};
+    return command::Result("No command to run");
 }

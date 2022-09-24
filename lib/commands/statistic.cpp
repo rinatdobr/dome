@@ -58,7 +58,7 @@ Result Statistic::execute()
     // 2 - type
     if (m_args.size() < 3) {
         spdlog::error("command::Statistic: Not enought args");
-        return {};
+        return Result(this, "Not enought args", Result::Status::Fail);
     }
 
     dome::io::Io::Type ioType = dome::io::Io::StrToType(m_args[2]);
@@ -68,17 +68,17 @@ Result Statistic::execute()
             spdlog::info("Executing {}... Done", name());
             switch (ioType) {
                 case dome::io::Io::Type::Data:
-                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType));
+                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType), Result::Status::Success);
                 break;
                 case dome::io::Io::Type::Chart:
-                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType), Result::FileType::Photo);
+                    return Result(this, Config::getInstance().m_dbs[configCommand.m_outputName]->readLastForSec(configCommand.m_name, PeriodToSeconds(m_args[1]), ioType), Result::FileType::Photo, Result::Status::Success);
                 break;
             }
         }
     }
 
     spdlog::error("command::Statistic: Invalid command");
-    return {};
+    return Result(this, "Invalid command", Result::Status::Fail);
 }
 
 }

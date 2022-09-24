@@ -15,7 +15,8 @@ enum class Type
 {
     Undefined,
     String,
-    File
+    File,
+    Error
 };
 
 enum class FileType
@@ -25,16 +26,23 @@ enum class FileType
     Document
 };
 
-    Result();
-    Result(const Command *command, const std::string &result);
-    Result(const Command *command, const std::filesystem::path &result, FileType fileType);
+enum class Status
+{
+    Success,
+    Fail
+};
+
+    Result(const std::string &result);
+    Result(const Command *command, const std::string &result, Status status);
+    Result(const Command *command, const std::filesystem::path &result, FileType fileType, Status status);
     ~Result();
 
     Type type() const;
     FileType fileType() const;
     const std::string &toString() const;
     bool isValid() const;
-    const Command *command() const; 
+    const Command *command() const;
+    std::string errorMessage() const;
 
 protected:
     bool m_isValid;

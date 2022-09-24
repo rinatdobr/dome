@@ -45,7 +45,7 @@ Result Info::execute()
         resultStr << "\nВлажность: " << "-";
     }
 
-    Result result(this, resultStr.str());
+    Result result(this, resultStr.str(), Result::Status::Success);
 
     return result;
 }

@@ -30,7 +30,7 @@ Result IpCamera::execute()
 
     if (m_args.size() < 2) {
         spdlog::error("command::IpCamera: Not enought args");
-        return {};
+        return Result(this, "Not enought args", Result::Status::Fail);
     }
 
     QDBusInterface iface(
@@ -55,16 +55,15 @@ Result IpCamera::execute()
         QDBusReply<QString> reply = iface.call(QString::fromStdString(methodName), QVariant(QString::fromStdString(m_args[1])));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, reply.value().toStdString(), fileType);
-            return result;
+            return Result(this, reply.value().toStdString(), fileType, Result::Status::Success);
         }
 
-        spdlog::error("command::IpCamera: Method call failed: {}:{}", reply.error().name().toStdString(), reply.error().message().toStdString());
-        return {};
+        spdlog::error("command::IpCamera: D-Bus method call failed: {}:{}", reply.error().name().toStdString(), reply.error().message().toStdString());
+        return Result(this, "D-Bus method call failed", Result::FileType::Undefined, Result::Status::Fail);
     }
 
-    spdlog::error("command::IpCamera: Invalid command");
-    return {};
+    spdlog::error("command::IpCamera: D-Bus interface is not valid: {}:{}", iface.lastError().name().toStdString(), iface.lastError().message().toStdString());
+    return Result(this, "D-Bus interface is not valid", Result::FileType::Undefined, Result::Status::Fail);
 }
 
 }

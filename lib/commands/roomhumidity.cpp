@@ -45,16 +45,15 @@ Result RoomHumidity::execute()
         QDBusReply<double> reply = iface.call(QString::fromStdString(dome::dbus::MethodRoomHumidity));
         if (reply.isValid()) {
             spdlog::info("Executing {}... Done", name());
-            Result result(this, ProcessRoomHumidityReply(reply.value()));
-            return result;
+            return Result(this, ProcessRoomHumidityReply(reply.value()), Result::Status::Success);
         }
 
-        spdlog::error("command::RoomHumidity: Method call failed: {}:{}", reply.error().name().toStdString(), reply.error().message().toStdString());
-        return {};
+        spdlog::error("command::RoomHumidity: D-Bus method call failed: {}:{}", reply.error().name().toStdString(), reply.error().message().toStdString());
+        return Result(this, "D-Bus method call failed", Result::Status::Fail);
     }
 
-    spdlog::error("command::RoomHumidity: Iface not valid: {}:{}", iface.lastError().name().toStdString(), iface.lastError().message().toStdString());
-    return {};
+    spdlog::error("command::RoomHumidity: D-Bus interface is not valid: {}:{}", iface.lastError().name().toStdString(), iface.lastError().message().toStdString());
+    return Result(this, "D-Bus interface is not valid", Result::Status::Fail);
 }
 
 }
