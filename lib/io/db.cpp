@@ -283,7 +283,7 @@ std::string Db::readLastValuesForSecChart(const std::string &tableName, uint sec
     min -= 2;
     max += 2;
 
-    int stepWidth = xy.size() / 12;
+    int stepWidth = std::ceil(xy.size() / 12.0);
     std::string outputImage(tableName + ".png");
 
     Gnuplot gp;
