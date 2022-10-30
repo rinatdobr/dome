@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 namespace dome {
-namespace data {
+namespace core {
 
 Provider::Provider()
 {

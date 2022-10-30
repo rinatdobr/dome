@@ -7,19 +7,20 @@
 #include "provider.h"
 
 namespace dome {
-namespace mqtt {
+namespace core {
 
 class Sender
 {
 public:
-    explicit Sender(const dome::config::Config &config, dome::data::Provider &provider);
+    explicit Sender(const dome::config::Config &config, dome::core::Provider &provider);
     ~Sender();
 
     void start(int period);
 private:
+    const dome::config::Config &m_config;
     struct mosquitto *m_mosq;
     std::string m_topic;
-    dome::data::Provider &m_provider;
+    dome::core::Provider &m_provider;
 };
 
 }

@@ -1,13 +1,15 @@
 #include "sender.h"
 
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 #include <sstream>
 
 namespace dome {
-namespace mqtt {
+namespace core {
 
-Sender::Sender(const dome::config::Config &config, dome::data::Provider &provider)
-    : m_mosq(nullptr)
+Sender::Sender(const dome::config::Config &config, dome::core::Provider &provider)
+    : m_config(config)
+    , m_mosq(nullptr)
     , m_provider(provider)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -50,28 +52,27 @@ void Sender::start(int period)
 
     while (1) {
         if (m_provider.prepareData()) {
-            auto a1 = m_provider.getReaderForFloat("aaed98aa-535a-11ed-84c0-4f35a8d3364f");
-            auto a2 = m_provider.getReaderForFloat("3968ec9e-535e-11ed-88cf-b73d78fb3403");
-            std::ostringstream data;
-            data << (*a1)() << " " << (*a2)();
-            std::string d = data.str();
+            nlohmann::json jData;
+            for (const auto &source : m_config.sources()) {
+                switch (source.dataType) {
+                    case dome::config::Source::DataType::Undefined:
+                    break;
+                    case dome::config::Source::DataType::Float: {
+                        auto dataReader = m_provider.getReaderForFloat(source.name);
+                        jData[source.name] = (*dataReader)();
+                    }
+                    break;
+                }
+                
+            }
 
-            mosquitto_publish(m_mosq, nullptr, "test", d.size(), d.c_str(), 0, false);
+            std::string data = jData.dump();
+            mosquitto_publish(m_mosq, nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
         }
         
-        std::this_thread::sleep_for(std::chrono::seconds(period));
+        std::this_thread::sleep_for(std::chrono::seconds(m_config.periodSec()));
     }
 }
-
-// std::string Sender::generateTopicName(const dome::config::Config &config)
-// {
-//     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-//     std::ostringstream topicName;
-//     // topicName << config.location() << "-" << dome::config::Config::SourceTypeToStr(config.sourceType()) << "-" << config.name();
-
-//     return topicName.str();
-// }
 
 }
 }

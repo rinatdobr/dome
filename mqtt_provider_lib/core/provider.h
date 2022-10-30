@@ -7,7 +7,7 @@
 #include "config/config.h"
 
 namespace dome {
-namespace data {
+namespace core {
 
 class Provider;
 

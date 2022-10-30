@@ -45,7 +45,7 @@ bool Dht22::prepareData()
     }
 }
 
-Reader<double> *Dht22::getReaderForFloat(const std::string &name)
+dome::core::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include "utils.h"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -59,7 +60,8 @@ void Config::parse()
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
     m_id = jConfig["id"].get<std::string>();
-    spdlog::info("Data provider id: id={}", m_id);
+    m_periodSec = PeriodToSeconds(jConfig["period"].get<std::string>());
+    spdlog::info("Data provider: id={} period={}", m_id, m_periodSec);
 
     auto jSources = jConfig["sources"];
     for(const auto &jSource : jSources) {
@@ -89,6 +91,13 @@ std::string Config::id() const
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_id;
+}
+
+uint Config::periodSec() const
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return m_periodSec;
 }
 
 const std::vector<Source> &Config::sources() const
