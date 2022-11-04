@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 namespace dome {
-namespace core {
+namespace mqtt_provider {
 
 Provider::Provider()
 {

@@ -5,9 +5,9 @@
 #include <sstream>
 
 namespace dome {
-namespace core {
+namespace mqtt_provider {
 
-Sender::Sender(const dome::config::Config &config, dome::core::Provider &provider)
+Sender::Sender(const dome::config::Provider &config, dome::mqtt_provider::Provider &provider)
     : m_config(config)
     , m_mosq(nullptr)
     , m_provider(provider)

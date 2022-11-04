@@ -1,4 +1,4 @@
-#include "config.h"
+#include "provider.h"
 
 #include "utils.h"
 #include <spdlog/spdlog.h>
@@ -28,7 +28,7 @@ Source::DataType StrToDataType(const std::string& str)
     return Source::DataType::Undefined;
 }
 
-Config::Config(std::string path)
+Provider::Provider(std::string path)
     : File(path)
 {
     spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
@@ -53,7 +53,7 @@ std::string Source::TypeToStr(Source::Type type)
     return "Undefined";
 }
 
-void Config::parse()
+void Provider::parse()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -86,21 +86,21 @@ void Config::parse()
 
 }
 
-std::string Config::id() const
+std::string Provider::id() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_id;
 }
 
-uint Config::periodSec() const
+uint Provider::periodSec() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_periodSec;
 }
 
-const std::vector<Source> &Config::sources() const
+const std::vector<Source> &Provider::sources() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

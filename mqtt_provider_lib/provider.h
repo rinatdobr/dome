@@ -4,10 +4,10 @@
 #include <mosquitto.h>
 #include <functional>
 
-#include "config/config.h"
+#include <config/provider.h>
 
 namespace dome {
-namespace core {
+namespace mqtt_provider {
 
 class Provider;
 

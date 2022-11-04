@@ -3,24 +3,24 @@
 
 #include <mosquitto.h>
 
-#include "config/config.h"
+#include <config/provider.h>
 #include "provider.h"
 
 namespace dome {
-namespace core {
+namespace mqtt_provider {
 
 class Sender
 {
 public:
-    explicit Sender(const dome::config::Config &config, dome::core::Provider &provider);
+    explicit Sender(const dome::config::Provider &config, dome::mqtt_provider::Provider &provider);
     ~Sender();
 
     void start(int period);
 private:
-    const dome::config::Config &m_config;
+    const dome::config::Provider &m_config;
     struct mosquitto *m_mosq;
     std::string m_topic;
-    dome::core::Provider &m_provider;
+    dome::mqtt_provider::Provider &m_provider;
 };
 
 }

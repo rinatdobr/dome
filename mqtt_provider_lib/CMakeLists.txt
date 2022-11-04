@@ -8,15 +8,14 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(mosquitto REQUIRED libmosquitto)
 
 set(SOURCE_FILES
-    config/config.cpp
-    config/file.cpp
-    core/provider.cpp
-    core/sender.cpp
-    utils.cpp
+    provider.cpp
+    sender.cpp
 )
 
 add_library(dome_mqtt_provider_lib SHARED ${SOURCE_FILES})
 target_include_directories(dome_mqtt_provider_lib PRIVATE .)
+target_include_directories(dome_mqtt_provider_lib PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 target_link_libraries(dome_mqtt_provider_lib PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(dome_mqtt_provider_lib PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome_mqtt_provider_lib PRIVATE ${mosquitto_LIBRARIES})
+target_link_libraries(dome_mqtt_provider_lib PRIVATE dome_lib)

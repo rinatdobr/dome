@@ -2,13 +2,15 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <config/provider.h>
-#include <sender.h>
-#include "dht22.h"
+#include <mosquitto.h>
+#include <config/core.h>
+
+#include "reciever.h"
+#include "db/writer.h"
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::trace);
-    spdlog::info("Start dht22_provider");
+    spdlog::info("Start dome_core");
 
     option longOptions[] = {
         {"config", required_argument, 0, 'c'}, 
@@ -29,10 +31,13 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath={}", configPath);
 
-    dome::config::Provider config(configPath);
-    dome::data::Dht22 dht22;
-    dome::mqtt_provider::Sender sender(config, dht22);
-    sender.start(1);
+    dome::config::Core config(configPath);
+    dome::db::Writer writer(config.database().path);
+    dome::core::Reciever reciever(config, writer);
+    reciever.start();
+    
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    reciever.stop();
 
     return 0;
 }

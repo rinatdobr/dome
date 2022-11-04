@@ -13,7 +13,6 @@ public:
 
 protected:
     std::string read();
-    virtual void parse() = 0;
 
 private:
     std::string m_path;

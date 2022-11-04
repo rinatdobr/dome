@@ -1,0 +1,10 @@
+{
+    "database": {
+        "path": "/home/pi/dome/domev2.db"
+    },
+    "config_files": [
+        {
+            "path": "/home/pi/workspace/dome/config/dht22.json"
+        }
+    ]
+}

@@ -45,7 +45,7 @@ bool Dht22::prepareData()
     }
 }
 
-dome::core::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
+dome::mqtt_provider::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef CONFIG_PROVIDER_H
+#define CONFIG_PROVIDER_H
 
 #include "file.h"
 
@@ -32,10 +32,10 @@ enum class DataType {
     DataType dataType;
 };
 
-class Config : public File
+class Provider : public File
 {
 public:
-    Config(std::string path);
+    Provider(std::string path);
 
     std::string id() const;
     uint periodSec() const;
