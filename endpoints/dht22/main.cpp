@@ -2,16 +2,15 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <mosquitto.h>
-#include <config/core.h>
-#include <mosquitto/mosq.h>
+#include <config/provider.h>
+#include <data/ping.h>
 #include <mosquitto/reciever.h>
-
-#include "data/dbsaver.h"
+#include <mosquitto/sender.h>
+#include "dht22.h"
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
-    spdlog::info("Start dome_core");
+    spdlog::info("Start dome_dht22");
 
     option longOptions[] = {
         {"config", required_argument, 0, 'c'}, 
@@ -43,14 +42,19 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath={}", configPath);
 
-    dome::config::Core config(configPath);
-    dome::data::DbSaver dbSaver(config.database().path);
-    std::vector<dome::data::Processor*> dataProcessors;
-    dataProcessors.push_back(&dbSaver);
-    dome::mosq::Reciever reciever("core/reciver", config.providers(), dataProcessors);
+    dome::config::Provider config(configPath);
+    dome::data::Dht22 dht22;
+    dome::mosq::Sender::Trigger trigger;
+    dome::mosq::Sender sender(config.id() + "/sender", config, dht22, trigger);
+    std::vector<dome::data::Processor*> processors;
+    dome::data::Ping ping(trigger);
+    processors.push_back(&ping);
+    dome::mosq::Reciever reciever(config.id() + "/reciever", config, processors);
+
     reciever.start();
-    
-    std::this_thread::sleep_for(std::chrono::seconds(60 * 3));
+    sender.start();
+    std::this_thread::sleep_for(std::chrono::seconds(60));
+    sender.stop();
     reciever.stop();
 
     return 0;

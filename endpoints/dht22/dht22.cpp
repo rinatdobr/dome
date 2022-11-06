@@ -45,9 +45,9 @@ bool Dht22::prepareData()
     }
 }
 
-dome::mqtt_provider::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
+dome::data::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
 {
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+    spdlog::trace("{}:{} {} name={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name);
 
     if (name == "aaed98aa-535a-11ed-84c0-4f35a8d3364f") {
         return &m_tempreatureReader;

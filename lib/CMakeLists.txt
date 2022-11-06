@@ -9,8 +9,15 @@ pkg_check_modules(mosquitto REQUIRED libmosquitto)
 
 set(SOURCE_FILES
     config/core.cpp
-    config/provider.cpp
     config/file.cpp
+    config/provider.cpp
+    config/telegram.cpp
+    data/ping.cpp
+    data/provider.cpp
+    mosquitto/mosq.cpp
+    mosquitto/reciever.cpp
+    mosquitto/sender.cpp
+    threader.cpp
     utils.cpp
 )
 

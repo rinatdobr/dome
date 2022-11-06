@@ -10,7 +10,7 @@ pkg_check_modules(mosquitto REQUIRED libmosquitto)
 
 set(SOURCE_FILES
     db/writer.cpp
-    reciever.cpp
+    data/dbsaver.cpp
     main.cpp
 )
 

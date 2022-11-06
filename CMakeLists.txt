@@ -4,5 +4,4 @@ project(dome VERSION 1.0 LANGUAGES CXX)
 
 add_subdirectory(lib)
 add_subdirectory(core)
-add_subdirectory(mqtt_provider_lib)
-add_subdirectory(mqtt_providers)
+add_subdirectory(endpoints)

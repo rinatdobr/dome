@@ -4,10 +4,10 @@
 #include <mosquitto.h>
 #include <functional>
 
-#include <config/provider.h>
+#include "config/provider.h"
 
 namespace dome {
-namespace mqtt_provider {
+namespace data {
 
 class Provider;
 
@@ -31,7 +31,8 @@ public:
     virtual ~Provider();
 
     virtual bool prepareData() = 0;
-    virtual Reader<double> *getReaderForFloat(const std::string &name) = 0;
+    virtual Reader<double> *getReaderForFloat(const std::string &name);
+    virtual Reader<std::string> *getReaderForString(const std::string &name);
 };
 
 }

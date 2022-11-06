@@ -1,5 +1,5 @@
-#ifndef TD_CLIENT_H
-#define TD_CLIENT_H
+#ifndef ENDPOINTS_TD_CLIENT_H
+#define ENDPOINTS_TD_CLIENT_H
 
 #include <td/telegram/Client.h>
 #include <td/telegram/td_api.h>
@@ -13,17 +13,42 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <queue>
 
+#include <data/provider.h>
 #include <config/telegram.h>
+#include <mosquitto/sender.h>
 
-class TdClient {
+namespace dome {
+namespace data {
+
+class TdClient : public dome::data::Provider {
 public:
-    TdClient(const dome::config::Telegram::Config &telegramConfig);
+class CommandReader : public dome::data::Reader<std::string>
+{
+public:
+    explicit CommandReader(TdClient *provider)
+        : Reader<std::string>(provider)
+    {}
+
+    std::string operator()() override;
+
+    friend class TdClient;
+};
+
+    TdClient(const dome::config::Telegram &config, dome::mosq::Sender::Trigger &senderTrigger);
+
+    bool prepareData() override;
+    dome::data::Reader<std::string> *getReaderForString(const std::string &name) override;
 
     void run();
 
 private:
-    uint m_refreshSec;
+    dome::mosq::Sender::Trigger &m_senderTrigger;
+    CommandReader m_commandReader;
+    std::queue<std::string> m_commands;
+
+    uint m_refreshPeriodSec;
     std::string m_login;
     std::string m_pass;
     td::td_api::int32 m_appId;
@@ -55,5 +80,8 @@ private:
     void checkAuthenticationError(Object object);
     td::ClientManager::RequestId nextQueryId();
 };
+
+}
+}
 
 #endif

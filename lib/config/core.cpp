@@ -7,7 +7,7 @@
 namespace dome {
 namespace config {
 
-Core::Core(std::string path)
+Core::Core(const std::string &path)
     : File(path)
 {
     spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,

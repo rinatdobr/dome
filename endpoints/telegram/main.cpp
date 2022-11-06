@@ -1,17 +1,14 @@
-#include <iostream>
-#include <spdlog/spdlog.h>
 #include <getopt.h>
+#include <spdlog/spdlog.h>
 
-#include <mosquitto.h>
-#include <config/core.h>
-#include <mosquitto/mosq.h>
-#include <mosquitto/reciever.h>
-
-#include "data/dbsaver.h"
+#include <config/provider.h>
+#include <config/telegram.h>
+#include <mosquitto/sender.h>
+#include "tdclient.h"
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
-    spdlog::info("Start dome_core");
+    spdlog::info("Start dome_telegram");
 
     option longOptions[] = {
         {"config", required_argument, 0, 'c'}, 
@@ -43,15 +40,9 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath={}", configPath);
 
-    dome::config::Core config(configPath);
-    dome::data::DbSaver dbSaver(config.database().path);
-    std::vector<dome::data::Processor*> dataProcessors;
-    dataProcessors.push_back(&dbSaver);
-    dome::mosq::Reciever reciever("core/reciver", config.providers(), dataProcessors);
-    reciever.start();
-    
-    std::this_thread::sleep_for(std::chrono::seconds(60 * 3));
-    reciever.stop();
-
-    return 0;
+    dome::config::Telegram telegramConfig(configPath);
+    dome::config::Provider providerConfig(configPath);
+    dome::mosq::Sender::Trigger trigger;
+    dome::data::TdClient tdClient(telegramConfig, trigger);
+    dome::mosq::Sender sender(providerConfig.id() + "/sender", providerConfig, tdClient, trigger);
 }

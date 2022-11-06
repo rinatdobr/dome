@@ -1,11 +1,25 @@
 {
-    "app_id": 0,
-    "app_hash": "app_hash",
-    "chat_ids": [
-        "chat_id"
+    "id": "f13c4c18-5dda-11ed-a30b-5ba1c9d04983",
+    "period": "0",
+    "save_period": "0",
+    "sources": [
+        {
+            "name": "08eb287a-5ddb-11ed-ab84-67bbbade1374",
+            "description": "Телеграм",
+            "location": "PC",
+            "type": "command",
+            "data_type": "string"
+        }
     ],
-    "login": "login",
-    "pass": "pass",
-    "log_level": "debug",
-    "refresh_period": "5s"
+    "telegram" : {
+        "app_id": 0,
+        "app_hash": "app_hash",
+        "chat_ids": [
+            "chat_id"
+        ],
+        "login": "login",
+        "pass": "pass",
+        "log_level": "debug",
+        "refresh_period": "5s"
+    }
 }

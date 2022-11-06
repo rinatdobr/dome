@@ -1,9 +1,11 @@
 #include "tdclient.h"
 
-#include "commandor.h"
-
 #include <chrono>
 #include <thread>
+#include <spdlog/spdlog.h>
+
+namespace dome {
+namespace data {
 
 // overloaded
 namespace detail {
@@ -31,24 +33,59 @@ auto overloaded(F... f) {
   return detail::overload<F...>(f...);
 }
 
-TdClient::TdClient(const dome::config::Telegram::Config &telegramConfig)
-    : m_clientId(0)
-    , m_refreshSec(telegramConfig.m_refreshPeriodSec)
-    , m_login(telegramConfig.m_login)
-    , m_pass(telegramConfig.m_pass)
-    , m_appId(telegramConfig.m_appId)
-    , m_appHash(telegramConfig.m_appHash)
-    , m_chatIds(telegramConfig.m_chatIds)
+TdClient::TdClient(const dome::config::Telegram &config, dome::mosq::Sender::Trigger &senderTrigger)
+    : m_senderTrigger(senderTrigger)
+    , m_commandReader(this)
+    , m_clientId(0)
+    , m_refreshPeriodSec(config.refreshPeriodSec())
+    , m_login(config.login())
+    , m_pass(config.pass())
+    , m_appId(config.appId())
+    , m_appHash(config.appHash())
+    , m_chatIds(config.chatIds())
 	, m_isAuthenticated(false)
     , m_currentQueryId(0)
     , m_authenticationQueryId(0)
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     td::ClientManager::execute(td::td_api::make_object<td::td_api::setLogVerbosityLevel>(2));
 
     m_clientManager = std::make_unique<td::ClientManager>();
     m_clientId = m_clientManager->create_client_id();
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
+}
+
+bool TdClient::prepareData()
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    if (m_commands.size()) {
+        m_commandReader.value = m_commands.front();
+        m_commands.pop();
+        return true;
+    }
+
+    return false;
+}
+
+std::string TdClient::CommandReader::operator()()
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return value;
+}
+
+dome::data::Reader<std::string> *TdClient::getReaderForString(const std::string &name)
+{
+    spdlog::trace("{}:{} {} name={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name);
+
+    if (name == "08eb287a-5ddb-11ed-ab84-67bbbade1374") {
+        return &m_commandReader;
+    }
+
+    return nullptr;
 }
 
 void TdClient::run() {
@@ -74,7 +111,7 @@ void TdClient::run() {
             else {
                 action = "u";
 				std::cout << "Sleeping..." << std::endl;
-                std::this_thread::sleep_for(std::chrono::seconds(m_refreshSec));
+                std::this_thread::sleep_for(std::chrono::seconds(m_refreshPeriodSec));
 				std::cout << "Sleeping... Done." << std::endl;
             }
 			if (action == "q") {
@@ -219,58 +256,62 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
 
                 if (isFound) {
                     std::cout << "DOME" << std::endl;
-                    command::Result result = Commandor::Run(text);
-                    if (result.isValid()) {
-                        std::cout << "Sending message to chat " << chatId << "..." << std::endl;
-                        auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
-                        send_message->chat_id_ = chatId;
-                        switch (result.type()) {
-                            case command::Result::Type::Error: {
-                                auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
-                                message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
-                                message_content->text_->text_ = std::move(result.errorMessage());
-                                send_message->input_message_content_ = std::move(message_content);
-                            }
-                            break;
-                            case command::Result::Type::String: {
-                                auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
-                                message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
-                                message_content->text_->text_ = std::move(result.toString());
-                                send_message->input_message_content_ = std::move(message_content);
-                            }
-                            break;
-                            case command::Result::Type::File: {
-                                switch (result.fileType()) {
-                                    case command::Result::FileType::Photo: {
-                                        auto message_content = td::td_api::make_object<td::td_api::inputMessagePhoto>();
-                                        message_content->photo_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
-                                        message_content->thumbnail_ = nullptr;
-                                        message_content->width_ = 1920;
-                                        message_content->height_ = 1080;
-                                        message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
-                                        message_content->caption_->text_ = std::move(result.toString());
-                                        send_message->input_message_content_ = std::move(message_content);
-                                    }
-                                    break;
-                                    case command::Result::FileType::Document: {
-                                        auto message_content = td::td_api::make_object<td::td_api::inputMessageDocument>();
-                                        message_content->document_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
-                                        message_content->thumbnail_ = nullptr;
-                                        message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
-                                        message_content->caption_->text_ = std::move(result.toString());
-                                        send_message->input_message_content_ = std::move(message_content);
-                                    }
-                                    break;
-                                }
-                            }
-                            break;
-                        }
+                    if (text.size() && text[0] == '/') {
+                        m_commands.push(text);
+                        m_senderTrigger.cv.notify_one();
+                    }
+                    // command::Result result = Commandor::Run(text);
+                    // if (result.isValid()) {
+                    //     std::cout << "Sending message to chat " << chatId << "..." << std::endl;
+                    //     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
+                    //     send_message->chat_id_ = chatId;
+                    //     switch (result.type()) {
+                    //         case command::Result::Type::Error: {
+                    //             auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
+                    //             message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
+                    //             message_content->text_->text_ = std::move(result.errorMessage());
+                    //             send_message->input_message_content_ = std::move(message_content);
+                    //         }
+                    //         break;
+                    //         case command::Result::Type::String: {
+                    //             auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
+                    //             message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
+                    //             message_content->text_->text_ = std::move(result.toString());
+                    //             send_message->input_message_content_ = std::move(message_content);
+                    //         }
+                    //         break;
+                    //         case command::Result::Type::File: {
+                    //             switch (result.fileType()) {
+                    //                 case command::Result::FileType::Photo: {
+                    //                     auto message_content = td::td_api::make_object<td::td_api::inputMessagePhoto>();
+                    //                     message_content->photo_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
+                    //                     message_content->thumbnail_ = nullptr;
+                    //                     message_content->width_ = 1920;
+                    //                     message_content->height_ = 1080;
+                    //                     message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
+                    //                     message_content->caption_->text_ = std::move(result.toString());
+                    //                     send_message->input_message_content_ = std::move(message_content);
+                    //                 }
+                    //                 break;
+                    //                 case command::Result::FileType::Document: {
+                    //                     auto message_content = td::td_api::make_object<td::td_api::inputMessageDocument>();
+                    //                     message_content->document_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
+                    //                     message_content->thumbnail_ = nullptr;
+                    //                     message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
+                    //                     message_content->caption_->text_ = std::move(result.toString());
+                    //                     send_message->input_message_content_ = std::move(message_content);
+                    //                 }
+                    //                 break;
+                    //             }
+                    //         }
+                    //         break;
+                    //     }
 
-                        sendQuery(std::move(send_message), {});
-                    }
-                    else {
-                        std::cout << "Result is invalid" << std::endl;
-                    }
+                        // sendQuery(std::move(send_message), {});
+                    // }
+                    // else {
+                    //     std::cout << "Result is invalid" << std::endl;
+                    // }
                 }
             },
             [](auto &update) {
@@ -367,4 +408,7 @@ void TdClient::checkAuthenticationError(Object object) {
 
 td::ClientManager::RequestId TdClient::nextQueryId() {
     return ++m_currentQueryId;
+}
+
+}
 }

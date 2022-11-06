@@ -19,7 +19,7 @@ public:
 class Core : public File
 {
 public:
-    Core(std::string path);
+    Core(const std::string &path);
 
     Database database() const;
     const std::vector<Provider> &providers() const;

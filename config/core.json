@@ -5,6 +5,9 @@
     "config_files": [
         {
             "path": "/home/pi/workspace/dome/config/dht22.json"
+        },
+        {
+            "path": "/home/pi/workspace/dome/config/telegram.json"
         }
     ]
 }
