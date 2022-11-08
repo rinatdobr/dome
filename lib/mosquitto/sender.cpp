@@ -34,24 +34,8 @@ void Sender::backgroundWork()
     bool triggered = false;
     while (m_isWorking) {
         if ((leftSec == 0 || triggered) && m_provider.prepareData()) {
-            nlohmann::json jData;
-            for (const auto &source : m_config.sources()) {
-                switch (source.dataType) {
-                    case dome::config::Source::DataType::Undefined:
-                    break;
-                    case dome::config::Source::DataType::Float: {
-                        auto dataReader = m_provider.getReaderForFloat(source.name);
-                        jData[source.name] = (*dataReader)();
-                    }
-                    break;
-                    case dome::config::Source::DataType::String: {
-                        auto dataReader = m_provider.getReaderForString(source.name);
-                        jData[source.name] = (*dataReader)();
-                    }
-                    break;
-                }
-            }
-
+            spdlog::debug("sending message to the {}", m_config.id());
+            nlohmann::json jData = m_provider.getData();
             std::string data = jData.dump();
             mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
         }
@@ -66,11 +50,11 @@ void Sender::backgroundWork()
         
         auto status = m_trigger.cv.wait_for(ul, std::chrono::seconds(1));
         if (status == std::cv_status::timeout) {
-            spdlog::trace("{}:{} {} timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+            spdlog::trace("{}:{} {} cv timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
             --leftSec;
         }
         else {
-            spdlog::trace("{}:{} {} no timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+            spdlog::trace("{}:{} {} cv no timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
             triggered = true;
         }
     }

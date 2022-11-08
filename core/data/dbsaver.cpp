@@ -2,7 +2,6 @@
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
 namespace dome {
 namespace data {
@@ -22,6 +21,11 @@ void DbSaver::process(const dome::config::Provider &provider, nlohmann::json &jM
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (jMessage["type"] != "data") {
+        spdlog::trace("{}:{} {} ignore...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+        return;
+    }
+
     if (!m_timestamps.count(provider.id())) {
         m_timestamps[provider.id()] = std::chrono::seconds(0);
     }
@@ -33,7 +37,7 @@ void DbSaver::process(const dome::config::Provider &provider, nlohmann::json &jM
                 case dome::config::Source::DataType::Undefined:
                 break;
                 case dome::config::Source::DataType::Float: {
-                    m_dbWriter.write(source.name, jMessage[source.name].get<double>());
+                    m_dbWriter.write(source.id, jMessage[source.id].get<double>());
                 }
                 break;
             }

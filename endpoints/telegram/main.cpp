@@ -3,7 +3,9 @@
 
 #include <config/provider.h>
 #include <config/telegram.h>
+#include <mosquitto/reciever.h>
 #include <mosquitto/sender.h>
+#include "replier.h"
 #include "tdclient.h"
 
 int main(int argc, char *argv[]) {
@@ -43,6 +45,13 @@ int main(int argc, char *argv[]) {
     dome::config::Telegram telegramConfig(configPath);
     dome::config::Provider providerConfig(configPath);
     dome::mosq::Sender::Trigger trigger;
-    dome::data::TdClient tdClient(telegramConfig, trigger);
+    dome::data::TdClient tdClient(telegramConfig, providerConfig, trigger);
     dome::mosq::Sender sender(providerConfig.id() + "/sender", providerConfig, tdClient, trigger);
+    std::vector<dome::data::Processor*> dataProcessors;
+    dome::data::Replier replier(tdClient);
+    dataProcessors.push_back(&replier);
+    dome::mosq::Reciever reciever(providerConfig.id() + "/reciever/reply", providerConfig, dataProcessors, dome::mosq::Reciever::Type::Reply);
+    sender.start();
+    reciever.start();
+    tdClient.run();
 }

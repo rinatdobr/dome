@@ -7,7 +7,7 @@
             "path": "/home/pi/workspace/dome/config/dht22.json"
         },
         {
-            "path": "/home/pi/workspace/dome/config/telegram.json"
+            "path": "/home/pi/dome/telegram.json"
         }
     ]
 }

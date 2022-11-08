@@ -4,14 +4,14 @@
     "save_period": "10s",
     "sources": [
         {
-            "name": "aaed98aa-535a-11ed-84c0-4f35a8d3364f",
-            "location": "room1",
+            "id": "aaed98aa-535a-11ed-84c0-4f35a8d3364f",
+            "location": "Комната 1",
             "type": "temperature",
             "data_type": "float"
         },
         {
-            "name": "3968ec9e-535e-11ed-88cf-b73d78fb3403",
-            "location": "room1",
+            "id": "3968ec9e-535e-11ed-88cf-b73d78fb3403",
+            "location": "Комната 1",
             "type": "humidity",
             "data_type": "float"
         } 

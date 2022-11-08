@@ -78,7 +78,6 @@ void Telegram::parse()
     m_logLevel = jTelegram["log_level"].get<std::string>();
     m_refreshPeriodSec = PeriodToSeconds(jTelegram["refresh_period"].get<std::string>());
     auto jChatIds = jTelegram["chat_ids"];
-    std::vector<std::string> chatIds;
     for (nlohmann::json::iterator it = jChatIds.begin(); it != jChatIds.end(); ++it) {
         m_chatIds.push_back(*it);
     }

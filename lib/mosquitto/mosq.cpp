@@ -14,8 +14,10 @@ Mosquitto::Mosquitto(const std::string clientId, void *owner)
         spdlog::error("mosquitto_lib_init error:", mosquitto_strerror(res));
         return;
     }
+    spdlog::debug("mosquitto library was inited");
 
-    m_mosq = mosquitto_new(clientId.data(), true, owner);
+    const char *id = clientId.empty() ? nullptr : clientId.data();
+    m_mosq = mosquitto_new(id, true, owner);
     if (!m_mosq) {
         spdlog::error("mosquitto_new error");
         return;
@@ -26,6 +28,7 @@ Mosquitto::Mosquitto(const std::string clientId, void *owner)
         spdlog::error("mosquitto_connect error:", mosquitto_strerror(res));
         return;
     }
+    spdlog::debug("connected to the mosquitto server");
 }
 
 Mosquitto::~Mosquitto()
@@ -37,6 +40,7 @@ Mosquitto::~Mosquitto()
         spdlog::error("mosquitto_disconnect error:", mosquitto_strerror(res));
         return;
     }
+    spdlog::debug("disconnected from the mosquitto server");
 
     mosquitto_destroy(m_mosq);
 }

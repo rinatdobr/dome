@@ -11,17 +11,18 @@
 namespace dome {
 namespace mosq {
 
-enum class RecieverType
-{
-    Provider,
-    Command
-};
-
 class Reciever : public dome::utils::Threader
 {
 public:
+enum class Type
+{
+    Provider,
+    Command,
+    Reply
+};
+
     Reciever(const std::string &mosqClientId, const std::vector<dome::config::Provider> &providers, std::vector<dome::data::Processor*> &dataProcessors);
-    Reciever(const std::string &mosqClientId, const dome::config::Provider &provider, std::vector<dome::data::Processor*> &dataProcessors);
+    Reciever(const std::string &mosqClientId, const dome::config::Provider &provider, std::vector<dome::data::Processor*> &dataProcessors, Type type);
     ~Reciever();
 
 private:
@@ -29,7 +30,7 @@ private:
     const dome::config::Provider &m_provider;
     dome::mosq::Mosquitto m_mosq;
     std::vector<dome::data::Processor*> m_dataProcessors;
-    RecieverType m_recieverType;
+    Type m_type;
 
     void setup();
     void subscribe();

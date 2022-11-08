@@ -15,6 +15,9 @@ Source::Type StrToSourceType(const std::string& str)
     else if (str == "humidity") {
         return Source::Type::Humidity;
     }
+    else if (str == "request") {
+        return Source::Type::Request;
+    }
 
     return Source::Type::Undefined;
 }
@@ -23,6 +26,9 @@ Source::DataType StrToDataType(const std::string& str)
 {
     if (str == "float") {
         return Source::DataType::Float;
+    }
+    else if (str == "string") {
+        return Source::DataType::String;
     }
 
     return Source::DataType::Undefined;
@@ -49,14 +55,14 @@ std::string Source::TypeToStr(Source::Type type)
     
     switch (type) {
         case Source::Type::Undefined:
-            return "Undefined";
+            return "undefined";
         case Source::Type::Temperature:
-            return "Temperature";
+            return "temperature";
         case Source::Type::Humidity:
-            return "Humidity";
+            return "humidity";
     }
 
-    return "Undefined";
+    return "undefined";
 }
 
 void Provider::parse()
@@ -72,19 +78,19 @@ void Provider::parse()
 
     auto jSources = jConfig["sources"];
     for (const auto &jSource : jSources) {
-        if (jSource.size() != 5) {
+        if (jSource.size() != 4) {
             spdlog::error("Invalid source format: \" {} \"", jSource.dump());
             continue;
         }
 
         Source source;
-        source.name = jSource["name"].get<std::string>();
+        source.id = jSource["id"].get<std::string>();
         source.location = jSource["location"].get<std::string>();
         source.type = StrToSourceType(jSource["type"].get<std::string>());
         source.dataType = StrToDataType(jSource["data_type"].get<std::string>());
 
-        spdlog::info("Data provider config: name={} location={} type={} data_type={}",
-            source.name, source.location, source.type, source.dataType);
+        spdlog::info("Data provider config: id={} location={} type={} data_type={}",
+            source.id, source.location, source.type, source.dataType);
 
         m_sources.push_back(source);
     }

@@ -8,6 +8,7 @@
 #include <mosquitto/reciever.h>
 
 #include "data/dbsaver.h"
+#include "data/requester.h"
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
@@ -45,12 +46,14 @@ int main(int argc, char *argv[]) {
 
     dome::config::Core config(configPath);
     dome::data::DbSaver dbSaver(config.database().path);
+    dome::data::Requester requester(config.providers());
     std::vector<dome::data::Processor*> dataProcessors;
     dataProcessors.push_back(&dbSaver);
-    dome::mosq::Reciever reciever("core/reciver", config.providers(), dataProcessors);
+    dataProcessors.push_back(&requester);
+    dome::mosq::Reciever reciever("core/reciever", config.providers(), dataProcessors);
     reciever.start();
     
-    std::this_thread::sleep_for(std::chrono::seconds(60 * 3));
+    std::this_thread::sleep_for(std::chrono::seconds(60 * 60));
     reciever.stop();
 
     return 0;

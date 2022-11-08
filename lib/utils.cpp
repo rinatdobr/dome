@@ -27,11 +27,11 @@ uint PeriodToSeconds(const std::string &period)
     return result;
 }
 
-std::string GetCommandTopic(const std::string &providerId)
+std::string GetRequestTopic(const std::string &providerId)
 {
     spdlog::trace("{}:{} {} providerId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, providerId);
 
-    return std::string(providerId + "/command");
+    return std::string(providerId + "/request");
 }
 
 std::string GetReplyTopic(const std::string &providerId)

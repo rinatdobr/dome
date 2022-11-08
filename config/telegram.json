@@ -4,10 +4,9 @@
     "save_period": "0",
     "sources": [
         {
-            "name": "08eb287a-5ddb-11ed-ab84-67bbbade1374",
-            "description": "Телеграм",
+            "id": "08eb287a-5ddb-11ed-ab84-67bbbade1374",
             "location": "PC",
-            "type": "command",
+            "type": "request",
             "data_type": "string"
         }
     ],

@@ -10,11 +10,11 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <queue>
 
+#include <config/provider.h>
 #include <data/provider.h>
 #include <config/telegram.h>
 #include <mosquitto/sender.h>
@@ -24,29 +24,20 @@ namespace data {
 
 class TdClient : public dome::data::Provider {
 public:
-class CommandReader : public dome::data::Reader<std::string>
-{
-public:
-    explicit CommandReader(TdClient *provider)
-        : Reader<std::string>(provider)
-    {}
 
-    std::string operator()() override;
-
-    friend class TdClient;
-};
-
-    TdClient(const dome::config::Telegram &config, dome::mosq::Sender::Trigger &senderTrigger);
-
-    bool prepareData() override;
-    dome::data::Reader<std::string> *getReaderForString(const std::string &name) override;
+    TdClient(const dome::config::Telegram &telegramConfig, const dome::config::Provider &providerConfig, dome::mosq::Sender::Trigger &senderTrigger);
 
     void run();
+    void sendTextMessage(int64_t chatId, int64_t messageId, const std::string text);
+
+protected:
+    bool prepareData() override;
+    nlohmann::json getData() override;
 
 private:
+    const dome::config::Provider &m_providerConfig;
     dome::mosq::Sender::Trigger &m_senderTrigger;
-    CommandReader m_commandReader;
-    std::queue<std::string> m_commands;
+    std::queue<std::string> m_requests;
 
     uint m_refreshPeriodSec;
     std::string m_login;

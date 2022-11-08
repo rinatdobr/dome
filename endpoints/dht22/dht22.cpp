@@ -6,9 +6,8 @@
 namespace dome {
 namespace data {
 
-Dht22::Dht22()
-    : m_tempreatureReader(this)
-    , m_humidityReader(this)
+Dht22::Dht22(const dome::config::Provider &config)
+    : m_config(config)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -35,8 +34,8 @@ bool Dht22::prepareData()
     if (data.status == DHT_GOOD) {
         spdlog::debug("temperature: {}", data.temperature);
         spdlog::debug("humidity: {}", data.humidity);
-        m_tempreatureReader.value = data.temperature;
-        m_humidityReader.value = data.humidity;
+        m_tempreature = data.temperature;
+        m_humidity = data.humidity;
         return true;
     }
     else {
@@ -45,28 +44,22 @@ bool Dht22::prepareData()
     }
 }
 
-dome::data::Reader<double> *Dht22::getReaderForFloat(const std::string &name)
+nlohmann::json Dht22::getData()
 {
-    spdlog::trace("{}:{} {} name={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name);
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (name == "aaed98aa-535a-11ed-84c0-4f35a8d3364f") {
-        return &m_tempreatureReader;
+    nlohmann::json jData;
+    jData["type"] = "data";
+    for (const auto &source : m_config.sources()) {
+        if (source.type == dome::config::Source::Type::Temperature) {
+            jData[source.id] = m_tempreature;
+        }
+        else if (source.type == dome::config::Source::Type::Humidity) {
+            jData[source.id] = m_humidity;
+        }
     }
-    else if (name == "3968ec9e-535e-11ed-88cf-b73d78fb3403") {
-        return &m_humidityReader;
-    }
 
-    return nullptr;
-}
-
-double Dht22::TemperatureReader::operator()()
-{
-    return value;
-}
-
-double Dht22::HumidityReader::operator()()
-{
-    return value;
+    return jData;
 }
 
 }

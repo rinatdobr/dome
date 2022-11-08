@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 
 namespace dome {
 namespace data {
@@ -33,16 +34,16 @@ auto overloaded(F... f) {
   return detail::overload<F...>(f...);
 }
 
-TdClient::TdClient(const dome::config::Telegram &config, dome::mosq::Sender::Trigger &senderTrigger)
-    : m_senderTrigger(senderTrigger)
-    , m_commandReader(this)
+TdClient::TdClient(const dome::config::Telegram &telegramConfig, const dome::config::Provider &providerConfig, dome::mosq::Sender::Trigger &senderTrigger)
+    : m_providerConfig(providerConfig)
+    , m_senderTrigger(senderTrigger)
     , m_clientId(0)
-    , m_refreshPeriodSec(config.refreshPeriodSec())
-    , m_login(config.login())
-    , m_pass(config.pass())
-    , m_appId(config.appId())
-    , m_appHash(config.appHash())
-    , m_chatIds(config.chatIds())
+    , m_refreshPeriodSec(telegramConfig.refreshPeriodSec())
+    , m_login(telegramConfig.login())
+    , m_pass(telegramConfig.pass())
+    , m_appId(telegramConfig.appId())
+    , m_appHash(telegramConfig.appHash())
+    , m_chatIds(telegramConfig.chatIds())
 	, m_isAuthenticated(false)
     , m_currentQueryId(0)
     , m_authenticationQueryId(0)
@@ -61,31 +62,23 @@ bool TdClient::prepareData()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (m_commands.size()) {
-        m_commandReader.value = m_commands.front();
-        m_commands.pop();
+    if (m_requests.size()) {
         return true;
     }
 
     return false;
 }
 
-std::string TdClient::CommandReader::operator()()
+nlohmann::json TdClient::getData()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return value;
-}
+    nlohmann::json jData;
+    jData["type"] = "request";
+    jData[m_providerConfig.sources()[0].id] = m_requests.front();
+    m_requests.pop();
 
-dome::data::Reader<std::string> *TdClient::getReaderForString(const std::string &name)
-{
-    spdlog::trace("{}:{} {} name={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, name);
-
-    if (name == "08eb287a-5ddb-11ed-ab84-67bbbade1374") {
-        return &m_commandReader;
-    }
-
-    return nullptr;
+    return jData;
 }
 
 void TdClient::run() {
@@ -171,6 +164,20 @@ void TdClient::run() {
 	}
 }
 
+void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::string text)
+{
+    spdlog::trace("{}:{} {} chatId={} messageId={} text={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, text);
+
+    auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
+    send_message->chat_id_ = chatId;
+    send_message->reply_to_message_id_ = messageId;
+    auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
+    message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
+    message_content->text_->text_ = std::move(text);
+    send_message->input_message_content_ = std::move(message_content);
+    sendQuery(std::move(send_message), {});
+}
+
 void TdClient::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
     auto queryId = nextQueryId();
     std::cout << "queryId: " << queryId << std::endl;
@@ -243,7 +250,7 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                 if (update_new_message.message_->content_->get_id() == td::td_api::messageText::ID) {
                     text = static_cast<td::td_api::messageText &>(*update_new_message.message_->content_).text_->text_;
                 }
-                std::cout << "Got message: [chatId:" << chatId << "] [from:" << senderName << "] [" << text
+                std::cout << "Got message: [chatId:" << chatId << "] [messageId:" << update_new_message.message_->id_ << "] [from:" << senderName << "] [" << text
                           << "]" << std::endl;
 
                 bool isFound = false;
@@ -257,9 +264,16 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                 if (isFound) {
                     std::cout << "DOME" << std::endl;
                     if (text.size() && text[0] == '/') {
-                        m_commands.push(text);
+                        std::cout << "SEND" << std::endl;
+                        nlohmann::json jMessage;
+                        jMessage["request"] = text;
+                        jMessage["message_id"] = update_new_message.message_->id_;
+                        jMessage["chat_id"] = chatId;
+                        m_requests.push(jMessage.dump());
                         m_senderTrigger.cv.notify_one();
                     }
+                    // reply_to_message_id_
+
                     // command::Result result = Commandor::Run(text);
                     // if (result.isValid()) {
                     //     std::cout << "Sending message to chat " << chatId << "..." << std::endl;

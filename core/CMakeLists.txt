@@ -11,6 +11,7 @@ pkg_check_modules(mosquitto REQUIRED libmosquitto)
 set(SOURCE_FILES
     db/writer.cpp
     data/dbsaver.cpp
+    data/requester.cpp
     main.cpp
 )
 

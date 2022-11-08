@@ -1,6 +1,5 @@
 #include "writer.h"
 
-#include <sstream>
 #include <sqlite3.h>
 #include <spdlog/spdlog.h>
 

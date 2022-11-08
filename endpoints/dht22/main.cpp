@@ -43,17 +43,17 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Provider config(configPath);
-    dome::data::Dht22 dht22;
+    dome::data::Dht22 dht22(config);
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id() + "/sender", config, dht22, trigger);
     std::vector<dome::data::Processor*> processors;
     dome::data::Ping ping(trigger);
     processors.push_back(&ping);
-    dome::mosq::Reciever reciever(config.id() + "/reciever", config, processors);
+    dome::mosq::Reciever reciever(config.id() + "/reciever/command", config, processors, dome::mosq::Reciever::Type::Command);
 
     reciever.start();
     sender.start();
-    std::this_thread::sleep_for(std::chrono::seconds(60));
+    std::this_thread::sleep_for(std::chrono::seconds(60 * 60));
     sender.stop();
     reciever.stop();
 

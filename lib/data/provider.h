@@ -3,6 +3,7 @@
 
 #include <mosquitto.h>
 #include <functional>
+#include <nlohmann/json.hpp>
 
 #include "config/provider.h"
 
@@ -11,19 +12,6 @@ namespace data {
 
 class Provider;
 
-template <class T>
-class Reader
-{
-public:
-    Reader(Provider *provider) : m_provider(provider) {}
-
-    virtual T operator()() = 0;
-
-protected:
-    Provider *m_provider;
-    T value;
-};
-
 class Provider
 {
 public:
@@ -31,8 +19,7 @@ public:
     virtual ~Provider();
 
     virtual bool prepareData() = 0;
-    virtual Reader<double> *getReaderForFloat(const std::string &name);
-    virtual Reader<std::string> *getReaderForString(const std::string &name);
+    virtual nlohmann::json getData() = 0;
 };
 
 }

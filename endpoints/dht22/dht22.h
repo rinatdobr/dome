@@ -1,6 +1,7 @@
 #ifndef ENDPOINTS_DHT22_H
 #define ENDPOINTS_DHT22_H
 
+#include <config/provider.h>
 #include <data/provider.h>
 
 #include <memory>
@@ -12,43 +13,22 @@ namespace data {
 class Dht22 : public dome::data::Provider
 {
 public:
-class TemperatureReader : public dome::data::Reader<double>
-{
-public:
-    explicit TemperatureReader(Dht22 *provider)
-        : Reader<double>(provider)
-    {}
 
-    double operator()() override;
-
-    friend class Dht22;
-};
-
-class HumidityReader : public dome::data::Reader<double>
-{
-public:
-    explicit HumidityReader(Dht22 *provider)
-        : Reader<double>(provider)
-    {}
-
-    double operator()() override;
-
-    friend class Dht22;
-};
-
-    explicit Dht22();
+    explicit Dht22(const dome::config::Provider &config);
     ~Dht22();
 
-    virtual dome::data::Reader<double> *getReaderForFloat(const std::string &name) override;
-
 protected:
+
     virtual bool prepareData() override;
+    nlohmann::json getData() override;
 
 private:
-    TemperatureReader m_tempreatureReader;
-    HumidityReader m_humidityReader;
+
+    const dome::config::Provider &m_config;
     int m_pi;
     DHTXXD_t *m_dht;
+    double m_tempreature;
+    double m_humidity;
 };
 
 }

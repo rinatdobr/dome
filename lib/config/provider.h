@@ -16,7 +16,7 @@ enum class Type {
     Undefined,
     Temperature,
     Humidity,
-    Command
+    Request
 };
 
 enum class DataType {
@@ -27,7 +27,7 @@ enum class DataType {
 
     static std::string TypeToStr(Type type);
 
-    std::string name;
+    std::string id;
     std::string location;
     Type type;
     DataType dataType;
