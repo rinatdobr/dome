@@ -17,7 +17,7 @@ DbSaver::~DbSaver()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void DbSaver::process(const dome::config::Provider &provider, nlohmann::json &jMessage)
+void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

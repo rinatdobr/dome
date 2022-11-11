@@ -12,7 +12,7 @@ set(SOURCE_FILES
     config/file.cpp
     config/provider.cpp
     config/telegram.cpp
-    data/ping.cpp
+    data/getter.cpp
     data/provider.cpp
     mosquitto/mosq.cpp
     mosquitto/reciever.cpp
@@ -26,3 +26,7 @@ target_include_directories(dome_lib PRIVATE .)
 target_link_libraries(dome_lib PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(dome_lib PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome_lib PRIVATE ${mosquitto_LIBRARIES})
+
+install(TARGETS dome_lib
+        LIBRARY DESTINATION /lib
+)

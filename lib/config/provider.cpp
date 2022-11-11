@@ -95,11 +95,11 @@ void Provider::parse()
         m_sources.push_back(source);
     }
 
-    auto jCommands = jConfig["commands"];
-    for (const auto &jCommand : jCommands) {
-        Command command;
-        command.name = jCommand;
-        m_commands.push_back(command);
+    auto jRequests = jConfig["commands"];
+    for (const auto &jRequest : jRequests) {
+        Request request;
+        request.name = jRequest;
+        m_requests.push_back(request);
     }
 }
 
@@ -131,11 +131,11 @@ const std::vector<Source> &Provider::sources() const
     return m_sources;
 }
 
-const std::vector<Command> &Provider::commands() const
+const std::vector<Request> &Provider::requests() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_commands;
+    return m_requests;
 }
 
 }

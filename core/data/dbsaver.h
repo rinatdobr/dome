@@ -16,7 +16,7 @@ public:
     explicit DbSaver(const std::string &path);
     ~DbSaver();
 
-    void process(const dome::config::Provider &provider, nlohmann::json &jMessage) override;
+    void process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 private:
     dome::db::Writer m_dbWriter;
     std::map<std::string, std::chrono::seconds> m_timestamps;

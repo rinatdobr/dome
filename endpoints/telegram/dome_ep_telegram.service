@@ -1,0 +1,7 @@
+[Unit]
+Description=Dome telegram endpoint
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_telegram -c /home/pi/dome/telegram.json -l d

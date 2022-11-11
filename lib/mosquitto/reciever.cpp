@@ -41,27 +41,31 @@ void Reciever::setup()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     mosquitto_message_callback_set(m_mosq.mosq(), [](struct mosquitto *mosq, void *userData, const struct mosquitto_message *mosqMessage){
-        spdlog::debug("got a message {} on {}", static_cast<char*>(mosqMessage->payload), mosqMessage->topic);
-
         auto _this = static_cast<Reciever*>(userData);
+
+        spdlog::debug("got a message {} from {} on {}", static_cast<char*>(mosqMessage->payload), mosqMessage->topic, _this->m_mosq.clientId());
+
         std::string topic(mosqMessage->topic);
         std::string message(static_cast<char*>(mosqMessage->payload), mosqMessage->payloadlen);
         nlohmann::json jMessage = nlohmann::json::parse(message);
+        if (jMessage["type"] == "ping") {
+            spdlog::debug("got a ping message from {}", mosqMessage->topic);
+        }
 
         switch (_this->m_type) {
             case Type::Provider:
                 for (const auto &provider : _this->m_providers) {
                     if (provider.id() == topic) {
                         for (auto dataProcessor : _this->m_dataProcessors) {
-                            dataProcessor->process(provider, jMessage);
+                            dataProcessor->process(_this->m_mosq, provider, jMessage);
                         }
                     }
                 }
             break;
-            case Type::Command:
+            case Type::Request:
             case Type::Reply:
                 for (auto dataProcessor : _this->m_dataProcessors) {
-                    dataProcessor->process(_this->m_provider, jMessage);
+                    dataProcessor->process(_this->m_mosq, _this->m_provider, jMessage);
                 }
             break;
         }
@@ -72,20 +76,36 @@ void Reciever::subscribe()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    int res;
     switch (m_type) {
         case Type::Provider:
             for (const auto &provider : m_providers) {
-                spdlog::debug("subscribed on the {}", provider.id());
-                mosquitto_subscribe(m_mosq.mosq(), NULL, provider.id().c_str(), 0);
+                res = mosquitto_subscribe(m_mosq.mosq(), NULL, provider.id().c_str(), 0);
+                if (res == MOSQ_ERR_SUCCESS) {
+                    spdlog::debug("subscribed on the {}", provider.id());
+                }
+                else {
+                    spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+                }
             }
         break;
-        case Type::Command:
-            spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
-            mosquitto_subscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str(), 0);
+        case Type::Request:
+            res = mosquitto_subscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str(), 0);
+            if (res == MOSQ_ERR_SUCCESS) {
+                spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
+            }
+            else {
+                spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         break;
         case Type::Reply:
-            spdlog::debug("subscribed on the {}", GetReplyTopic(m_provider.id()));
-            mosquitto_subscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str(), 0);
+            res = mosquitto_subscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str(), 0);
+            if (res == MOSQ_ERR_SUCCESS) {
+                spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
+            }
+            else {
+                spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         break;
     }
 }
@@ -94,20 +114,36 @@ void Reciever::unsubscribe()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    int res;
     switch (m_type) {
         case Type::Provider:
             for (const auto &provider : m_providers) {
-                spdlog::debug("unsubscribed from the {}", provider.id());
-                mosquitto_unsubscribe(m_mosq.mosq(), NULL, provider.id().c_str());
+                res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, provider.id().c_str());
+                if (res == MOSQ_ERR_SUCCESS) {
+                    spdlog::debug("unsubscribed from the {}", provider.id());
+                }
+                else {
+                    spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+                }
             }
         break;
-        case Type::Command:
-            spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
-            mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str());
+        case Type::Request:
+            res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str());
+            if (res == MOSQ_ERR_SUCCESS) {
+                spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
+            }
+            else {
+                spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         break;
         case Type::Reply:
-            spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
-            mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str());
+            res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str());
+            if (res == MOSQ_ERR_SUCCESS) {
+                spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
+            }
+            else {
+                spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         break;
     }
 }
@@ -119,7 +155,30 @@ void Reciever::backgroundWork()
     subscribe();
 
     while (m_isWorking) {
+        spdlog::debug("recieving on {}...", m_mosq.clientId());
+
         mosquitto_loop(m_mosq.mosq(), -1, 1);
+
+        if (m_mosq.decrementKeepAlive()) {
+            auto message = dome::mosq::Mosquitto::PingMessage();
+            spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
+
+            int res;
+            switch (m_type) {
+                case Type::Request:
+                    res = mosquitto_publish(m_mosq.mosq(), nullptr, GetRequestTopic(m_provider.id()).c_str(), message.size(), message.c_str(), 0, false);
+                    if (res != MOSQ_ERR_SUCCESS) {
+                        spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+                    }
+                break;
+                case Type::Reply:
+                    res = mosquitto_publish(m_mosq.mosq(), nullptr, GetReplyTopic(m_provider.id()).c_str(), message.size(), message.c_str(), 0, false);
+                    if (res != MOSQ_ERR_SUCCESS) {
+                        spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+                    }
+                break;
+            }
+        }
     }
 
     unsubscribe();

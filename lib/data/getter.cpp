@@ -1,26 +1,26 @@
-#include "ping.h"
+#include "getter.h"
 
 #include <spdlog/spdlog.h>
 
 namespace dome {
 namespace data {
 
-Ping::Ping(dome::mosq::Sender::Trigger &senderTrigger)
+Getter::Getter(dome::mosq::Sender::Trigger &senderTrigger)
     : m_senderTrigger(senderTrigger)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-Ping::~Ping()
+Getter::~Getter()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void Ping::process(const dome::config::Provider &provider, nlohmann::json &jMessage)
+void Getter::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (jMessage["name"] == "ping") {
+    if (jMessage["name"] == "get") {
         m_senderTrigger.cv.notify_one();
     }
 }

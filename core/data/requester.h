@@ -39,12 +39,11 @@ public:
     explicit Requester(const std::vector<dome::config::Provider> &providers);
     ~Requester();
 
-    void process(const dome::config::Provider &provider, nlohmann::json &jMessage) override;
+    void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 
 private:
     const std::vector<dome::config::Provider> &m_providers;
     std::deque<std::shared_ptr<Request>> m_requests;
-    dome::mosq::Mosquitto m_mosq;
 };
 
 }

@@ -17,7 +17,7 @@ public:
 enum class Type
 {
     Provider,
-    Command,
+    Request,
     Reply
 };
 

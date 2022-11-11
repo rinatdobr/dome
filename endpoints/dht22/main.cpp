@@ -3,9 +3,10 @@
 #include <getopt.h>
 
 #include <config/provider.h>
-#include <data/ping.h>
+#include <data/getter.h>
 #include <mosquitto/reciever.h>
 #include <mosquitto/sender.h>
+#include <utils.h>
 #include "dht22.h"
 
 int main(int argc, char *argv[]) {
@@ -45,15 +46,17 @@ int main(int argc, char *argv[]) {
     dome::config::Provider config(configPath);
     dome::data::Dht22 dht22(config);
     dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(config.id() + "/sender", config, dht22, trigger);
+    dome::mosq::Sender sender(config.id(), config, dht22, trigger);
     std::vector<dome::data::Processor*> processors;
-    dome::data::Ping ping(trigger);
-    processors.push_back(&ping);
-    dome::mosq::Reciever reciever(config.id() + "/reciever/command", config, processors, dome::mosq::Reciever::Type::Command);
+    dome::data::Getter getter(trigger);
+    processors.push_back(&getter);
+    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), config, processors, dome::mosq::Reciever::Type::Request);
 
     reciever.start();
     sender.start();
-    std::this_thread::sleep_for(std::chrono::seconds(60 * 60));
+    while (1) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     sender.stop();
     reciever.stop();
 

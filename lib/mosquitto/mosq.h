@@ -7,6 +7,8 @@
 namespace dome {
 namespace mosq {
 
+const int KeepAliveSec = 3600;
+
 class Mosquitto
 {
 public:
@@ -14,9 +16,15 @@ public:
     ~Mosquitto();
 
     struct mosquitto *mosq();
+    const std::string &clientId() const;
+    int keepAliveSec();
+    bool decrementKeepAlive(int diffSec = 1);
+    static std::string PingMessage();
 
 private:
     struct mosquitto *m_mosq;
+    std::string m_clientId;
+    int m_keepAliveSec;
 };
 
 }

@@ -13,7 +13,7 @@ public:
     explicit Replier(dome::data::TdClient &tdClient);
     ~Replier();
 
-    void process(const dome::config::Provider &provider, nlohmann::json &jMessage) override;
+    void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 
 private:
     dome::data::TdClient &m_tdClient;

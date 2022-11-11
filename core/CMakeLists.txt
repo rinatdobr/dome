@@ -23,3 +23,11 @@ target_link_libraries(dome_core PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome_core PRIVATE ${mosquitto_LIBRARIES})
 target_link_libraries(dome_core PRIVATE SQLite::SQLite3)
 target_link_libraries(dome_core PRIVATE dome_lib)
+
+install(TARGETS dome_core
+        RUNTIME DESTINATION /usr/bin
+)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_core.service
+        DESTINATION /usr/lib/systemd/user/
+)

@@ -1,0 +1,7 @@
+[Unit]
+Description=Dome core
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_core -c /home/pi/dome/core.json -l d

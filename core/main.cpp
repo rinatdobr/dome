@@ -52,8 +52,10 @@ int main(int argc, char *argv[]) {
     dataProcessors.push_back(&requester);
     dome::mosq::Reciever reciever("core/reciever", config.providers(), dataProcessors);
     reciever.start();
-    
-    std::this_thread::sleep_for(std::chrono::seconds(60 * 60));
+
+    while (1) {    
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     reciever.stop();
 
     return 0;

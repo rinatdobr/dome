@@ -33,7 +33,7 @@ enum class DataType {
     DataType dataType;
 };
 
-class Command
+class Request
 {
 public:
     std::string name;
@@ -49,7 +49,7 @@ public:
     uint periodSec() const;
     uint savePeriodSec() const;
     const std::vector<Source> &sources() const;
-    const std::vector<Command> &commands() const;
+    const std::vector<Request> &requests() const;
 
 private:
     void parse();
@@ -58,7 +58,7 @@ private:
     uint m_periodSec;
     uint m_savePeriodSec;
     std::vector<Source> m_sources;
-    std::vector<Command> m_commands;
+    std::vector<Request> m_requests;
 };
 
 }

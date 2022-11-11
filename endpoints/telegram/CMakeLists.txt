@@ -24,6 +24,6 @@ install(TARGETS dome_telegram
         RUNTIME DESTINATION /usr/bin
 )
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_telegram.service
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_ep_telegram.service
         DESTINATION /usr/lib/systemd/user/
 )

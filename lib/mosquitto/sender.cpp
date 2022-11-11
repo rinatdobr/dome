@@ -2,6 +2,9 @@
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
+#include <cerrno>
+
+#include "utils.h"
 
 namespace dome {
 namespace mosq {
@@ -32,12 +35,16 @@ void Sender::backgroundWork()
     std::unique_lock<std::mutex> ul(m_trigger.mutex);
     uint leftSec = 0;
     bool triggered = false;
+    bool sendByDemand = !m_config.periodSec();
     while (m_isWorking) {
-        if ((leftSec == 0 || triggered) && m_provider.prepareData()) {
-            spdlog::debug("sending message to the {}", m_config.id());
+        if (((!sendByDemand && leftSec == 0) || triggered) && m_provider.prepareData()) {
             nlohmann::json jData = m_provider.getData();
             std::string data = jData.dump();
-            mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
+            spdlog::debug("sending message {} to {} from {}", data, m_config.id(), m_mosq.clientId());
+            int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
+            if (res != MOSQ_ERR_SUCCESS) {
+                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         }
 
         if (leftSec == 0) {
@@ -56,6 +63,15 @@ void Sender::backgroundWork()
         else {
             spdlog::trace("{}:{} {} cv no timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
             triggered = true;
+        }
+
+        if (m_mosq.decrementKeepAlive()) {
+            auto message = dome::mosq::Mosquitto::PingMessage();
+            spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
+            int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), message.size(), message.c_str(), 0, false);
+            if (res != MOSQ_ERR_SUCCESS) {
+                spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            }
         }
     }
 }

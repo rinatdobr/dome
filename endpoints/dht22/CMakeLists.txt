@@ -25,3 +25,11 @@ target_link_libraries(dome_dht22 PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(dome_dht22 PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(dome_dht22 PRIVATE pigpio::pigpiod_if2)
 target_link_libraries(dome_dht22 PRIVATE dome_lib)
+
+install(TARGETS dome_dht22
+        RUNTIME DESTINATION /usr/bin
+)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dome_ep_dht22.service
+        DESTINATION /usr/lib/systemd/user/
+)

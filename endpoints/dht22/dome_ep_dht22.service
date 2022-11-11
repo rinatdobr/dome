@@ -1,0 +1,7 @@
+[Unit]
+Description=Dome dht22 endpoint
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_dht22 -c /home/pi/dome/dht22.json -l d
