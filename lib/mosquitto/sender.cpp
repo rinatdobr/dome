@@ -36,14 +36,28 @@ void Sender::backgroundWork()
     uint leftSec = 0;
     bool triggered = false;
     bool sendByDemand = !m_config.periodSec();
+    std::chrono::seconds prepareDataTsSec(0);
+    bool isDataPrepared = false;
     while (m_isWorking) {
-        if (((!sendByDemand && leftSec == 0) || triggered) && m_provider.prepareData()) {
-            nlohmann::json jData = m_provider.getData();
-            std::string data = jData.dump();
-            spdlog::debug("sending message {} to {} from {}", data, m_config.id(), m_mosq.clientId());
-            int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+        if (((!sendByDemand && leftSec == 0) || triggered)) {
+            auto now = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
+            auto diff = now - prepareDataTsSec;
+            if (diff > std::chrono::seconds(m_config.maxFrequenceSec())) {
+                isDataPrepared = m_provider.prepareData();
+                prepareDataTsSec = now;
+            }
+            else {
+                spdlog::warn("data preparation is too often in {}, sending old values...", m_mosq.clientId());
+            }
+
+            if (isDataPrepared) {
+                nlohmann::json jData = m_provider.getData();
+                std::string data = jData.dump();
+                spdlog::debug("sending message {} to {} from {}", data, m_config.id(), m_mosq.clientId());
+                int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
+                if (res != MOSQ_ERR_SUCCESS) {
+                    spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+                }
             }
         }
 

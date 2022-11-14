@@ -1,17 +1,17 @@
 {
     "id": "721ff13a-53c3-11ed-8219-43af54afa26b",
-    "period": "1s",
+    "period": "30s",
     "save_period": "1m",
+    "max_frequence": "10s",
+    "location": "room1",
     "sources": [
         {
             "id": "aaed98aa-535a-11ed-84c0-4f35a8d3364f",
-            "location": "Комната 1",
             "type": "temperature",
             "data_type": "float"
         },
         {
             "id": "3968ec9e-535e-11ed-88cf-b73d78fb3403",
-            "location": "Комната 1",
             "type": "humidity",
             "data_type": "float"
         } 

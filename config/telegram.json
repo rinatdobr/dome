@@ -2,10 +2,11 @@
     "id": "f13c4c18-5dda-11ed-a30b-5ba1c9d04983",
     "period": "0",
     "save_period": "0",
+    "max_frequence": "0",
+    "location": "PC",
     "sources": [
         {
             "id": "08eb287a-5ddb-11ed-ab84-67bbbade1374",
-            "location": "PC",
             "type": "request",
             "data_type": "string"
         }

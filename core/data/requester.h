@@ -18,19 +18,25 @@ class Request
 public:
 enum class Type
 {
-    Info
+    Info,
+    Statistic
 };
 
+    std::string idFrom;
     Request::Type type;
     nlohmann::json reply;
+    std::vector<std::string> args;
 };
 
 class Info : public Request
 {
 public:
-    std::string idFrom;
-    std::vector<std::string> args;
     std::unordered_map<std::string, bool> sources;
+};
+
+class Statistic : public Request
+{
+public:
 };
 
 class Requester : public Processor

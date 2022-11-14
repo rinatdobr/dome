@@ -28,7 +28,6 @@ enum class DataType {
     static std::string TypeToStr(Type type);
 
     std::string id;
-    std::string location;
     Type type;
     DataType dataType;
 };
@@ -46,8 +45,10 @@ public:
     Provider(std::string path);
 
     std::string id() const;
+    std::string location() const;
     uint periodSec() const;
     uint savePeriodSec() const;
+    uint maxFrequenceSec() const;
     const std::vector<Source> &sources() const;
     const std::vector<Request> &requests() const;
 
@@ -57,6 +58,8 @@ private:
     std::string m_id;
     uint m_periodSec;
     uint m_savePeriodSec;
+    uint m_maxFrequenceSec;
+    std::string m_location;
     std::vector<Source> m_sources;
     std::vector<Request> m_requests;
 };

@@ -8,6 +8,7 @@ namespace dome {
 namespace data {
 
 const std::string InfoRequestStr("/info");
+const std::string StatisticRequestStr("/statistic");
 
 std::vector<std::string> ParseArgs(const std::string &args)
 {
@@ -66,7 +67,7 @@ void Requester::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
             info->type = Request::Type::Info;
             info->idFrom = provider.id();
             info->args = args;
-            info->reply["type"] = "/info";
+            info->reply["type"] = InfoRequestStr;
             info->reply["message_id"] = jSource["message_id"];
             info->reply["chat_id"] = jSource["chat_id"];
             for (const auto &provider : m_providers) {
@@ -90,6 +91,15 @@ void Requester::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
                 }
             }
         }
+        else if (StatisticRequestStr == name) {
+            auto statistic = std::make_shared<Statistic>();
+            statistic->type = Request::Type::Statistic;
+            statistic->idFrom = provider.id();
+            statistic->args = args;
+            statistic->reply["type"] = StatisticRequestStr;
+            statistic->reply["message_id"] = jSource["message_id"];
+            statistic->reply["chat_id"] = jSource["chat_id"];
+        }
     }
     else if (jMessage["type"] == "data") {
         if (m_requests.size() == 0) {
@@ -107,7 +117,7 @@ void Requester::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
                         continue;
                     }
                     else if (!info->sources[source.id]) {
-                        info->reply["data"][source.location][dome::config::Source::TypeToStr(source.type)] = jMessage[source.id];
+                        info->reply["data"][provider.location()][dome::config::Source::TypeToStr(source.type)] = jMessage[source.id];
                         info->sources[source.id] = true;
                     }
                 }
