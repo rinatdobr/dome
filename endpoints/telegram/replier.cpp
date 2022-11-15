@@ -9,6 +9,7 @@ namespace dome {
 namespace data {
 
 const std::string InfoRequestStr("/info");
+const std::string StatisticRequestStr("/statistic");
 
 Replier::Replier(dome::data::TdClient &tdClient)
     : m_tdClient(tdClient)
@@ -45,7 +46,17 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
             jMessage["message_id"].get<int64_t>(),
             reply.str()
         );
-        spdlog::trace("reply: {}", reply.str());
+
+        return;
+    }
+    else if (jMessage["type"] == StatisticRequestStr) {
+        spdlog::debug("reply processing...");
+
+        m_tdClient.sendPhoto(
+            jMessage["chat_id"].get<int64_t>(),
+            jMessage["message_id"].get<int64_t>(),
+            jMessage["path"].get<std::string>()
+        );
 
         return;
     }

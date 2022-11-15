@@ -178,6 +178,24 @@ void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::str
     sendQuery(std::move(send_message), {});
 }
 
+void TdClient::sendPhoto(int64_t chatId, int64_t messageId, const std::string path)
+{
+    spdlog::trace("{}:{} {} chatId={} messageId={} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
+
+    auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
+    send_message->chat_id_ = chatId;
+    send_message->reply_to_message_id_ = messageId;
+    auto message_content = td::td_api::make_object<td::td_api::inputMessagePhoto>();
+    message_content->photo_ = td::td_api::make_object<td::td_api::inputFileLocal>(path);
+    message_content->thumbnail_ = nullptr;
+    // message_content->width_ = 1920;
+    // message_content->height_ = 1080;
+    // message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
+    // message_content->caption_->text_ = std::move(result.toString());
+    send_message->input_message_content_ = std::move(message_content);
+    sendQuery(std::move(send_message), {});
+}
+
 void TdClient::sendQuery(td::td_api::object_ptr<td::td_api::Function> f, std::function<void(Object)> handler) {
     auto queryId = nextQueryId();
     std::cout << "queryId: " << queryId << std::endl;

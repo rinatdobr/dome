@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
     dome::config::Core config(configPath);
     dome::data::DbSaver dbSaver(config.database().path);
-    dome::data::Requester requester(config.providers());
+    dome::data::Requester requester(configPath, config.providers());
     std::vector<dome::data::Processor*> dataProcessors;
     dataProcessors.push_back(&dbSaver);
     dataProcessors.push_back(&requester);

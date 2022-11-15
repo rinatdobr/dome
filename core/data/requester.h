@@ -42,12 +42,13 @@ public:
 class Requester : public Processor
 {
 public:
-    explicit Requester(const std::vector<dome::config::Provider> &providers);
+    explicit Requester(const std::string configPath, const std::vector<dome::config::Provider> &providers);
     ~Requester();
 
     void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 
 private:
+    const std::string m_configPath;
     const std::vector<dome::config::Provider> &m_providers;
     std::deque<std::shared_ptr<Request>> m_requests;
 };
