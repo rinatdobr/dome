@@ -18,6 +18,9 @@ Source::Type StrToSourceType(const std::string& str)
     else if (str == "request") {
         return Source::Type::Request;
     }
+    else if (str == "ip_camera") {
+        return Source::Type::IpCamera;
+    }
 
     return Source::Type::Undefined;
 }
@@ -27,8 +30,8 @@ Source::DataType StrToDataType(const std::string& str)
     if (str == "float") {
         return Source::DataType::Float;
     }
-    else if (str == "string") {
-        return Source::DataType::String;
+    else if (str == "path") {
+        return Source::DataType::Path;
     }
 
     return Source::DataType::Undefined;
@@ -60,6 +63,8 @@ std::string Source::TypeToStr(Source::Type type)
             return "temperature";
         case Source::Type::Humidity:
             return "humidity";
+        case Source::Type::IpCamera:
+            return "ip_camera";
     }
 
     return "undefined";

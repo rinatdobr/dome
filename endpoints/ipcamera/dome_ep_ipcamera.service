@@ -1,0 +1,7 @@
+[Unit]
+Description=Dome IP camera endpoint
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_ipcamera -c /home/pi/dome/ipcamera.json -l d

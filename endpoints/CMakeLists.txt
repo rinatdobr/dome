@@ -4,3 +4,4 @@ project(dome_endpoints VERSION 1.0 LANGUAGES CXX)
 
 add_subdirectory(dht22)
 add_subdirectory(telegram)
+add_subdirectory(ipcamera)

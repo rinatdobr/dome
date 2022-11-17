@@ -19,7 +19,8 @@ public:
 enum class Type
 {
     Info,
-    Statistic
+    Statistic,
+    IpCamera
 };
 
     std::string idFrom;
@@ -28,30 +29,7 @@ enum class Type
     std::vector<std::string> args;
 };
 
-class Info : public Request
-{
-public:
-    std::unordered_map<std::string, bool> sources;
-};
-
-class Statistic : public Request
-{
-public:
-};
-
-class Requester : public Processor
-{
-public:
-    explicit Requester(const std::string configPath, const std::vector<dome::config::Provider> &providers);
-    ~Requester();
-
-    void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
-
-private:
-    const std::string m_configPath;
-    const std::vector<dome::config::Provider> &m_providers;
-    std::deque<std::shared_ptr<Request>> m_requests;
-};
+std::vector<std::string> ParseArgs(const std::string &args);
 
 }
 }

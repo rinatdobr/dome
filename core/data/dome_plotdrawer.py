@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import os
 
 parser = argparse.ArgumentParser(description='Draw charts via plotly library.')
-parser.add_argument('-c', '--config', help='path to the dome_core configuration file', required=True)
+parser.add_argument('-d', '--db', help='path to the database', required=True)
 parser.add_argument('-t', '--tables', nargs='*', help='tables to read', required=True)
 parser.add_argument('-y', '--y-legends', nargs='*', help='Y axis legend for values', required=True)
 parser.add_argument('-p', '--period', type=int, help='period in seconds to read data', required=True)
@@ -14,11 +14,7 @@ parser.add_argument('-n', '--name', help='Chart name', required=True)
 parser.add_argument('-f', '--file', help='File to save', required=True)
 args = parser.parse_args()
 
-core_config_file = open(args.config)
-core_config = json.load(core_config_file)
-db_path = core_config['database']['path']
-
-db_conn = sqlite3.connect(db_path)
+db_conn = sqlite3.connect(args.db)
 db_cur = db_conn.cursor()
 
 fig = go.Figure()
@@ -47,6 +43,8 @@ fig.update_layout(title=args.name,
                    xaxis_title=args.titles[0],
                    yaxis_title=args.titles[1],
                    showlegend=True)
+fig.update_yaxes(gridcolor='black', griddash='dash', minor_griddash="dot")
+
 fig.write_image(args.file, engine="kaleido")
 
 print(args.file, end='')

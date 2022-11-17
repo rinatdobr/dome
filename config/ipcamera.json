@@ -1,11 +1,25 @@
 {
-    "ip_cameras": [
+    "id": "efac9936-656c-11ed-95dd-f773e9167f21",
+    "period": "10m",
+    "save_period": "10m",
+    "max_frequence": "30s",
+    "location": "room1",
+    "sources": [
         {
-            "name": "exampleName",
-            "login": "exampleLogin",
-            "pass": "examplePass",
-            "ip": "exampleIp",
-            "port": "examplePort"
+            "id": "2394505e-656d-11ed-ab92-73655be3cee0",
+            "type": "ip_camera",
+            "data_type": "path"
         }
-    ]
+    ],
+    "requests": [
+        "get"
+    ],
+    "ip_camera": {
+        "id": "2394505e-656d-11ed-ab92-73655be3cee0",
+        "name": "exampleName",
+        "login": "exampleLogin",
+        "pass": "examplePass",
+        "ip": "exampleIp",
+        "port": "examplePort"
+    }
 }

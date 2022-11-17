@@ -2,20 +2,17 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <mosquitto.h>
-#include <config/core.h>
-#include <mosquitto/mosq.h>
+#include <config/provider.h>
+#include <config/ipcamera.h>
+#include <data/getter.h>
 #include <mosquitto/reciever.h>
-
-#include "data/dbsaver.h"
-#include "data/filesaver.h"
-#include "data/inforequester.h"
-#include "data/ipcamerarequester.h"
-#include "data/statisticrequester.h"
+#include <mosquitto/sender.h>
+#include <utils.h>
+#include "ipcamera.h"
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
-    spdlog::info("Start dome_core");
+    spdlog::info("Start dome_ipcamera");
 
     option longOptions[] = {
         {"config", required_argument, 0, 'c'}, 
@@ -47,24 +44,22 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath={}", configPath);
 
-    dome::config::Core config(configPath);
-    dome::data::DbSaver dbSaver(config.database().path);
-    dome::data::FileSaver fileSaver;
-    dome::data::InfoRequester infoRequester(config.providers());
-    dome::data::StatisticRequester statisticRequester(config.database().path, config.providers());
-    dome::data::IpCameraRequester ipCameraRequester(config.providers(), config.ipCameras());
-    std::vector<dome::data::Processor*> dataProcessors;
-    dataProcessors.push_back(&dbSaver);
-    dataProcessors.push_back(&fileSaver);
-    dataProcessors.push_back(&infoRequester);
-    dataProcessors.push_back(&statisticRequester);
-    dataProcessors.push_back(&ipCameraRequester);
-    dome::mosq::Reciever reciever("core/reciever", config.providers(), dataProcessors);
-    reciever.start();
+    dome::config::Provider providerConfig(configPath);
+    dome::config::IpCamera ipCameraConfig(configPath);
+    dome::data::IpCamera ipCamera(providerConfig, ipCameraConfig);
+    dome::mosq::Sender::Trigger trigger;
+    dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
+    std::vector<dome::data::Processor*> processors;
+    dome::data::Getter getter(trigger);
+    processors.push_back(&getter);
+    dome::mosq::Reciever reciever(GetRequestTopic(providerConfig.id()), providerConfig, processors, dome::mosq::Reciever::Type::Request);
 
-    while (1) {    
+    reciever.start();
+    sender.start();
+    while (1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    sender.stop();
     reciever.stop();
 
     return 0;

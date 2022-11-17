@@ -38,11 +38,11 @@ void Core::parse()
         }
 
         Provider provider(jConfigFile["path"].get<std::string>());
+        IpCamera ipCamera(jConfigFile["path"].get<std::string>());
 
         m_providers.push_back(provider);
+        m_ipCameras.push_back(ipCamera);
     }
-
-
 }
 
 Database Core::database() const
@@ -57,6 +57,13 @@ const std::vector<dome::config::Provider> &Core::providers() const
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_providers;
+}
+
+const std::vector<dome::config::IpCamera> &Core::ipCameras() const
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return m_ipCameras;
 }
 
 }

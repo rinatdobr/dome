@@ -30,6 +30,7 @@ public:
     void run();
     void sendTextMessage(int64_t chatId, int64_t messageId, const std::string text);
     void sendPhoto(int64_t chatId, int64_t messageId, const std::string path);
+    void sendImage(int64_t chatId, int64_t messageId, const std::string path);
 
 protected:
     bool prepareData() override;

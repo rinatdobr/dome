@@ -16,13 +16,14 @@ enum class Type {
     Undefined,
     Temperature,
     Humidity,
-    Request
+    Request,
+    IpCamera
 };
 
 enum class DataType {
     Undefined,
     Float,
-    String
+    Path
 };
 
     static std::string TypeToStr(Type type);

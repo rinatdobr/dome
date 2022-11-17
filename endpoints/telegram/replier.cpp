@@ -10,6 +10,7 @@ namespace data {
 
 const std::string InfoRequestStr("/info");
 const std::string StatisticRequestStr("/statistic");
+const std::string IpCameraRequestStr("/ipcamera");
 
 Replier::Replier(dome::data::TdClient &tdClient)
     : m_tdClient(tdClient)
@@ -57,6 +58,26 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
             jMessage["message_id"].get<int64_t>(),
             jMessage["path"].get<std::string>()
         );
+
+        return;
+    }
+    else if (jMessage["type"] == IpCameraRequestStr) {
+        spdlog::debug("reply processing...");
+
+        if (jMessage["quality"] == "sd") {
+            m_tdClient.sendPhoto(
+                jMessage["chat_id"].get<int64_t>(),
+                jMessage["message_id"].get<int64_t>(),
+                jMessage["path"].get<std::string>()
+            );
+        }
+        else if (jMessage["quality"] == "hd") {
+            m_tdClient.sendImage(
+                jMessage["chat_id"].get<int64_t>(),
+                jMessage["message_id"].get<int64_t>(),
+                jMessage["path"].get<std::string>()
+            );
+        }
 
         return;
     }

@@ -2,6 +2,7 @@
 #define CONFIG_CORE_H
 
 #include "file.h"
+#include "ipcamera.h"
 #include "provider.h"
 
 #include <string>
@@ -23,12 +24,14 @@ public:
 
     Database database() const;
     const std::vector<Provider> &providers() const;
+    const std::vector<IpCamera> &ipCameras() const;
 
 private:
     void parse();
 
     Database m_database;
     std::vector<Provider> m_providers;
+    std::vector<IpCamera> m_ipCameras;
 };
 
 }

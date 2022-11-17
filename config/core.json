@@ -8,6 +8,9 @@
         },
         {
             "path": "/home/pi/dome/telegram.json"
+        },
+        {
+            "path": "/home/pi/dome/ipcamera.json"
         }
     ]
 }
