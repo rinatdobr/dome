@@ -1,9 +1,0 @@
-[Unit]
-Description=Dome statistic
-
-[Service]
-Type=simple
-Environment="DOME_DB_CONFIG=%h/dome/db.json"
-Environment="DOME_DIR_CONFIG=%h/dome/dir.json"
-Environment="DOME_STATISTIC_CONFIG=%h/dome/statistic.json"
-ExecStart=/usr/bin/dome_statistic

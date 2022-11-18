@@ -1,4 +1,0 @@
-[D-BUS Service]
-Name=ru.dome
-Exec=/bin/false
-SystemdService=domed.service

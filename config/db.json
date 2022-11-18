@@ -1,8 +1,0 @@
-{
-    "databases": [
-        {
-            "name": "main",
-            "path": "db_path"
-        }
-    ]
-}
