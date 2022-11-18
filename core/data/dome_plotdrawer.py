@@ -20,8 +20,8 @@ db_cur = db_conn.cursor()
 fig = go.Figure()
 index = 0
 for table in args.tables:
-    res = db_cur.execute(f"select strftime('%m.%d|%H:%M',timestamp,'localtime'), value from '{table}' \
-    where timestamp >= (select DATETIME('now', '-{args.period} second'))")
+    res = db_cur.execute(f"select strftime('%Y-%m-%dT%H:%M:%f',timestamp,'localtime'), value from '{table}' \
+    where timestamp >= (select DATETIME('now', '-{args.period} second')) order by timestamp ASC")
     data = res.fetchall()
 
     x_data = []
