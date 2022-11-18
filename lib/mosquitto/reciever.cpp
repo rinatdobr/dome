@@ -157,7 +157,7 @@ void Reciever::backgroundWork()
     while (m_isWorking) {
         spdlog::debug("recieving on {}...", m_mosq.clientId());
 
-        mosquitto_loop(m_mosq.mosq(), -1, 1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         if (m_mosq.decrementKeepAlive()) {
             auto message = dome::mosq::Mosquitto::PingMessage();

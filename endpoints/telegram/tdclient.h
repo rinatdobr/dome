@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <mutex>
 
 #include <config/provider.h>
 #include <data/provider.h>
@@ -33,13 +34,15 @@ public:
     void sendImage(int64_t chatId, int64_t messageId, const std::string path);
 
 protected:
-    bool prepareData() override;
-    nlohmann::json getData() override;
+    virtual bool prepareData() override;
+    virtual nlohmann::json getData() override;
+    virtual bool isDataLeft() override;
 
 private:
     const dome::config::Provider &m_providerConfig;
     dome::mosq::Sender::Trigger &m_senderTrigger;
     std::queue<std::string> m_requests;
+    std::mutex m_requestsMutex;
 
     uint m_refreshPeriodSec;
     std::string m_login;

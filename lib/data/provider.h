@@ -20,6 +20,7 @@ public:
 
     virtual bool prepareData() = 0;
     virtual nlohmann::json getData() = 0;
+    virtual bool isDataLeft() = 0;
 };
 
 }

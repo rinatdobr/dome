@@ -60,6 +60,8 @@ TdClient::TdClient(const dome::config::Telegram &telegramConfig, const dome::con
 
 bool TdClient::prepareData()
 {
+    std::lock_guard<std::mutex> lock(m_requestsMutex);
+
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     if (m_requests.size()) {
@@ -71,6 +73,8 @@ bool TdClient::prepareData()
 
 nlohmann::json TdClient::getData()
 {
+    std::lock_guard<std::mutex> lock(m_requestsMutex);
+
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jData;
@@ -79,6 +83,15 @@ nlohmann::json TdClient::getData()
     m_requests.pop();
 
     return jData;
+}
+
+bool TdClient::isDataLeft()
+{
+    std::lock_guard<std::mutex> lock(m_requestsMutex);
+
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return m_requests.size() == 0 ? false : true;
 }
 
 void TdClient::run() {
@@ -292,6 +305,8 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                 if (isFound) {
                     std::cout << "DOME" << std::endl;
                     if (text.size() && text[0] == '/') {
+                        std::lock_guard<std::mutex> lock(m_requestsMutex);
+
                         std::cout << "SEND" << std::endl;
                         nlohmann::json jMessage;
                         jMessage["request"] = text;
@@ -300,60 +315,6 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                         m_requests.push(jMessage.dump());
                         m_senderTrigger.cv.notify_one();
                     }
-                    // reply_to_message_id_
-
-                    // command::Result result = Commandor::Run(text);
-                    // if (result.isValid()) {
-                    //     std::cout << "Sending message to chat " << chatId << "..." << std::endl;
-                    //     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
-                    //     send_message->chat_id_ = chatId;
-                    //     switch (result.type()) {
-                    //         case command::Result::Type::Error: {
-                    //             auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
-                    //             message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
-                    //             message_content->text_->text_ = std::move(result.errorMessage());
-                    //             send_message->input_message_content_ = std::move(message_content);
-                    //         }
-                    //         break;
-                    //         case command::Result::Type::String: {
-                    //             auto message_content = td::td_api::make_object<td::td_api::inputMessageText>();
-                    //             message_content->text_ = td::td_api::make_object<td::td_api::formattedText>();
-                    //             message_content->text_->text_ = std::move(result.toString());
-                    //             send_message->input_message_content_ = std::move(message_content);
-                    //         }
-                    //         break;
-                    //         case command::Result::Type::File: {
-                    //             switch (result.fileType()) {
-                    //                 case command::Result::FileType::Photo: {
-                    //                     auto message_content = td::td_api::make_object<td::td_api::inputMessagePhoto>();
-                    //                     message_content->photo_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
-                    //                     message_content->thumbnail_ = nullptr;
-                    //                     message_content->width_ = 1920;
-                    //                     message_content->height_ = 1080;
-                    //                     message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
-                    //                     message_content->caption_->text_ = std::move(result.toString());
-                    //                     send_message->input_message_content_ = std::move(message_content);
-                    //                 }
-                    //                 break;
-                    //                 case command::Result::FileType::Document: {
-                    //                     auto message_content = td::td_api::make_object<td::td_api::inputMessageDocument>();
-                    //                     message_content->document_ = td::td_api::make_object<td::td_api::inputFileLocal>(result.toString());
-                    //                     message_content->thumbnail_ = nullptr;
-                    //                     message_content->caption_ = td::td_api::make_object<td::td_api::formattedText>();
-                    //                     message_content->caption_->text_ = std::move(result.toString());
-                    //                     send_message->input_message_content_ = std::move(message_content);
-                    //                 }
-                    //                 break;
-                    //             }
-                    //         }
-                    //         break;
-                    //     }
-
-                        // sendQuery(std::move(send_message), {});
-                    // }
-                    // else {
-                    //     std::cout << "Result is invalid" << std::endl;
-                    // }
                 }
             },
             [](auto &update) {

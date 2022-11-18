@@ -20,7 +20,8 @@ public:
 protected:
 
     virtual bool prepareData() override;
-    nlohmann::json getData() override;
+    virtual nlohmann::json getData() override;
+    virtual bool isDataLeft() override;
 
 private:
 

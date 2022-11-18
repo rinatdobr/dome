@@ -31,6 +31,13 @@ Mosquitto::Mosquitto(const std::string clientId, void *owner)
         spdlog::error("mosquitto_connect error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         return;
     }
+
+    res = mosquitto_loop_start(m_mosq);
+    if (res != MOSQ_ERR_SUCCESS) {
+        spdlog::error("mosquitto_loop_start error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+        return;
+    }
+
     spdlog::debug("connected to the mosquitto server");
 }
 
@@ -38,7 +45,13 @@ Mosquitto::~Mosquitto()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    int res = mosquitto_disconnect(m_mosq);
+    int res = mosquitto_loop_stop(m_mosq, true);
+    if (res != MOSQ_ERR_SUCCESS) {
+        spdlog::error("mosquitto_loop_stop error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+        return;
+    }
+
+    res = mosquitto_disconnect(m_mosq);
     if (res != MOSQ_ERR_SUCCESS) {
         spdlog::error("mosquitto_disconnect error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         return;

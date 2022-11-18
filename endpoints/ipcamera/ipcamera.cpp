@@ -64,5 +64,12 @@ nlohmann::json IpCamera::getData()
     return jData;
 }
 
+bool IpCamera::isDataLeft()
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    return false;
+}
+
 }
 }

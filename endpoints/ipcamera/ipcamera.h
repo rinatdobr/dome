@@ -4,7 +4,6 @@
 #include <config/provider.h>
 #include <config/ipcamera.h>
 #include <data/provider.h>
-#include <utils/dir.h>
 
 namespace dome {
 namespace data {
@@ -19,7 +18,8 @@ public:
 protected:
 
     virtual bool prepareData() override;
-    nlohmann::json getData() override;
+    virtual nlohmann::json getData() override;
+    virtual bool isDataLeft() override;
 
 private:
     std::string m_photoPath;
