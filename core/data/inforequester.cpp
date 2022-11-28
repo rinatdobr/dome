@@ -50,7 +50,8 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
         for (const auto &provider : m_providers) {
             for (const auto &source : provider.sources()) {
                 if (source.type == dome::config::Source::Type::Temperature ||
-                    source.type == dome::config::Source::Type::Humidity) {
+                    source.type == dome::config::Source::Type::Humidity ||
+                    source.type == dome::config::Source::Type::Co2) {
                     info->sources[source.id] = false;
                     providerIds.insert(provider.id());
                 }
@@ -62,7 +63,7 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
         jData["name"] = "get";
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
-            spdlog::debug("requesting \"get\"...");
+            spdlog::debug("requesting \"get\" from {}...", providerId);
             int res = mosquitto_publish(mosq.mosq(), nullptr, GetRequestTopic(providerId).c_str(), data.size(), data.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {
                 spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetRequestTopic(providerId), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));

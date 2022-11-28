@@ -1,0 +1,17 @@
+{
+    "id": "8e33857a-6963-11ed-b69a-cf3b88155846",
+    "period": "30s",
+    "save_period": "1m",
+    "max_frequence": "10s",
+    "location": "room1",
+    "sources": [
+        {
+            "id": "9556167e-6963-11ed-b5b6-3b09cf57e242",
+            "type": "co2",
+            "data_type": "int"
+        } 
+    ],
+    "requests": [
+        "get"
+    ]
+}

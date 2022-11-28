@@ -40,8 +40,12 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
                 else if (data.key() == "humidity") {
                     reply << "\nВлажность: " << std::setprecision(3) << data.value().get<double>();
                 }
+                else if (data.key() == "co2") {
+                    reply << "\nCO2: " << data.value().get<int>();
+                }
             }
         }
+        spdlog::debug("{}", reply.str());
         m_tdClient.sendTextMessage(
             jMessage["chat_id"].get<int64_t>(),
             jMessage["message_id"].get<int64_t>(),

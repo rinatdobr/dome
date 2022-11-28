@@ -39,6 +39,10 @@ void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
                 case dome::config::Source::DataType::Float: {
                     m_dbWriter.write(source.id, jMessage[source.id].get<double>());
                 }
+		break;
+                case dome::config::Source::DataType::Int: {
+                    m_dbWriter.write(source.id, jMessage[source.id].get<int>());
+                }
                 break;
             }
         }

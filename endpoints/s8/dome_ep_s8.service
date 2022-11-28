@@ -1,0 +1,7 @@
+[Unit]
+Description=Dome SenseAir S8 endpoint
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_s8 -c /home/pi/dome/s8.json -l d

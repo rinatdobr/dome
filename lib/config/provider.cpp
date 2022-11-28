@@ -7,24 +7,6 @@
 namespace dome {
 namespace config {
 
-Source::Type StrToSourceType(const std::string& str)
-{
-    if (str == "temperature") {
-        return Source::Type::Temperature;
-    }
-    else if (str == "humidity") {
-        return Source::Type::Humidity;
-    }
-    else if (str == "request") {
-        return Source::Type::Request;
-    }
-    else if (str == "ip_camera") {
-        return Source::Type::IpCamera;
-    }
-
-    return Source::Type::Undefined;
-}
-
 Source::DataType StrToDataType(const std::string& str)
 {
     if (str == "float") {
@@ -32,6 +14,9 @@ Source::DataType StrToDataType(const std::string& str)
     }
     else if (str == "path") {
         return Source::DataType::Path;
+    }
+    else if (str == "int") {
+        return Source::DataType::Int;
     }
 
     return Source::DataType::Undefined;
@@ -65,9 +50,34 @@ std::string Source::TypeToStr(Source::Type type)
             return "humidity";
         case Source::Type::IpCamera:
             return "ip_camera";
+        case Source::Type::Co2:
+            return "co2";
     }
 
     return "undefined";
+}
+
+Source::Type Source::StrToType(const std::string &str)
+{
+    spdlog::trace("{}:{} {} str={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, str);
+
+    if (str == "temperature") {
+        return Source::Type::Temperature;
+    }
+    else if (str == "humidity") {
+        return Source::Type::Humidity;
+    }
+    else if (str == "request") {
+        return Source::Type::Request;
+    }
+    else if (str == "ip_camera") {
+        return Source::Type::IpCamera;
+    }
+    else if (str == "co2") {
+        return Source::Type::Co2;
+    }
+
+    return Source::Type::Undefined;
 }
 
 void Provider::parse()
@@ -92,7 +102,7 @@ void Provider::parse()
 
         Source source;
         source.id = jSource["id"].get<std::string>();
-        source.type = StrToSourceType(jSource["type"].get<std::string>());
+        source.type = Source::StrToType(jSource["type"].get<std::string>());
         source.dataType = StrToDataType(jSource["data_type"].get<std::string>());
 
         spdlog::info("Data provider config: id={} type={} data_type={}",

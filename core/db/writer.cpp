@@ -74,6 +74,24 @@ void Writer::write(const std::string &tableName, double value)
     writeValue(tableName, {.doubleV = value}, dome::config::Source::DataType::Float);
 }
 
+void Writer::write(const std::string &tableName, int value)
+{
+    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
+
+    if (!m_isValid) {
+        spdlog::error("DB is not valid to write");
+        return;
+    }
+
+    if (!checkIfTableExists(tableName) &&
+        !createTable(tableName, dome::config::Source::DataType::Int)) {
+        spdlog::error("No table to write result");
+        return;
+    }
+
+    writeValue(tableName, {.intV = value}, dome::config::Source::DataType::Int);
+}
+
 bool Writer::checkIfTableExists(const std::string &tableName)
 {
     spdlog::trace("{}:{} {} tableName={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName);
@@ -124,6 +142,9 @@ bool Writer::createTable(const std::string &tableName, dome::config::Source::Dat
         case dome::config::Source::DataType::Float:
             createTable.replace(createTable.find(valueTypeToReplace), valueTypeToReplace.length(), "REAL");
         break;
+        case dome::config::Source::DataType::Int:
+	    createTable.replace(createTable.find(valueTypeToReplace), valueTypeToReplace.length(), "INTEGER");
+	break;
     }
 
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, createTable.c_str(), -1, &sqlRequest, NULL);
@@ -166,6 +187,14 @@ void Writer::writeValue(const std::string &tableName, const union value& v, dome
     switch (dataType) {
         case dome::config::Source::DataType::Float:
             sqlCode = sqlite3_bind_double(sqlRequest, 1, v.doubleV);
+            if (sqlCode != SQLITE_OK) {
+                spdlog::error("sqlite3_bind_text: {}", sqlite3_errmsg(m_dbHandler));
+                sqlite3_finalize(sqlRequest);
+                return;
+            }
+        break;
+        case dome::config::Source::DataType::Int:
+            sqlCode = sqlite3_bind_int(sqlRequest, 1, v.intV);
             if (sqlCode != SQLITE_OK) {
                 spdlog::error("sqlite3_bind_text: {}", sqlite3_errmsg(m_dbHandler));
                 sqlite3_finalize(sqlRequest);

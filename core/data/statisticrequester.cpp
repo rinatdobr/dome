@@ -4,6 +4,7 @@
 
 #include <utils.h>
 #include <sstream>
+#include <set>
 
 namespace dome {
 namespace data {
@@ -51,6 +52,7 @@ void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config
         std::string location;
         std::string tables;
         std::string lables;
+        std::set<dome::config::Source::Type> sourceTypes;
         // 0 - period
         if (args.size() == 1) {
             periodSec = PeriodToSeconds(args[0]);
@@ -61,13 +63,29 @@ void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config
             location = args[0];
             periodSec = PeriodToSeconds(args[1]);
         }
+        // 0 - location
+        // 1 - period
+        // 2 - sources type
+        else if (args.size() == 3) {
+            location = args[0];
+            periodSec = PeriodToSeconds(args[1]);
+            std::istringstream sourceTypesStream(args[2]);
+            std::string sourceType;
+            while (std::getline(sourceTypesStream, sourceType, '&')) {
+                sourceTypes.insert(dome::config::Source::StrToType(sourceType));
+            }
+        }
 
         for (const auto &provider : m_providers) {
             if (location.empty() || provider.location() == location) {
                 for (const auto &source : provider.sources()) {
                     auto type = dome::config::Source::TypeToStr(source.type);
-                    if (source.type == dome::config::Source::Type::Temperature ||
-                        source.type == dome::config::Source::Type::Humidity) {
+                    if ((sourceTypes.empty() && (source.type == dome::config::Source::Type::Temperature ||
+                                                source.type == dome::config::Source::Type::Humidity ||
+                                                source.type == dome::config::Source::Type::Co2))
+                            ||
+                        sourceTypes.count(source.type)
+                        ) {
                         tables += source.id + " ";
                         lables += type + " ";
                     }

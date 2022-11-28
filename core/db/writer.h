@@ -12,6 +12,7 @@ namespace db {
 
 union value
 {
+    int intV;
     double doubleV;
 };
 
@@ -23,6 +24,7 @@ public:
     ~Writer();
 
     void write(const std::string &tableName, double value);
+    void write(const std::string &tableName, int value);
 
 private:
     std::string m_path;
