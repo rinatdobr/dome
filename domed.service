@@ -1,0 +1,12 @@
+[Unit]
+Description=Dome bridge service
+Requires=dome.target
+After=dome.target
+
+[Install]
+WantedBy=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/true
+RemainAfterExit=yes

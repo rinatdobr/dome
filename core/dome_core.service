@@ -1,7 +1,11 @@
 [Unit]
 Description=Dome core
 
+[Install]
+RequiredBy=dome.target
+
 [Service]
 Type=simple
 WorkingDirectory=%h/dome
 ExecStart=/usr/bin/dome_core -c /home/pi/dome/core.json -l d
+ExecStartPost=/usr/bin/sleep 10

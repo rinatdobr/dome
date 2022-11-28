@@ -1,5 +1,10 @@
 [Unit]
 Description=Dome dht22 endpoint
+Requires=dome_core.service
+After=dome_core.service
+
+[Install]
+RequiredBy=dome.target
 
 [Service]
 Type=simple
