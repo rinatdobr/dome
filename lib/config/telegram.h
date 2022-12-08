@@ -23,7 +23,7 @@ public:
     uint refreshPeriodSec() const;
 
 private:
-    void parse();
+    bool parse();
 
     int m_appId;
     std::string m_appHash;

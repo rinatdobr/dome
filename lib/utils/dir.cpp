@@ -32,7 +32,7 @@ void Dir::copyFile(const std::string &filePath)
     spdlog::trace("{}:{} {} filePath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, filePath);
 
     if (!m_isValid) {
-        spdlog::error("directory is not valid to write");
+        spdlog::error("Invalid directory to write");
         return;
     }
 

@@ -4,12 +4,14 @@
 #include <mosquitto.h>
 #include <string>
 
+#include "validatable.h"
+
 namespace dome {
 namespace mosq {
 
 const int KeepAliveSec = 3600;
 
-class Mosquitto
+class Mosquitto : public Validatable
 {
 public:
     explicit Mosquitto(const std::string clientId, void *owner);

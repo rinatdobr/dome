@@ -11,6 +11,8 @@ IpCamera::IpCamera(const dome::config::Provider &providerConfig, const dome::con
     , m_ipCameraConfig(ipCameraConfig)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    I_am_valid();
 }
 
 IpCamera::~IpCamera()

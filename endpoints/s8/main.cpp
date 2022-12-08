@@ -44,6 +44,11 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Provider config(configPath);
+    if (!config.isValid()) {
+        spdlog::error("Can't setup S8");
+        return EXIT_FAILURE;
+    }
+
     dome::data::S8 s8(config);
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, s8, trigger);
@@ -60,5 +65,5 @@ int main(int argc, char *argv[]) {
     sender.stop();
     reciever.stop();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

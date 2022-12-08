@@ -6,13 +6,14 @@
 #include <nlohmann/json.hpp>
 
 #include "config/provider.h"
+#include "validatable.h"
 
 namespace dome {
 namespace data {
 
 class Provider;
 
-class Provider
+class Provider : public Validatable
 {
 public:
     explicit Provider();

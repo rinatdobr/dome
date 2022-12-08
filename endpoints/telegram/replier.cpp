@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <config/provider.h>
+#include <utils.h>
 
 namespace dome {
 namespace data {
@@ -27,8 +28,15 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) {
+        spdlog::error("{}", ErrorMessage(ErrorNum::JsonKeyNoType));
+        return;
+    };
+
     if (jMessage["type"] == InfoRequestStr) {
         spdlog::debug("reply processing...");
+
+        if (!CheckJsonMessageForKeys(jMessage, { "data", "chat_id", "message_id" })) return;
 
         std::ostringstream reply;
         for (const auto &location : jMessage["data"].items()) {
@@ -45,7 +53,7 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
                 }
             }
         }
-        spdlog::debug("{}", reply.str());
+
         m_tdClient.sendTextMessage(
             jMessage["chat_id"].get<int64_t>(),
             jMessage["message_id"].get<int64_t>(),
@@ -57,6 +65,8 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
     else if (jMessage["type"] == StatisticRequestStr) {
         spdlog::debug("reply processing...");
 
+        if (!CheckJsonMessageForKeys(jMessage, { "path", "chat_id", "message_id" })) return;
+
         m_tdClient.sendPhoto(
             jMessage["chat_id"].get<int64_t>(),
             jMessage["message_id"].get<int64_t>(),
@@ -67,6 +77,8 @@ void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
     }
     else if (jMessage["type"] == IpCameraRequestStr) {
         spdlog::debug("reply processing...");
+
+        if (!CheckJsonMessageForKeys(jMessage, { "quality", "path", "chat_id", "message_id" })) return;
 
         if (jMessage["quality"] == "sd") {
             m_tdClient.sendPhoto(

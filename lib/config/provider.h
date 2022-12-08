@@ -57,7 +57,7 @@ public:
     const std::vector<Request> &requests() const;
 
 private:
-    void parse();
+    bool parse();
 
     std::string m_id;
     uint m_periodSec;

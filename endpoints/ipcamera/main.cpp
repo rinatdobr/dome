@@ -45,7 +45,17 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Provider providerConfig(configPath);
+    if (!providerConfig.isValid()) {
+        spdlog::error("Can't setup IP camera");
+        return EXIT_FAILURE;
+    }
+
     dome::config::IpCamera ipCameraConfig(configPath);
+    if (!ipCameraConfig.isValid()) {
+        spdlog::error("Can't setup IP camera");
+        return EXIT_FAILURE;
+    }
+
     dome::data::IpCamera ipCamera(providerConfig, ipCameraConfig);
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
@@ -62,5 +72,5 @@ int main(int argc, char *argv[]) {
     sender.stop();
     reciever.stop();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -61,7 +61,7 @@ void Writer::write(const std::string &tableName, double value)
     spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
 
     if (!m_isValid) {
-        spdlog::error("DB is not valid to write");
+        spdlog::error("Invalid DB to write");
         return;
     }
 
@@ -79,7 +79,7 @@ void Writer::write(const std::string &tableName, int value)
     spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
 
     if (!m_isValid) {
-        spdlog::error("DB is not valid to write");
+        spdlog::error("Invalid DB to write");
         return;
     }
 

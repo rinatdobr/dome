@@ -3,10 +3,12 @@
 
 #include <string>
 
+#include "validatable.h"
+
 namespace dome {
 namespace config {
 
-class File
+class File : public Validatable
 {
 public:
     explicit File(const std::string &path);

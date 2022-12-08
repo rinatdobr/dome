@@ -22,7 +22,7 @@ public:
     uint port() const;
 
 private:
-    void parse();
+    bool parse();
 
     std::string m_id;
     std::string m_name;

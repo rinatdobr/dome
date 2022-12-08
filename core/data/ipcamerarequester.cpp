@@ -26,9 +26,13 @@ void IpCameraRequester::process(dome::mosq::Mosquitto &mosq, const dome::config:
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
+
     if (jMessage["type"] == "request") {
         spdlog::debug("request processing...");
+        if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
+        if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
         std::string text = jSource["request"].get<std::string>();
         std::size_t delimetr = text.find(' ');
         std::string name(text, 0, delimetr);
@@ -55,6 +59,8 @@ void IpCameraRequester::process(dome::mosq::Mosquitto &mosq, const dome::config:
             quality = args[1];
         }
 
+        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
+
         auto ipCameraRequest = std::make_shared<IpCamera>();
         ipCameraRequest->type = Request::Type::IpCamera;
         ipCameraRequest->idFrom = provider.id();
@@ -80,7 +86,7 @@ void IpCameraRequester::process(dome::mosq::Mosquitto &mosq, const dome::config:
         m_requests.push_back(ipCameraRequest);
 
         nlohmann::json jData;
-        jData["name"] = "get";
+        jData["request"] = "get";
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
             spdlog::debug("requesting \"get\"...");
@@ -104,6 +110,7 @@ void IpCameraRequester::process(dome::mosq::Mosquitto &mosq, const dome::config:
                 continue;
             }
             else if (!ipCameraRequest->sources[source.id]) {
+                if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                 ipCameraRequest->reply["path"] = jMessage[source.id];
                 ipCameraRequest->sources[source.id] = true;
             }

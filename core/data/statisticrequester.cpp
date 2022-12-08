@@ -27,9 +27,13 @@ void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
+
     if (jMessage["type"] == "request") {
         spdlog::debug("request processing...");
+        if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
+        if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
         std::string text = jSource["request"].get<std::string>();
         std::size_t delimetr = text.find(' ');
         std::string name(text, 0, delimetr);
@@ -39,6 +43,8 @@ void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config
         }
 
         auto args = ParseArgs(std::string(text, delimetr + 1));
+
+        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
         auto statistic = std::make_shared<Statistic>();
         statistic->type = Request::Type::Statistic;

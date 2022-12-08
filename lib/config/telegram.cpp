@@ -10,9 +10,20 @@ namespace config {
 Telegram::Telegram(const std::string &path)
     : File(path)
 {
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            path);
 
-    parse();
+    if (!isValid()) {
+        return;
+    }
+
+    if (!parse()) {
+        spdlog::error("Can't parse IP camera config file: {}", path);
+        I_am_not_valid();
+        return;
+    }
+
+    I_am_valid();
 }
 
 int Telegram::appId() const
@@ -64,13 +75,23 @@ uint Telegram::refreshPeriodSec() const
     return m_refreshPeriodSec;
 }
 
-void Telegram::parse()
+bool Telegram::parse()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
+    if (!CheckJsonMessageForKeys(jConfig, { "telegram" })) {
+        spdlog::error("Invalid telegram main JSON: \" {} \"", jConfig.dump());
+        return false;
+    }
+
     nlohmann::json jTelegram = jConfig["telegram"];
+    if (!CheckJsonMessageForKeys(jTelegram, { "app_id", "app_hash", "login", "pass", "log_level", "refresh_period", "chat_ids" })) {
+        spdlog::error("Invalid telegram JSON: \" {} \"", jTelegram.dump());
+        return false;
+    }
+
     m_appId = jTelegram["app_id"].get<int>();
     m_appHash = jTelegram["app_hash"].get<std::string>();
     m_login = jTelegram["login"].get<std::string>();
@@ -82,8 +103,8 @@ void Telegram::parse()
         m_chatIds.push_back(*it);
     }
 
-    spdlog::info("Telegram config: appId={} appHash={} chatIds.size()={} login={} pass={} logLevel={} refreshPeriodSec={}",
-                    m_appId, m_appHash, m_chatIds.size(), m_login, m_pass, m_logLevel, m_refreshPeriodSec);
+    spdlog::info("Telegram: appId={} appHash={} chatIds.size()={} login={} pass={} logLevel={} refreshPeriodSec={}",
+                            m_appId, m_appHash, m_chatIds.size(), m_login, m_pass, m_logLevel, m_refreshPeriodSec);
 }
 
 }

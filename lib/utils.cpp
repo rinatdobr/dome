@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <stdio.h>
 #include <array>
+#include <map>
 
 uint PeriodToSeconds(const std::string &period)
 {
@@ -80,4 +81,31 @@ std::string GetTmpName(const std::string id)
     spdlog::debug("tmpName={}", tmpName);
 
     return tmpName;
+}
+
+bool CheckJsonMessageForKeys(const nlohmann::json &jMessage, const std::vector<std::string> &keys)
+{
+    spdlog::trace("{}:{} {}");
+
+    for (const auto &key : keys) {
+        if (!jMessage.contains(key)) {
+            spdlog::warn("JSON message {} doesn't contain '{}' key", jMessage.dump(), key);
+            return false;
+        }
+    }
+
+    spdlog::trace("JSON message {} contains all keys", jMessage.dump());
+    return true;
+}
+
+std::string ErrorMessage(ErrorNum errorNum)
+{
+    const static std::map<ErrorNum, std::string> Descriptions {
+        {
+            ErrorNum::JsonKeyNoType,
+            "В ответном сообщении отсутствует поле 'type'"
+        }
+    };
+
+    return Descriptions.at(errorNum);
 }

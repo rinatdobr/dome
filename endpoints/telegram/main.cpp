@@ -44,7 +44,16 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Telegram telegramConfig(configPath);
+    if (!telegramConfig.isValid()) {
+        spdlog::error("Can't setup Telegram");
+        return EXIT_FAILURE;
+    }
+
     dome::config::Provider providerConfig(configPath);
+    if (!providerConfig.isValid()) {
+        spdlog::error("Can't setup Telegram");
+        return EXIT_FAILURE;
+    }
 
     dome::mosq::Sender::Trigger trigger;
     dome::data::TdClient tdClient(telegramConfig, providerConfig, trigger);

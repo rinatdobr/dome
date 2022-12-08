@@ -26,9 +26,13 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
+
     if (jMessage["type"] == "request") {
         spdlog::debug("request processing...");
+        if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
+        if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
         std::string text = jSource["request"].get<std::string>();
         std::size_t delimetr = text.find(' ');
         std::string name(text, 0, delimetr);
@@ -39,6 +43,7 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
 
         auto args = ParseArgs(std::string(text, delimetr + 1));
 
+        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
         auto info = std::make_shared<Info>();
         info->type = Request::Type::Info;
         info->idFrom = provider.id();
@@ -60,7 +65,7 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
         m_requests.push_back(info);
 
         nlohmann::json jData;
-        jData["name"] = "get";
+        jData["request"] = "get";
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
             spdlog::debug("requesting \"get\" from {}...", providerId);
@@ -84,6 +89,7 @@ void InfoRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Pro
                 continue;
             }
             else if (!info->sources[source.id]) {
+                if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                 info->reply["data"][provider.location()][dome::config::Source::TypeToStr(source.type)] = jMessage[source.id];
                 info->sources[source.id] = true;
             }

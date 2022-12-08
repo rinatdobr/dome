@@ -11,12 +11,10 @@ namespace data {
 class IpCamera : public dome::data::Provider
 {
 public:
-
     explicit IpCamera(const dome::config::Provider &providerConfig, const dome::config::IpCamera &ipCameraConfig);
     ~IpCamera();
 
 protected:
-
     virtual bool prepareData() override;
     virtual nlohmann::json getData() override;
     virtual bool isDataLeft() override;

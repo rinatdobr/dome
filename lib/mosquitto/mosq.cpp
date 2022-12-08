@@ -10,14 +10,15 @@ Mosquitto::Mosquitto(const std::string clientId, void *owner)
     : m_clientId(clientId)
     , m_keepAliveSec(KeepAliveSec)
 {
-    spdlog::trace("{}:{} {} clientId={} owner={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, clientId, owner);
+    spdlog::trace("{}:{} {} clientId={} owner={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            clientId, owner);
 
     int res = mosquitto_lib_init();
     if (res != MOSQ_ERR_SUCCESS) {
         spdlog::error("mosquitto_lib_init error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         return;
     }
-    spdlog::debug("mosquitto library was inited");
+    spdlog::info("mosquitto library was inited");
 
     const char *id = clientId.empty() ? nullptr : clientId.data();
     m_mosq = mosquitto_new(id, true, owner);
@@ -31,14 +32,16 @@ Mosquitto::Mosquitto(const std::string clientId, void *owner)
         spdlog::error("mosquitto_connect error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         return;
     }
+    spdlog::info("connected to the mosquitto server");
 
     res = mosquitto_loop_start(m_mosq);
     if (res != MOSQ_ERR_SUCCESS) {
         spdlog::error("mosquitto_loop_start error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         return;
     }
+    spdlog::info("the mosquitto loop was started");
 
-    spdlog::debug("connected to the mosquitto server");
+    I_am_valid();
 }
 
 Mosquitto::~Mosquitto()
@@ -46,17 +49,20 @@ Mosquitto::~Mosquitto()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     int res = mosquitto_loop_stop(m_mosq, true);
-    if (res != MOSQ_ERR_SUCCESS) {
+    if (res == MOSQ_ERR_SUCCESS) {
+        spdlog::info("the mosquitto loop was stopped");
+    }
+    else {
         spdlog::error("mosquitto_loop_stop error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-        return;
     }
 
     res = mosquitto_disconnect(m_mosq);
-    if (res != MOSQ_ERR_SUCCESS) {
-        spdlog::error("mosquitto_disconnect error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-        return;
+    if (res == MOSQ_ERR_SUCCESS) {
+        spdlog::info("disconnected from the mosquitto server");
     }
-    spdlog::debug("disconnected from the mosquitto server");
+    else {
+        spdlog::error("mosquitto_disconnect error[{}]: {}", res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+    }
 
     mosquitto_destroy(m_mosq);
 
@@ -86,7 +92,8 @@ int Mosquitto::keepAliveSec()
 
 bool Mosquitto::decrementKeepAlive(int diffSec)
 {
-    spdlog::trace("{}:{} {} diffSec={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, diffSec);
+    spdlog::trace("{}:{} {} diffSec={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            diffSec);
 
     m_keepAliveSec -= diffSec;
     if (m_keepAliveSec <= 0) {
@@ -99,6 +106,8 @@ bool Mosquitto::decrementKeepAlive(int diffSec)
 
 std::string Mosquitto::PingMessage()
 {
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
     nlohmann::json jMessage;
     jMessage["type"] = "ping";
     return jMessage.dump();

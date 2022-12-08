@@ -27,7 +27,7 @@ public:
     const std::vector<IpCamera> &ipCameras() const;
 
 private:
-    void parse();
+    bool parse();
 
     Database m_database;
     std::vector<Provider> m_providers;

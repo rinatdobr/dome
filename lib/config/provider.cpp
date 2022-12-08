@@ -22,24 +22,10 @@ Source::DataType StrToDataType(const std::string& str)
     return Source::DataType::Undefined;
 }
 
-Provider::Provider()
-    : File("")
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-}
-
-Provider::Provider(std::string path)
-    : File(path)
-{
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
-        path);
-
-    parse();
-}
-
 std::string Source::TypeToStr(Source::Type type)
 {
-    spdlog::trace("{}:{} {} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, type);
+    spdlog::trace("{}:{} {}, type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            type);
     
     switch (type) {
         case Source::Type::Undefined:
@@ -59,7 +45,8 @@ std::string Source::TypeToStr(Source::Type type)
 
 Source::Type Source::StrToType(const std::string &str)
 {
-    spdlog::trace("{}:{} {} str={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, str);
+    spdlog::trace("{}:{} {}, str={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            str);
 
     if (str == "temperature") {
         return Source::Type::Temperature;
@@ -80,43 +67,31 @@ Source::Type Source::StrToType(const std::string &str)
     return Source::Type::Undefined;
 }
 
-void Provider::parse()
+Provider::Provider()
+    : File("")
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    auto configData = read();
-    nlohmann::json jConfig = nlohmann::json::parse(configData);
-    m_id = jConfig["id"].get<std::string>();
-    m_location = jConfig["location"].get<std::string>();
-    m_periodSec = PeriodToSeconds(jConfig["period"].get<std::string>());
-    m_savePeriodSec = PeriodToSeconds(jConfig["save_period"].get<std::string>());
-    m_maxFrequenceSec = PeriodToSeconds(jConfig["max_frequence"].get<std::string>());
-    spdlog::info("Data provider: id={} location={} period={}", m_id, m_location, m_periodSec);
+    I_am_not_valid();
+}
 
-    auto jSources = jConfig["sources"];
-    for (const auto &jSource : jSources) {
-        if (jSource.size() != 3) {
-            spdlog::error("Invalid source format: \" {} \"", jSource.dump());
-            continue;
-        }
+Provider::Provider(std::string path)
+    : File(path)
+{
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            path);
 
-        Source source;
-        source.id = jSource["id"].get<std::string>();
-        source.type = Source::StrToType(jSource["type"].get<std::string>());
-        source.dataType = StrToDataType(jSource["data_type"].get<std::string>());
-
-        spdlog::info("Data provider config: id={} type={} data_type={}",
-            source.id, source.type, source.dataType);
-
-        m_sources.push_back(source);
+    if (!isValid()) {
+        return;
     }
 
-    auto jRequests = jConfig["commands"];
-    for (const auto &jRequest : jRequests) {
-        Request request;
-        request.name = jRequest;
-        m_requests.push_back(request);
+    if (!parse()) {
+        spdlog::error("Can't parse provider config file: {}", path);
+        I_am_not_valid();
+        return;
     }
+
+    I_am_valid();
 }
 
 std::string Provider::id() const
@@ -166,6 +141,55 @@ const std::vector<Request> &Provider::requests() const
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     return m_requests;
+}
+
+bool Provider::parse()
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    auto configData = read();
+    nlohmann::json jConfig = nlohmann::json::parse(configData);
+    if (!CheckJsonMessageForKeys(jConfig, { "id", "location", "period", "save_period", "max_frequence", "sources", "commands" })) {
+        spdlog::error("Invalid provider JSON: \" {} \"", jConfig.dump());
+        return false;   
+    }
+
+    m_id = jConfig["id"].get<std::string>();
+    m_location = jConfig["location"].get<std::string>();
+    m_periodSec = PeriodToSeconds(jConfig["period"].get<std::string>());
+    m_savePeriodSec = PeriodToSeconds(jConfig["save_period"].get<std::string>());
+    m_maxFrequenceSec = PeriodToSeconds(jConfig["max_frequence"].get<std::string>());
+    spdlog::info("Data provider: id={} location={} period={} save_period={} max_frequence={}",
+                                 m_id, m_location, m_periodSec, m_savePeriodSec, m_maxFrequenceSec);
+
+    auto jSources = jConfig["sources"];
+    for (const auto &jSource : jSources) {
+        if (!CheckJsonMessageForKeys(jSource, { "id", "type", "data_type" })) {
+            spdlog::error("Invalid source JSON: \" {} \"", jSource.dump());
+            continue;
+        }
+
+        Source source;
+        source.id = jSource["id"].get<std::string>();
+        source.type = Source::StrToType(jSource["type"].get<std::string>());
+        source.dataType = StrToDataType(jSource["data_type"].get<std::string>());
+        spdlog::info("Data provider source: id={} type={} data_type={}",
+                                            source.id, source.type, source.dataType);
+
+        m_sources.push_back(source);
+    }
+
+    auto jRequests = jConfig["commands"];
+    for (const auto &jRequest : jRequests) {
+        Request request;
+        request.name = jRequest;
+        spdlog::info("Data provider command: name={}",
+                                             request.name);
+        
+        m_requests.push_back(request);
+    }
+
+    return true;
 }
 
 }

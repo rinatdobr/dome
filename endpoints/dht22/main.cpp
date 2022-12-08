@@ -44,7 +44,17 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Provider config(configPath);
+    if (!config.isValid()) {
+        spdlog::error("Can't setup DHT22");
+        return EXIT_FAILURE;
+    }
+
     dome::data::Dht22 dht22(config);
+    if (!dht22.isValid()) {
+        spdlog::error("Can't setup DHT22");
+        return EXIT_FAILURE;
+    }
+
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, dht22, trigger);
     std::vector<dome::data::Processor*> processors;
@@ -60,5 +70,5 @@ int main(int argc, char *argv[]) {
     sender.stop();
     reciever.stop();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

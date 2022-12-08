@@ -4,6 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <utils/dir.h>
 
+#include <utils.h>
+
 namespace dome {
 namespace data {
 
@@ -21,6 +23,8 @@ void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &p
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
+
     if (jMessage["type"] != "data") {
         spdlog::trace("{}:{} {} ignore...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
         return;
@@ -37,6 +41,7 @@ void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &p
                 case dome::config::Source::DataType::Undefined:
                 break;
                 case dome::config::Source::DataType::Path: {
+                    if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                     dome::utils::Dir dir(source.id);
                     dir.copyFile(jMessage[source.id].get<std::string>());
                 }

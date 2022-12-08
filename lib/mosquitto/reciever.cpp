@@ -48,6 +48,7 @@ void Reciever::setup()
         std::string topic(mosqMessage->topic);
         std::string message(static_cast<char*>(mosqMessage->payload), mosqMessage->payloadlen);
         nlohmann::json jMessage = nlohmann::json::parse(message);
+        if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
         if (jMessage["type"] == "ping") {
             spdlog::debug("got a ping message from {}", mosqMessage->topic);
         }

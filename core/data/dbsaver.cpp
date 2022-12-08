@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
+#include <utils.h>
+
 namespace dome {
 namespace data {
 
@@ -21,6 +23,8 @@ void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
+
     if (jMessage["type"] != "data") {
         spdlog::trace("{}:{} {} ignore...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
         return;
@@ -37,10 +41,12 @@ void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &pro
                 case dome::config::Source::DataType::Undefined:
                 break;
                 case dome::config::Source::DataType::Float: {
+                    if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                     m_dbWriter.write(source.id, jMessage[source.id].get<double>());
                 }
-		break;
+                break;
                 case dome::config::Source::DataType::Int: {
+                    if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                     m_dbWriter.write(source.id, jMessage[source.id].get<int>());
                 }
                 break;

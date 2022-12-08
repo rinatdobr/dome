@@ -21,6 +21,7 @@ set(SOURCE_FILES
     utils/dir.cpp
     threader.cpp
     utils.cpp
+    validatable.cpp
 )
 
 add_library(dome_lib SHARED ${SOURCE_FILES})

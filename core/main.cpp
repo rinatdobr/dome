@@ -48,6 +48,11 @@ int main(int argc, char *argv[]) {
     spdlog::debug("configPath={}", configPath);
 
     dome::config::Core config(configPath);
+    if (!config.isValid()) {
+        spdlog::error("Can't setup core");
+        return EXIT_FAILURE;
+    }
+
     dome::data::DbSaver dbSaver(config.database().path);
     dome::data::FileSaver fileSaver;
     dome::data::InfoRequester infoRequester(config.providers());
@@ -67,5 +72,5 @@ int main(int argc, char *argv[]) {
     }
     reciever.stop();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

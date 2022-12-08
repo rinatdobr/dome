@@ -1,6 +1,7 @@
 #include "getter.h"
 
 #include <spdlog/spdlog.h>
+#include "utils.h"
 
 namespace dome {
 namespace data {
@@ -20,7 +21,9 @@ void Getter::process(dome::mosq::Mosquitto &, const dome::config::Provider &prov
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (jMessage["name"] == "get") {
+    if (!CheckJsonMessageForKeys(jMessage, { "request" })) return;
+
+    if (jMessage["request"] == "get") {
         m_senderTrigger.cv.notify_one();
     }
 }
