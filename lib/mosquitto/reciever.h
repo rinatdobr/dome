@@ -3,34 +3,23 @@
 
 #include <vector>
 
-#include "config/provider.h"
-#include "data/processor.h"
-#include "mosquitto/mosq.h"
-#include "threader.h"
+#include "mosq.h"
+#include "topic/processor.h"
+#include "utils/threader.h"
+#include "utils/validatable.h"
 
 namespace dome {
 namespace mosq {
 
-class Reciever : public dome::utils::Threader
+class Reciever : public dome::utils::Threader, public dome::utils::Validatable
 {
 public:
-enum class Type
-{
-    Provider,
-    Request,
-    Reply
-};
-
-    Reciever(const std::string &mosqClientId, const std::vector<dome::config::Provider> &providers, std::vector<dome::data::Processor*> &dataProcessors);
-    Reciever(const std::string &mosqClientId, const dome::config::Provider &provider, std::vector<dome::data::Processor*> &dataProcessors, Type type);
+    Reciever(const std::string &mosqClientId, dome::topic::Processor &topicProcessor);
     ~Reciever();
 
 private:
-    const std::vector<dome::config::Provider> &m_providers;
-    const dome::config::Provider &m_provider;
+    dome::topic::Processor &m_topicProcessor;
     dome::mosq::Mosquitto m_mosq;
-    std::vector<dome::data::Processor*> m_dataProcessors;
-    Type m_type;
 
     void setup();
     void subscribe();

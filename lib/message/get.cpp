@@ -1,23 +1,23 @@
-#include "getter.h"
+#include "get.h"
 
 #include <spdlog/spdlog.h>
-#include "utils.h"
+#include "utils/utils.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-Getter::Getter(dome::mosq::Sender::Trigger &senderTrigger)
+Get::Get(dome::mosq::Sender::Trigger &senderTrigger)
     : m_senderTrigger(senderTrigger)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-Getter::~Getter()
+Get::~Get()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void Getter::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
+void Get::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

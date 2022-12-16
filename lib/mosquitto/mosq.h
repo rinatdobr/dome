@@ -4,14 +4,14 @@
 #include <mosquitto.h>
 #include <string>
 
-#include "validatable.h"
+#include "utils/validatable.h"
 
 namespace dome {
 namespace mosq {
 
 const int KeepAliveSec = 3600;
 
-class Mosquitto : public Validatable
+class Mosquitto : public dome::utils::Validatable
 {
 public:
     explicit Mosquitto(const std::string clientId, void *owner);
@@ -21,7 +21,6 @@ public:
     const std::string &clientId() const;
     int keepAliveSec();
     bool decrementKeepAlive(int diffSec = 1);
-    static std::string PingMessage();
 
 private:
     struct mosquitto *m_mosq;

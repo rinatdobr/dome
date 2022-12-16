@@ -5,7 +5,7 @@
 #include <memory>
 #include <sqlite3.h>
 
-#include <config/provider.h>
+#include "config/provider.h"
 
 namespace dome {
 namespace db {

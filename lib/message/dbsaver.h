@@ -1,22 +1,24 @@
-#ifndef DATA_FILE_SAVER_H
-#define DATA_FILE_SAVER_H
+#ifndef MESSAGE_DB_SAVER_H
+#define MESSAGE_DB_SAVER_H
 
 #include <map>
 #include <chrono>
 
-#include <data/processor.h>
+#include "processor.h"
+#include "db/writer.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-class FileSaver : public Processor
+class DbSaver : public Processor
 {
 public:
-    explicit FileSaver();
-    ~FileSaver();
+    explicit DbSaver(const std::string &path);
+    ~DbSaver();
 
     void process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 private:
+    dome::db::Writer m_dbWriter;
     std::map<std::string, std::chrono::seconds> m_timestamps;
 };
 

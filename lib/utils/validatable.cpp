@@ -1,5 +1,8 @@
 #include "validatable.h"
 
+namespace dome {
+namespace utils {
+
 Validatable::Validatable()
     : m_isValid(false)
 {
@@ -19,4 +22,7 @@ void Validatable::I_am_valid()
 void Validatable::I_am_not_valid()
 {
     m_isValid = false;
+}
+
+}
 }

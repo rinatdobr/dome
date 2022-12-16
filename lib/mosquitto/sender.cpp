@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <cerrno>
 
-#include "utils.h"
+#include "utils/utils.h"
 
 namespace dome {
 namespace mosq {
@@ -15,7 +15,15 @@ Sender::Sender(const std::string &mosqClientId, const dome::config::Provider &co
     , m_provider(provider)
     , m_trigger(trigger)
 {
-    spdlog::trace("{}:{} {} mosqClientId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, mosqClientId);
+    spdlog::trace("{}:{} {} mosqClientId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            mosqClientId);
+
+    if (!m_mosq.isValid()) {
+        spdlog::error("Invalid mosquitto");
+        return;
+    }
+
+    I_am_valid();
 }
 
 Sender::~Sender()
@@ -31,6 +39,11 @@ Sender::Trigger &Sender::trigger()
 void Sender::backgroundWork()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    if (!isValid()) {
+        spdlog::error("Invalid sender");
+        return;
+    }
 
     std::unique_lock<std::mutex> ul(m_trigger.mutex);
     uint leftSec = 0;
@@ -85,7 +98,7 @@ void Sender::backgroundWork()
         }
 
         if (m_mosq.decrementKeepAlive()) {
-            auto message = dome::mosq::Mosquitto::PingMessage();
+            auto message = PingMessage();
             spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
             int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), message.size(), message.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {

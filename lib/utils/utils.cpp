@@ -83,6 +83,15 @@ std::string GetTmpName(const std::string id)
     return tmpName;
 }
 
+std::string PingMessage()
+{
+    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    nlohmann::json jMessage;
+    jMessage["type"] = "ping";
+    return jMessage.dump();
+}
+
 bool CheckJsonMessageForKeys(const nlohmann::json &jMessage, const std::vector<std::string> &keys)
 {
     spdlog::trace("{}:{} {}");

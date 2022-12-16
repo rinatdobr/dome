@@ -1,6 +1,6 @@
 #include "provider.h"
 
-#include "utils.h"
+#include "utils/utils.h"
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -140,7 +140,7 @@ const std::vector<Request> &Provider::requests() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_requests;
+    return m_messages;
 }
 
 bool Provider::parse()
@@ -186,7 +186,7 @@ bool Provider::parse()
         spdlog::info("Data provider command: name={}",
                                              request.name);
         
-        m_requests.push_back(request);
+        m_messages.push_back(request);
     }
 
     return true;

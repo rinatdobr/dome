@@ -1,4 +1,4 @@
-#include "file.h"
+#include "utils/file.h"
 
 #include <sstream>
 #include <fstream>
@@ -6,7 +6,7 @@
 #include <spdlog/spdlog.h>
 
 namespace dome {
-namespace config {
+namespace utils {
 
 File::File(const std::string &path)
     : m_path(path)

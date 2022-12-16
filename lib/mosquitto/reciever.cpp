@@ -2,33 +2,25 @@
 
 #include <spdlog/spdlog.h>
 
-#include <utils.h>
+#include "utils/utils.h"
 
 namespace dome {
 namespace mosq {
 
-Reciever::Reciever(const std::string &mosqClientId, const std::vector<dome::config::Provider> &providers, std::vector<dome::data::Processor*> &dataProcessors)
-    : m_providers(providers)
-    , m_provider({})
-    , m_mosq(mosqClientId, this)
-    , m_dataProcessors(dataProcessors)
-    , m_type(Type::Provider)
+Reciever::Reciever(const std::string &mosqClientId, dome::topic::Processor &processor)
+    : m_mosq(mosqClientId, this)
+    , m_topicProcessor(processor)
 {
     spdlog::trace("{}:{} {} mosqClientId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, mosqClientId);
 
-    setup();
-}
-
-Reciever::Reciever(const std::string &mosqClientId, const dome::config::Provider &provider, std::vector<dome::data::Processor*> &dataProcessors, Type type)
-    : m_providers({})
-    , m_provider(provider)
-    , m_mosq(mosqClientId, this)
-    , m_dataProcessors(dataProcessors)
-    , m_type(type)
-{
-    spdlog::trace("{}:{} {} mosqClientId={} type={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, mosqClientId, type);
+    if (!m_mosq.isValid()) {
+        spdlog::error("Invalid mosquitto");
+        return;
+    }
 
     setup();
+
+    I_am_valid();
 }
 
 Reciever::~Reciever()
@@ -51,25 +43,10 @@ void Reciever::setup()
         if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
         if (jMessage["type"] == "ping") {
             spdlog::debug("got a ping message from {}", mosqMessage->topic);
+            return;
         }
 
-        switch (_this->m_type) {
-            case Type::Provider:
-                for (const auto &provider : _this->m_providers) {
-                    if (provider.id() == topic) {
-                        for (auto dataProcessor : _this->m_dataProcessors) {
-                            dataProcessor->process(_this->m_mosq, provider, jMessage);
-                        }
-                    }
-                }
-            break;
-            case Type::Request:
-            case Type::Reply:
-                for (auto dataProcessor : _this->m_dataProcessors) {
-                    dataProcessor->process(_this->m_mosq, _this->m_provider, jMessage);
-                }
-            break;
-        }
+        _this->m_topicProcessor.process(_this->m_mosq, topic, jMessage);
     });
 }
 
@@ -77,81 +54,34 @@ void Reciever::subscribe()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    int res;
-    switch (m_type) {
-        case Type::Provider:
-            for (const auto &provider : m_providers) {
-                res = mosquitto_subscribe(m_mosq.mosq(), NULL, provider.id().c_str(), 0);
-                if (res == MOSQ_ERR_SUCCESS) {
-                    spdlog::debug("subscribed on the {}", provider.id());
-                }
-                else {
-                    spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-                }
-            }
-        break;
-        case Type::Request:
-            res = mosquitto_subscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str(), 0);
-            if (res == MOSQ_ERR_SUCCESS) {
-                spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
-            }
-            else {
-                spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
-        break;
-        case Type::Reply:
-            res = mosquitto_subscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str(), 0);
-            if (res == MOSQ_ERR_SUCCESS) {
-                spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
-            }
-            else {
-                spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
-        break;
+    if (!isValid()) {
+        spdlog::error("Invalid reciever");
+        return;
     }
+
+    m_topicProcessor.subscribe(m_mosq);
 }
 
 void Reciever::unsubscribe()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    int res;
-    switch (m_type) {
-        case Type::Provider:
-            for (const auto &provider : m_providers) {
-                res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, provider.id().c_str());
-                if (res == MOSQ_ERR_SUCCESS) {
-                    spdlog::debug("unsubscribed from the {}", provider.id());
-                }
-                else {
-                    spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-                }
-            }
-        break;
-        case Type::Request:
-            res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str());
-            if (res == MOSQ_ERR_SUCCESS) {
-                spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
-            }
-            else {
-                spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
-        break;
-        case Type::Reply:
-            res = mosquitto_unsubscribe(m_mosq.mosq(), NULL, GetReplyTopic(m_provider.id()).c_str());
-            if (res == MOSQ_ERR_SUCCESS) {
-                spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
-            }
-            else {
-                spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
-        break;
+    if (!isValid()) {
+        spdlog::error("Invalid reciever");
+        return;
     }
+
+    m_topicProcessor.unsubscribe(m_mosq);
 }
 
 void Reciever::backgroundWork()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    if (!isValid()) {
+        spdlog::error("Invalid reciever");
+        return;
+    }
 
     subscribe();
 
@@ -161,24 +91,10 @@ void Reciever::backgroundWork()
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         if (m_mosq.decrementKeepAlive()) {
-            auto message = dome::mosq::Mosquitto::PingMessage();
+            auto message = PingMessage();
             spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
 
-            int res;
-            switch (m_type) {
-                case Type::Request:
-                    res = mosquitto_publish(m_mosq.mosq(), nullptr, GetRequestTopic(m_provider.id()).c_str(), message.size(), message.c_str(), 0, false);
-                    if (res != MOSQ_ERR_SUCCESS) {
-                        spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-                    }
-                break;
-                case Type::Reply:
-                    res = mosquitto_publish(m_mosq.mosq(), nullptr, GetReplyTopic(m_provider.id()).c_str(), message.size(), message.c_str(), 0, false);
-                    if (res != MOSQ_ERR_SUCCESS) {
-                        spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", GetReplyTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-                    }
-                break;
-            }
+            m_topicProcessor.sendPingMessage(m_mosq, message);
         }
     }
 

@@ -1,25 +1,25 @@
-#include "filesaver.h"
+#include "dbsaver.h"
 
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
-#include <utils/dir.h>
 
-#include <utils.h>
+#include "utils/utils.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-FileSaver::FileSaver()
+DbSaver::DbSaver(const std::string &path)
+    : m_dbWriter(path)
+{
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+}
+
+DbSaver::~DbSaver()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-FileSaver::~FileSaver()
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-}
-
-void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
+void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -40,10 +40,14 @@ void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &p
             switch (source.dataType) {
                 case dome::config::Source::DataType::Undefined:
                 break;
-                case dome::config::Source::DataType::Path: {
+                case dome::config::Source::DataType::Float: {
                     if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
-                    dome::utils::Dir dir(source.id);
-                    dir.copyFile(jMessage[source.id].get<std::string>());
+                    m_dbWriter.write(source.id, jMessage[source.id].get<double>());
+                }
+                break;
+                case dome::config::Source::DataType::Int: {
+                    if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
+                    m_dbWriter.write(source.id, jMessage[source.id].get<int>());
                 }
                 break;
             }

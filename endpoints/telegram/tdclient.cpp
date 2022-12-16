@@ -60,11 +60,11 @@ TdClient::TdClient(const dome::config::Telegram &telegramConfig, const dome::con
 
 bool TdClient::prepareData()
 {
-    std::lock_guard<std::mutex> lock(m_requestsMutex);
+    std::lock_guard<std::mutex> lock(m_messagesMutex);
 
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (m_requests.size()) {
+    if (m_messages.size()) {
         return true;
     }
 
@@ -73,25 +73,25 @@ bool TdClient::prepareData()
 
 nlohmann::json TdClient::getData()
 {
-    std::lock_guard<std::mutex> lock(m_requestsMutex);
+    std::lock_guard<std::mutex> lock(m_messagesMutex);
 
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jData;
     jData["type"] = "request";
-    jData[m_providerConfig.sources()[0].id] = m_requests.front();
-    m_requests.pop();
+    jData[m_providerConfig.sources()[0].id] = m_messages.front();
+    m_messages.pop();
 
     return jData;
 }
 
 bool TdClient::isDataLeft()
 {
-    std::lock_guard<std::mutex> lock(m_requestsMutex);
+    std::lock_guard<std::mutex> lock(m_messagesMutex);
 
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_requests.size() == 0 ? false : true;
+    return m_messages.size() == 0 ? false : true;
 }
 
 void TdClient::run() {
@@ -305,14 +305,14 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                 if (isFound) {
                     std::cout << "DOME" << std::endl;
                     if (text.size() && text[0] == '/') {
-                        std::lock_guard<std::mutex> lock(m_requestsMutex);
+                        std::lock_guard<std::mutex> lock(m_messagesMutex);
 
                         std::cout << "SEND" << std::endl;
                         nlohmann::json jMessage;
                         jMessage["request"] = text;
                         jMessage["message_id"] = update_new_message.message_->id_;
                         jMessage["chat_id"] = chatId;
-                        m_requests.push(jMessage.dump());
+                        m_messages.push(jMessage.dump());
                         m_senderTrigger.cv.notify_one();
                     }
                 }

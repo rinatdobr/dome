@@ -3,10 +3,11 @@
 #include <getopt.h>
 
 #include <config/provider.h>
-#include <data/getter.h>
+#include <message/get.h>
 #include <mosquitto/reciever.h>
+#include <topic/request.h>
 #include <mosquitto/sender.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include "s8.h"
 
 int main(int argc, char *argv[]) {
@@ -52,10 +53,19 @@ int main(int argc, char *argv[]) {
     dome::data::S8 s8(config);
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, s8, trigger);
-    std::vector<dome::data::Processor*> processors;
-    dome::data::Getter getter(trigger);
-    processors.push_back(&getter);
-    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), config, processors, dome::mosq::Reciever::Type::Request);
+    if (!sender.isValid()) {
+        spdlog::error("Can't setup S8");
+        return EXIT_FAILURE;
+    }
+    std::vector<dome::message::Processor*> processors;
+    dome::message::Get get(trigger);
+    processors.push_back(&get);
+    dome::topic::Request topicRequest(config, processors);
+    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), topicRequest);
+    if (!reciever.isValid()) {
+        spdlog::error("Can't setup S8");
+        return EXIT_FAILURE;
+    }
 
     reciever.start();
     sender.start();

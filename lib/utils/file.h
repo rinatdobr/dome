@@ -1,12 +1,12 @@
-#ifndef CONFIG_FILE_H
-#define CONFIG_FILE_H
+#ifndef UTILS_FILE_H
+#define UTILS_FILE_H
 
 #include <string>
 
 #include "validatable.h"
 
 namespace dome {
-namespace config {
+namespace utils {
 
 class File : public Validatable
 {

@@ -1,19 +1,20 @@
-#ifndef SENDER_H
-#define SENDER_H
+#ifndef MOSQUITTO_SENDER_H
+#define MOSQUITTO_SENDER_H
 
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
-#include "threader.h"
+#include "utils/threader.h"
 #include "config/provider.h"
 #include "data/provider.h"
-#include "mosquitto/mosq.h"
+#include "mosq.h"
+#include "utils/validatable.h"
 
 namespace dome {
 namespace mosq {
 
-class Sender : public dome::utils::Threader
+class Sender : public dome::utils::Threader, public dome::utils::Validatable
 {
 public:
 

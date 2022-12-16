@@ -1,5 +1,8 @@
-#ifndef VALIDATABLE_H
-#define VALIDATABLE_H
+#ifndef UTILS_VALIDATABLE_H
+#define UTILS_VALIDATABLE_H
+
+namespace dome {
+namespace utils {
 
 class Validatable
 {
@@ -13,5 +16,8 @@ public:
 protected:
     bool m_isValid;
 };
+
+}
+}
 
 #endif

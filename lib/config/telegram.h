@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 
-#include "file.h"
+#include "utils/file.h"
 
 namespace dome {
 namespace config {
 
-class Telegram : public File
+class Telegram : public dome::utils::File
 {
 public:
     explicit Telegram(const std::string &path);

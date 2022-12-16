@@ -1,7 +1,7 @@
 #include "ipcamera.h"
 
 #include <spdlog/spdlog.h>
-#include "utils.h"
+#include <utils/utils.h>
 
 namespace dome {
 namespace data {

@@ -41,8 +41,8 @@ protected:
 private:
     const dome::config::Provider &m_providerConfig;
     dome::mosq::Sender::Trigger &m_senderTrigger;
-    std::queue<std::string> m_requests;
-    std::mutex m_requestsMutex;
+    std::queue<std::string> m_messages;
+    std::mutex m_messagesMutex;
 
     uint m_refreshPeriodSec;
     std::string m_login;

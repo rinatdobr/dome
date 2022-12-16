@@ -1,5 +1,5 @@
-#ifndef DATA_PROCESSOR_H
-#define DATA_PROCESSOR_H
+#ifndef MESSAGE_PROCESSOR_H
+#define MESSAGE_PROCESSOR_H
 
 #include <nlohmann/json.hpp>
 
@@ -7,7 +7,7 @@
 #include "mosquitto/mosq.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
 class Processor
 {

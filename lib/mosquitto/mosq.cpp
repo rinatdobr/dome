@@ -104,15 +104,5 @@ bool Mosquitto::decrementKeepAlive(int diffSec)
     return false;
 }
 
-std::string Mosquitto::PingMessage()
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-    nlohmann::json jMessage;
-    jMessage["type"] = "ping";
-    return jMessage.dump();
-}
-
-
 }
 }

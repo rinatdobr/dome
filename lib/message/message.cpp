@@ -1,12 +1,12 @@
-#include "requester.h"
+#include "message.h"
 
 #include <spdlog/spdlog.h>
 
-#include <utils.h>
+#include "utils/utils.h"
 #include <sstream>
 
 namespace dome {
-namespace data {
+namespace message {
 
 std::vector<std::string> ParseArgs(const std::string &args)
 {

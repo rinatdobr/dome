@@ -1,7 +1,7 @@
 #include "s8.h"
 
 #include <spdlog/spdlog.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include <sstream>
 
 namespace dome {

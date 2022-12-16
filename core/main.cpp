@@ -6,12 +6,12 @@
 #include <config/core.h>
 #include <mosquitto/mosq.h>
 #include <mosquitto/reciever.h>
-
-#include "data/dbsaver.h"
-#include "data/filesaver.h"
-#include "data/inforequester.h"
-#include "data/ipcamerarequester.h"
-#include "data/statisticrequester.h"
+#include <message/dbsaver.h>
+#include <message/filesaver.h>
+#include <message/info.h>
+#include <message/ipcamera.h>
+#include <message/statistic.h>
+#include <topic/provider.h>
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
@@ -53,18 +53,23 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    dome::data::DbSaver dbSaver(config.database().path);
-    dome::data::FileSaver fileSaver;
-    dome::data::InfoRequester infoRequester(config.providers());
-    dome::data::StatisticRequester statisticRequester(config.database().path, config.providers());
-    dome::data::IpCameraRequester ipCameraRequester(config.providers(), config.ipCameras());
-    std::vector<dome::data::Processor*> dataProcessors;
-    dataProcessors.push_back(&dbSaver);
-    dataProcessors.push_back(&fileSaver);
-    dataProcessors.push_back(&infoRequester);
-    dataProcessors.push_back(&statisticRequester);
-    dataProcessors.push_back(&ipCameraRequester);
-    dome::mosq::Reciever reciever("core/reciever", config.providers(), dataProcessors);
+    dome::message::DbSaver dbSaver(config.database().path);
+    dome::message::FileSaver fileSaver;
+    dome::message::Info info(config.providers());
+    dome::message::Statistic statistic(config.database().path, config.providers());
+    dome::message::IpCamera ipCamera(config.providers(), config.ipCameras());
+    std::vector<dome::message::Processor*> messageProcessors;
+    messageProcessors.push_back(&dbSaver);
+    messageProcessors.push_back(&fileSaver);
+    messageProcessors.push_back(&info);
+    messageProcessors.push_back(&statistic);
+    messageProcessors.push_back(&ipCamera);
+    dome::topic::Provider topicProvider(config.providers(), messageProcessors);
+    dome::mosq::Reciever reciever("core/reciever", topicProvider);
+    if (!reciever.isValid()) {
+        spdlog::error("Can't setup core");
+        return EXIT_FAILURE;
+    }
     reciever.start();
 
     while (1) {    

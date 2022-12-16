@@ -4,10 +4,11 @@
 
 #include <config/provider.h>
 #include <config/ipcamera.h>
-#include <data/getter.h>
+#include <message/get.h>
 #include <mosquitto/reciever.h>
+#include <topic/request.h>
 #include <mosquitto/sender.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include "ipcamera.h"
 
 int main(int argc, char *argv[]) {
@@ -59,10 +60,19 @@ int main(int argc, char *argv[]) {
     dome::data::IpCamera ipCamera(providerConfig, ipCameraConfig);
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
-    std::vector<dome::data::Processor*> processors;
-    dome::data::Getter getter(trigger);
-    processors.push_back(&getter);
-    dome::mosq::Reciever reciever(GetRequestTopic(providerConfig.id()), providerConfig, processors, dome::mosq::Reciever::Type::Request);
+    if (!sender.isValid()) {
+        spdlog::error("Can't setup IP camera");
+        return EXIT_FAILURE;
+    }
+    std::vector<dome::message::Processor*> processors;
+    dome::message::Get get(trigger);
+    processors.push_back(&get);
+    dome::topic::Request topicRequest(providerConfig, processors);
+    dome::mosq::Reciever reciever(GetRequestTopic(providerConfig.id()), topicRequest);
+    if (!reciever.isValid()) {
+        spdlog::error("Can't setup IP camera");
+        return EXIT_FAILURE;
+    }
 
     reciever.start();
     sender.start();

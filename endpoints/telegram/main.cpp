@@ -4,9 +4,10 @@
 #include <config/provider.h>
 #include <config/telegram.h>
 #include <mosquitto/reciever.h>
+#include <topic/reply.h>
 #include <mosquitto/sender.h>
-#include <utils.h>
-#include "replier.h"
+#include <utils/utils.h>
+#include "reply.h"
 #include "tdclient.h"
 
 int main(int argc, char *argv[]) {
@@ -58,11 +59,20 @@ int main(int argc, char *argv[]) {
     dome::mosq::Sender::Trigger trigger;
     dome::data::TdClient tdClient(telegramConfig, providerConfig, trigger);
     dome::mosq::Sender sender(providerConfig.id(), providerConfig, tdClient, trigger);
+    if (!sender.isValid()) {
+        spdlog::error("Can't setup Telegram");
+        return EXIT_FAILURE;
+    }
 
-    std::vector<dome::data::Processor*> dataProcessors;
-    dome::data::Replier replier(tdClient);
-    dataProcessors.push_back(&replier);
-    dome::mosq::Reciever reciever(GetReplyTopic(providerConfig.id()), providerConfig, dataProcessors, dome::mosq::Reciever::Type::Reply);
+    std::vector<dome::message::Processor*> messageProcessors;
+    dome::message::Reply reply(tdClient);
+    messageProcessors.push_back(&reply);
+    dome::topic::Reply topicReply(providerConfig, messageProcessors);
+    dome::mosq::Reciever reciever(GetReplyTopic(providerConfig.id()), topicReply);
+    if (!reciever.isValid()) {
+        spdlog::error("Can't setup Telegram");
+        return EXIT_FAILURE;
+    }
 
     sender.start();
     reciever.start();

@@ -1,30 +1,30 @@
-#include "replier.h"
+#include "reply.h"
 
 #include <sstream>
 #include <spdlog/spdlog.h>
 
 #include <config/provider.h>
-#include <utils.h>
+#include <utils/utils.h>
 
 namespace dome {
-namespace data {
+namespace message {
 
 const std::string InfoRequestStr("/info");
 const std::string StatisticRequestStr("/statistic");
 const std::string IpCameraRequestStr("/ipcamera");
 
-Replier::Replier(dome::data::TdClient &tdClient)
+Reply::Reply(dome::data::TdClient &tdClient)
     : m_tdClient(tdClient)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-Replier::~Replier()
+Reply::~Reply()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void Replier::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
+void Reply::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

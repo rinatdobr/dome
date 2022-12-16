@@ -1,29 +1,29 @@
-#include "statisticrequester.h"
+#include "statistic.h"
 
 #include <spdlog/spdlog.h>
 
-#include <utils.h>
+#include "utils/utils.h"
 #include <sstream>
 #include <set>
 
 namespace dome {
-namespace data {
+namespace message {
 
 const std::string StatisticRequestStr("/statistic");
 
-StatisticRequester::StatisticRequester(const std::string &dbPath, const std::vector<dome::config::Provider> &providers)
+Statistic::Statistic(const std::string &dbPath, const std::vector<dome::config::Provider> &providers)
     : m_dbPath(dbPath)
     , m_providers(providers)
 {
     spdlog::trace("{}:{} {} dbPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, dbPath);
 }
 
-StatisticRequester::~StatisticRequester()
+Statistic::~Statistic()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage)
+void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -46,8 +46,8 @@ void StatisticRequester::process(dome::mosq::Mosquitto &mosq, const dome::config
 
         if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
-        auto statistic = std::make_shared<Statistic>();
-        statistic->type = Request::Type::Statistic;
+        auto statistic = std::make_shared<StatisticMessage>();
+        statistic->type = Message::Type::Statistic;
         statistic->idFrom = provider.id();
         statistic->args = args;
         statistic->reply["type"] = StatisticRequestStr;

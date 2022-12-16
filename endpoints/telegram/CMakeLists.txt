@@ -7,7 +7,7 @@ find_package(spdlog REQUIRED)
 find_package(Td PATHS ${CMAKE_SOURCE_DIR}/3rdparty/td/build/root/lib/cmake 1.8.4 REQUIRED)
 
 set(SOURCE_FILES
-    replier.cpp
+    reply.cpp
     tdclient.cpp
     main.cpp
 )

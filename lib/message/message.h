@@ -1,19 +1,19 @@
-#ifndef DATA_REQUESTER_H
-#define DATA_REQUESTER_H
+#ifndef MESSAGE_MESSAGE_H
+#define MESSAGE_MESSAGE_H
 
 #include <string>
 #include <deque>
 #include <unordered_map>
 #include <memory>
 
-#include <config/provider.h>
-#include <data/processor.h>
-#include <mosquitto/mosq.h>
+#include "config/provider.h"
+#include "processor.h"
+#include "mosquitto/mosq.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-class Request
+class Message
 {
 public:
 enum class Type
@@ -24,7 +24,7 @@ enum class Type
 };
 
     std::string idFrom;
-    Request::Type type;
+    Message::Type type;
     nlohmann::json reply;
     std::vector<std::string> args;
 };

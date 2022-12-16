@@ -3,10 +3,11 @@
 #include <getopt.h>
 
 #include <config/provider.h>
-#include <data/getter.h>
+#include <message/get.h>
 #include <mosquitto/reciever.h>
+#include <topic/request.h>
 #include <mosquitto/sender.h>
-#include <utils.h>
+#include <utils/utils.h>
 #include "dht22.h"
 
 int main(int argc, char *argv[]) {
@@ -57,10 +58,19 @@ int main(int argc, char *argv[]) {
 
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, dht22, trigger);
-    std::vector<dome::data::Processor*> processors;
-    dome::data::Getter getter(trigger);
-    processors.push_back(&getter);
-    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), config, processors, dome::mosq::Reciever::Type::Request);
+    if (!sender.isValid()) {
+        spdlog::error("Can't setup DHT22");
+        return EXIT_FAILURE;
+    }
+    std::vector<dome::message::Processor*> processors;
+    dome::message::Get get(trigger);
+    processors.push_back(&get);
+    dome::topic::Request topicRequest(config, processors);
+    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), topicRequest);
+    if (!reciever.isValid()) {
+        spdlog::error("Can't setup DHT22");
+        return EXIT_FAILURE;
+    }
 
     reciever.start();
     sender.start();

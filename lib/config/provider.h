@@ -1,7 +1,7 @@
 #ifndef CONFIG_PROVIDER_H
 #define CONFIG_PROVIDER_H
 
-#include "file.h"
+#include "utils/file.h"
 
 #include <string>
 #include <vector>
@@ -42,7 +42,7 @@ public:
     std::string name;
 };
 
-class Provider : public File
+class Provider : public dome::utils::File
 {
 public:
     Provider();
@@ -65,7 +65,7 @@ private:
     uint m_maxFrequenceSec;
     std::string m_location;
     std::vector<Source> m_sources;
-    std::vector<Request> m_requests;
+    std::vector<Request> m_messages;
 };
 
 }

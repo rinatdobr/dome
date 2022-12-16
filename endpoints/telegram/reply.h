@@ -1,17 +1,17 @@
 #ifndef REPLIER_H
 #define REPLIER_H
 
-#include <data/processor.h>
+#include <message/processor.h>
 #include "tdclient.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-class Replier : public Processor
+class Reply : public Processor
 {
 public:
-    explicit Replier(dome::data::TdClient &tdClient);
-    ~Replier();
+    explicit Reply(dome::data::TdClient &tdClient);
+    ~Reply();
 
     void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 

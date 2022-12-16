@@ -1,7 +1,7 @@
 #ifndef CONFIG_CORE_H
 #define CONFIG_CORE_H
 
-#include "file.h"
+#include "utils/file.h"
 #include "ipcamera.h"
 #include "provider.h"
 
@@ -17,7 +17,7 @@ public:
     std::string path;
 };
 
-class Core : public File
+class Core : public dome::utils::File
 {
 public:
     Core(const std::string &path);

@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 
-#include "file.h"
+#include "utils/file.h"
 
 namespace dome {
 namespace config {
 
-class IpCamera : public File
+class IpCamera : public dome::utils::File
 {
 public:
     explicit IpCamera(const std::string &path);

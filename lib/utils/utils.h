@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_UTILS_H
+#define UTILS_UTILS_H
 
 #include <vector>
 #include <string>
@@ -13,6 +13,8 @@ std::string GetReplyTopic(const std::string &providerId);
 
 std::pair<int, std::string> Exec(const std::string cmdLine);
 std::string GetTmpName(const std::string id);
+
+std::string PingMessage();
 
 bool CheckJsonMessageForKeys(const nlohmann::json &jMessage, const std::vector<std::string> &keys);
 

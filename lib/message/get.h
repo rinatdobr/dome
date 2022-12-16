@@ -1,17 +1,17 @@
-#ifndef DATA_GETTER_H
-#define DATA_GETTER_H
+#ifndef MESSAGE_GET_H
+#define MESSAGE_GET_H
 
-#include "data/processor.h"
+#include "processor.h"
 #include "mosquitto/sender.h"
 
 namespace dome {
-namespace data {
+namespace message {
 
-class Getter : public Processor
+class Get : public Processor
 {
 public:
-    explicit Getter(dome::mosq::Sender::Trigger &senderTrigger);
-    ~Getter();
+    explicit Get(dome::mosq::Sender::Trigger &senderTrigger);
+    ~Get();
 
     void process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
 
