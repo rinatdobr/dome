@@ -6,11 +6,12 @@
 
 #include "processor.h"
 #include "db/writer.h"
+#include "utils/validatable.h"
 
 namespace dome {
 namespace message {
 
-class DbSaver : public Processor
+class DbSaver : public Processor, public dome::utils::Validatable
 {
 public:
     explicit DbSaver(const std::string &path);

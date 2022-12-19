@@ -16,9 +16,6 @@ class Provider;
 class Provider : public dome::utils::Validatable
 {
 public:
-    explicit Provider();
-    virtual ~Provider();
-
     virtual bool prepareData() = 0;
     virtual nlohmann::json getData() = 0;
     virtual bool isDataLeft() = 0;

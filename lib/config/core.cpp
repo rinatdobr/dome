@@ -10,7 +10,7 @@ namespace config {
 Core::Core(const std::string &path)
     : File(path)
 {
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__,
                             path);
 
     if (!isValid()) {
@@ -18,7 +18,7 @@ Core::Core(const std::string &path)
     }
 
     if (!parse()) {
-        spdlog::error("Can't parse core config file: {}", path);
+        spdlog::error("Can't parse core config file: \"{}\"", path);
         I_am_not_valid();
         return;
     }
@@ -54,13 +54,13 @@ bool Core::parse()
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
     if (!CheckJsonMessageForKeys(jConfig, { "database", "config_files" })) {
-        spdlog::error("Invalid core JSON: \" {} \"", jConfig.dump());
+        spdlog::error("Invalid core JSON: [{}]", jConfig.dump());
         return false;
     }
 
     auto jDatabase = jConfig["database"];
-    if (!CheckJsonMessageForKeys(jConfig, { "path" })) {
-        spdlog::error("Invalid core database JSON: \" {} \"", jDatabase.dump());
+    if (!CheckJsonMessageForKeys(jDatabase, { "path" })) {
+        spdlog::error("Invalid core database JSON: [{}]", jDatabase.dump());
         return false;
     }
 
@@ -71,7 +71,7 @@ bool Core::parse()
     auto jConfigFiles = jConfig["config_files"];
     for(const auto &jConfigFile : jConfigFiles) {
         if (!CheckJsonMessageForKeys(jConfigFile, { "path" })) {
-            spdlog::error("Invalid core config file JSON: \" {} \"", jConfigFile.dump());
+            spdlog::error("Invalid core config file JSON: [{}]", jConfigFile.dump());
             continue;
         }
 

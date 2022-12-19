@@ -12,6 +12,12 @@ DbSaver::DbSaver(const std::string &path)
     : m_dbWriter(path)
 {
     spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+
+    if (!m_dbWriter.isValid()) {
+        return;
+    }
+
+    I_am_valid();
 }
 
 DbSaver::~DbSaver()
@@ -22,6 +28,11 @@ DbSaver::~DbSaver()
 void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    if (!isValid()) {
+        spdlog::error("Invalid DB saver");
+        return;
+    }
 
     if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
 

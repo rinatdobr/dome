@@ -60,7 +60,7 @@ void Sender::backgroundWork()
                 prepareDataTsSec = now;
             }
             else {
-                spdlog::warn("data preparation is too often in {}, sending old values...", m_mosq.clientId());
+                spdlog::warn("data preparation is too often in \"{}\", sending old values...", m_mosq.clientId());
             }
 
             if (isDataPrepared) {
@@ -68,7 +68,7 @@ void Sender::backgroundWork()
                 while (isFirstGet || m_provider.isDataLeft()) {
                     nlohmann::json jData = m_provider.getData();
                     std::string data = jData.dump();
-                    spdlog::debug("sending message {} to {} from {}", data, m_config.id(), m_mosq.clientId());
+                    spdlog::debug("sending message [{}] to \"{}\" from \"{}\"", data, m_config.id(), m_mosq.clientId());
                     int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
                     if (res != MOSQ_ERR_SUCCESS) {
                         spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
@@ -99,7 +99,7 @@ void Sender::backgroundWork()
 
         if (m_mosq.decrementKeepAlive()) {
             auto message = PingMessage();
-            spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
+            spdlog::debug("sending ping message \"{}\" from \"{}\"", message, m_mosq.clientId());
             int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), message.size(), message.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {
                 spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));

@@ -35,15 +35,18 @@ void Reciever::setup()
     mosquitto_message_callback_set(m_mosq.mosq(), [](struct mosquitto *mosq, void *userData, const struct mosquitto_message *mosqMessage){
         auto _this = static_cast<Reciever*>(userData);
 
-        spdlog::debug("got a message {} from {} on {}", static_cast<char*>(mosqMessage->payload), mosqMessage->topic, _this->m_mosq.clientId());
+        spdlog::debug("got a message [{}] from \"{}\" on \"{}\"", static_cast<char*>(mosqMessage->payload), mosqMessage->topic, _this->m_mosq.clientId());
 
         std::string topic(mosqMessage->topic);
         std::string message(static_cast<char*>(mosqMessage->payload), mosqMessage->payloadlen);
         nlohmann::json jMessage = nlohmann::json::parse(message);
         if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
         if (jMessage["type"] == "ping") {
-            spdlog::debug("got a ping message from {}", mosqMessage->topic);
+            spdlog::debug("got a ping message from \"{}\"", mosqMessage->topic);
             return;
+        }
+        else {
+            spdlog::debug("got a message from \"{}\"", mosqMessage->topic);
         }
 
         _this->m_topicProcessor.process(_this->m_mosq, topic, jMessage);
@@ -86,13 +89,13 @@ void Reciever::backgroundWork()
     subscribe();
 
     while (m_isWorking) {
-        spdlog::debug("recieving on {}...", m_mosq.clientId());
+        spdlog::debug("recieving on \"{}\"...", m_mosq.clientId());
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         if (m_mosq.decrementKeepAlive()) {
             auto message = PingMessage();
-            spdlog::debug("sending ping message {} from {}", message, m_mosq.clientId());
+            spdlog::debug("sending ping message [{}] from \"{}\"", message, m_mosq.clientId());
 
             m_topicProcessor.sendPingMessage(m_mosq, message);
         }

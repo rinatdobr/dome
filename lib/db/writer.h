@@ -6,6 +6,7 @@
 #include <sqlite3.h>
 
 #include "config/provider.h"
+#include "utils/validatable.h"
 
 namespace dome {
 namespace db {
@@ -17,7 +18,7 @@ union value
 };
 
 
-class Writer
+class Writer : public dome::utils::Validatable
 {
 public:
     Writer(const std::string &path);
@@ -28,7 +29,6 @@ public:
 
 private:
     std::string m_path;
-    bool m_isValid;
     sqlite3 *m_dbHandler;
 
     bool checkIfTableExists(const std::string &tableName);

@@ -11,6 +11,8 @@
             "data_type": "string"
         }
     ],
+    "requests": [
+    ],
     "telegram" : {
         "app_id": 0,
         "app_hash": "app_hash",

@@ -76,13 +76,13 @@ bool IpCamera::parse()
 
     nlohmann::json jConfig = nlohmann::json::parse(configData);
     if (!CheckJsonMessageForKeys(jConfig, { "ip_camera" })) {
-        spdlog::error("Invalid IP camera main JSON: \" {} \"", jConfig.dump());
+        spdlog::error("Invalid IP camera main JSON: [{}]", jConfig.dump());
         return false;
     }
 
     nlohmann::json jIpCamera = jConfig["ip_camera"];
     if (!CheckJsonMessageForKeys(jIpCamera, { "id", "name", "login", "pass", "ip", "port" })) {
-        spdlog::error("Invalid IP camera JSON: \" {} \"", jIpCamera.dump());
+        spdlog::error("Invalid IP camera JSON: [{}]", jIpCamera.dump());
         return false;
     }
 

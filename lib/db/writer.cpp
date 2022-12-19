@@ -30,24 +30,25 @@ namespace db {
 
 Writer::Writer(const std::string &path)
     : m_path(path)
-    , m_isValid(false)
     , m_dbHandler(nullptr)
 {
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            path);
 
     if (sqlite3_open(path.c_str(), &m_dbHandler) != SQLITE_OK) {
-        spdlog::error("Can't open DB: {}", sqlite3_errmsg(m_dbHandler));
+        spdlog::error("Can't open DB: {}, {}", sqlite3_errmsg(m_dbHandler), path);
         return;
     }
 
-    m_isValid = true;
+    I_am_valid();
 }
 
 Writer::~Writer()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (!m_isValid) {
+    if (!isValid()) {
+        spdlog::error("Invalid DB");
         return;
     }
 
@@ -58,16 +59,17 @@ Writer::~Writer()
 
 void Writer::write(const std::string &tableName, double value)
 {
-    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
+    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            tableName, value);
 
-    if (!m_isValid) {
-        spdlog::error("Invalid DB to write");
+    if (!isValid()) {
+        spdlog::error("Invalid DB");
         return;
     }
 
     if (!checkIfTableExists(tableName) &&
         !createTable(tableName, dome::config::Source::DataType::Float)) {
-        spdlog::error("No table to write result");
+        spdlog::error("No table to write");
         return;
     }
 
@@ -76,16 +78,17 @@ void Writer::write(const std::string &tableName, double value)
 
 void Writer::write(const std::string &tableName, int value)
 {
-    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, value);
+    spdlog::trace("{}:{} {} tableName={} value={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            tableName, value);
 
-    if (!m_isValid) {
-        spdlog::error("Invalid DB to write");
+    if (!isValid()) {
+        spdlog::error("Invalid DB");
         return;
     }
 
     if (!checkIfTableExists(tableName) &&
         !createTable(tableName, dome::config::Source::DataType::Int)) {
-        spdlog::error("No table to write result");
+        spdlog::error("No table to write");
         return;
     }
 
@@ -94,7 +97,8 @@ void Writer::write(const std::string &tableName, int value)
 
 bool Writer::checkIfTableExists(const std::string &tableName)
 {
-    spdlog::trace("{}:{} {} tableName={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName);
+    spdlog::trace("{}:{} {} tableName={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            tableName);
 
     sqlite3_stmt *sqlRequest;
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, CheckIfTableExists.c_str(), -1, &sqlRequest, NULL);
@@ -131,7 +135,8 @@ bool Writer::checkIfTableExists(const std::string &tableName)
 
 bool Writer::createTable(const std::string &tableName, dome::config::Source::DataType dataType)
 {
-    spdlog::trace("{}:{} {} tableName={} dataType={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, dataType);
+    spdlog::trace("{}:{} {} tableName={} dataType={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            tableName, dataType);
 
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");
@@ -143,8 +148,8 @@ bool Writer::createTable(const std::string &tableName, dome::config::Source::Dat
             createTable.replace(createTable.find(valueTypeToReplace), valueTypeToReplace.length(), "REAL");
         break;
         case dome::config::Source::DataType::Int:
-	    createTable.replace(createTable.find(valueTypeToReplace), valueTypeToReplace.length(), "INTEGER");
-	break;
+            createTable.replace(createTable.find(valueTypeToReplace), valueTypeToReplace.length(), "INTEGER");
+        break;
     }
 
     int sqlCode = sqlite3_prepare_v2(m_dbHandler, createTable.c_str(), -1, &sqlRequest, NULL);
@@ -170,7 +175,8 @@ bool Writer::createTable(const std::string &tableName, dome::config::Source::Dat
 
 void Writer::writeValue(const std::string &tableName, const union value& v, dome::config::Source::DataType dataType)
 {
-    spdlog::trace("{}:{} {} tableName={} dataType={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, tableName, dataType);
+    spdlog::trace("{}:{} {} tableName={} dataType={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            tableName, dataType);
 
     sqlite3_stmt *sqlRequest;
     std::string tableNameToReplace("table_name");

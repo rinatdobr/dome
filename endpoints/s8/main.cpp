@@ -42,11 +42,11 @@ int main(int argc, char *argv[]) {
                 spdlog::info("Unsupported option was passed");
         }
     }
-    spdlog::debug("configPath={}", configPath);
+    spdlog::debug("configPath=\"{}\"", configPath);
 
     dome::config::Provider config(configPath);
     if (!config.isValid()) {
-        spdlog::error("Can't setup S8");
+        spdlog::error("Can't setup S8 [1]");
         return EXIT_FAILURE;
     }
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, s8, trigger);
     if (!sender.isValid()) {
-        spdlog::error("Can't setup S8");
+        spdlog::error("Can't setup S8 [2]");
         return EXIT_FAILURE;
     }
     std::vector<dome::message::Processor*> processors;
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     dome::topic::Request topicRequest(config, processors);
     dome::mosq::Reciever reciever(GetRequestTopic(config.id()), topicRequest);
     if (!reciever.isValid()) {
-        spdlog::error("Can't setup S8");
+        spdlog::error("Can't setup S8 [3]");
         return EXIT_FAILURE;
     }
 

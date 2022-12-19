@@ -42,17 +42,17 @@ int main(int argc, char *argv[]) {
                 spdlog::info("Unsupported option was passed");
         }
     }
-    spdlog::debug("configPath={}", configPath);
+    spdlog::debug("configPath=\"{}\"", configPath);
 
     dome::config::Telegram telegramConfig(configPath);
     if (!telegramConfig.isValid()) {
-        spdlog::error("Can't setup Telegram");
+        spdlog::error("Can't setup Telegram [1]");
         return EXIT_FAILURE;
     }
 
     dome::config::Provider providerConfig(configPath);
     if (!providerConfig.isValid()) {
-        spdlog::error("Can't setup Telegram");
+        spdlog::error("Can't setup Telegram [2]");
         return EXIT_FAILURE;
     }
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     dome::data::TdClient tdClient(telegramConfig, providerConfig, trigger);
     dome::mosq::Sender sender(providerConfig.id(), providerConfig, tdClient, trigger);
     if (!sender.isValid()) {
-        spdlog::error("Can't setup Telegram");
+        spdlog::error("Can't setup Telegram [3]");
         return EXIT_FAILURE;
     }
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     dome::topic::Reply topicReply(providerConfig, messageProcessors);
     dome::mosq::Reciever reciever(GetReplyTopic(providerConfig.id()), topicReply);
     if (!reciever.isValid()) {
-        spdlog::error("Can't setup Telegram");
+        spdlog::error("Can't setup Telegram [4]");
         return EXIT_FAILURE;
     }
 

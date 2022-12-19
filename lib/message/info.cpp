@@ -30,9 +30,12 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
 
     if (jMessage["type"] == "request") {
         spdlog::debug("request processing...");
+
         if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
+
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
         if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
+
         std::string text = jSource["request"].get<std::string>();
         std::size_t delimetr = text.find(' ');
         std::string name(text, 0, delimetr);
@@ -40,10 +43,9 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
             spdlog::trace("ignore...");
             return;
         }
+        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
         auto args = ParseArgs(std::string(text, delimetr + 1));
-
-        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
         auto info = std::make_shared<InfoMessage>();
         info->type = Message::Type::Info;
         info->idFrom = provider.id();
@@ -65,10 +67,11 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
         m_messages.push_back(info);
 
         nlohmann::json jData;
+        jData["type"] = "request";
         jData["request"] = "get";
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
-            spdlog::debug("requesting \"get\" from {}...", providerId);
+            spdlog::debug("requesting \"get\" on \"{}\" from \"{}\"...", GetRequestTopic(providerId), mosq.clientId());
             int res = mosquitto_publish(mosq.mosq(), nullptr, GetRequestTopic(providerId).c_str(), data.size(), data.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {
                 spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetRequestTopic(providerId), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
@@ -105,7 +108,7 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
 
         if (gotAllData) {
             std::string data = info->reply.dump();
-            spdlog::debug("replying...");
+            spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(info->idFrom), mosq.clientId());
             int res = mosquitto_publish(mosq.mosq(), nullptr, GetReplyTopic(info->idFrom).c_str(), data.size(), data.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {
                 spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetReplyTopic(provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));

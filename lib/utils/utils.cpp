@@ -46,7 +46,7 @@ std::string GetReplyTopic(const std::string &providerId)
 
 std::pair<int, std::string> Exec(const std::string cmdLine)
 {
-    spdlog::trace("{}:{} {} cmdLine={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, cmdLine);
+    spdlog::trace("{}:{} {} cmdLine=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, cmdLine);
 
     auto f = popen(cmdLine.c_str(), "r");
     if (!f) {
@@ -71,14 +71,14 @@ std::string GetTmpName(const std::string id)
     std::string tmpDir("/tmp/dome." + id + ".XXXXXX");
     char *tmpDirRaw = mkdtemp(&tmpDir[0]);
     chmod(tmpDirRaw, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
-    spdlog::debug("tmpDir={}", tmpDir);
+    spdlog::debug("tmpDir=\"{}\"", tmpDir);
 
     auto const time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::array<char, 50> buffer;
     std::strftime(buffer.data(), buffer.size(), "%Y%m%d_%H%M%S", std::localtime(&time));
 
     std::string tmpName = tmpDir + "/" + buffer.data() + ".png";
-    spdlog::debug("tmpName={}", tmpName);
+    spdlog::debug("tmpName=\"{}\"", tmpName);
 
     return tmpName;
 }
@@ -98,12 +98,12 @@ bool CheckJsonMessageForKeys(const nlohmann::json &jMessage, const std::vector<s
 
     for (const auto &key : keys) {
         if (!jMessage.contains(key)) {
-            spdlog::warn("JSON message {} doesn't contain '{}' key", jMessage.dump(), key);
+            spdlog::warn("JSON message [{}] doesn't contain \"{}\" key", jMessage.dump(), key);
             return false;
         }
     }
 
-    spdlog::trace("JSON message {} contains all keys", jMessage.dump());
+    spdlog::trace("JSON message [{}] contains all keys", jMessage.dump());
     return true;
 }
 

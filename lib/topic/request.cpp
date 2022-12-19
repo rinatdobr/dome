@@ -25,7 +25,7 @@ void Request::subscribe(dome::mosq::Mosquitto &mosq)
 
     int res = mosquitto_subscribe(mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str(), 0);
     if (res == MOSQ_ERR_SUCCESS) {
-        spdlog::debug("subscribed on the {}", GetRequestTopic(m_provider.id()));
+        spdlog::debug("subscribed on the \"{}\"", GetRequestTopic(m_provider.id()));
     }
     else {
         spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
@@ -38,7 +38,7 @@ void Request::unsubscribe(dome::mosq::Mosquitto &mosq)
 
     int res = mosquitto_unsubscribe(mosq.mosq(), NULL, GetRequestTopic(m_provider.id()).c_str());
     if (res == MOSQ_ERR_SUCCESS) {
-        spdlog::debug("unsubscribed from the {}", GetRequestTopic(m_provider.id()));
+        spdlog::debug("unsubscribed from the \"{}\"", GetRequestTopic(m_provider.id()));
     }
     else {
         spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", GetRequestTopic(m_provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
@@ -49,8 +49,8 @@ void Request::process(dome::mosq::Mosquitto &mosq, const std::string &topic, nlo
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    for (auto dataProcessor : m_messageProcessors) {
-        dataProcessor->process(mosq, m_provider, jMessage);
+    for (auto messageProcessor : m_messageProcessors) {
+        messageProcessor->process(mosq, m_provider, jMessage);
     }
 }
 

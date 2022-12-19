@@ -179,7 +179,7 @@ void TdClient::run() {
 
 void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::string text)
 {
-    spdlog::trace("{}:{} {} chatId={} messageId={} text={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, text);
+    spdlog::trace("{}:{} {} chatId={} messageId={} text=[{}]", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, text);
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;
@@ -193,7 +193,7 @@ void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::str
 
 void TdClient::sendPhoto(int64_t chatId, int64_t messageId, const std::string path)
 {
-    spdlog::trace("{}:{} {} chatId={} messageId={} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
+    spdlog::trace("{}:{} {} chatId={} messageId={} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;
@@ -207,7 +207,7 @@ void TdClient::sendPhoto(int64_t chatId, int64_t messageId, const std::string pa
 
 void TdClient::sendImage(int64_t chatId, int64_t messageId, const std::string path)
 {
-    spdlog::trace("{}:{} {} chatId={} messageId={} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
+    spdlog::trace("{}:{} {} chatId={} messageId={} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;

@@ -43,17 +43,17 @@ int main(int argc, char *argv[]) {
                 spdlog::info("Unsupported option was passed");
         }
     }
-    spdlog::debug("configPath={}", configPath);
+    spdlog::debug("configPath=\"{}\"", configPath);
 
     dome::config::Provider providerConfig(configPath);
     if (!providerConfig.isValid()) {
-        spdlog::error("Can't setup IP camera");
+        spdlog::error("Can't setup IP camera [1]");
         return EXIT_FAILURE;
     }
 
     dome::config::IpCamera ipCameraConfig(configPath);
     if (!ipCameraConfig.isValid()) {
-        spdlog::error("Can't setup IP camera");
+        spdlog::error("Can't setup IP camera [2]");
         return EXIT_FAILURE;
     }
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
     if (!sender.isValid()) {
-        spdlog::error("Can't setup IP camera");
+        spdlog::error("Can't setup IP camera [3]");
         return EXIT_FAILURE;
     }
     std::vector<dome::message::Processor*> processors;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     dome::topic::Request topicRequest(providerConfig, processors);
     dome::mosq::Reciever reciever(GetRequestTopic(providerConfig.id()), topicRequest);
     if (!reciever.isValid()) {
-        spdlog::error("Can't setup IP camera");
+        spdlog::error("Can't setup IP camera [4]");
         return EXIT_FAILURE;
     }
 

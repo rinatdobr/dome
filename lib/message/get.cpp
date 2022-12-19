@@ -21,9 +21,9 @@ void Get::process(dome::mosq::Mosquitto &, const dome::config::Provider &provide
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (!CheckJsonMessageForKeys(jMessage, { "request" })) return;
+    if (!CheckJsonMessageForKeys(jMessage, { "type", "request" })) return;
 
-    if (jMessage["request"] == "get") {
+    if (jMessage["type"] == "request" && jMessage["request"] == "get") {
         m_senderTrigger.cv.notify_one();
     }
 }

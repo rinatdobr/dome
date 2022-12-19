@@ -15,7 +15,7 @@ Statistic::Statistic(const std::string &dbPath, const std::vector<dome::config::
     : m_dbPath(dbPath)
     , m_providers(providers)
 {
-    spdlog::trace("{}:{} {} dbPath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, dbPath);
+    spdlog::trace("{}:{} {} dbPath=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, dbPath);
 }
 
 Statistic::~Statistic()
@@ -31,8 +31,10 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
 
     if (jMessage["type"] == "request") {
         spdlog::debug("request processing...");
+
         if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
+
         if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
         std::string text = jSource["request"].get<std::string>();
         std::size_t delimetr = text.find(' ');
@@ -41,10 +43,9 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
             spdlog::trace("ignore...");
             return;
         }
+        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
         auto args = ParseArgs(std::string(text, delimetr + 1));
-
-        if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
         auto statistic = std::make_shared<StatisticMessage>();
         statistic->type = Message::Type::Statistic;
@@ -116,14 +117,14 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
         if (execRes.first == 0) {
             statistic->reply["path"] = execRes.second;
             std::string data = statistic->reply.dump();
-            spdlog::debug("replying...");
+            spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(statistic->idFrom), mosq.clientId());
             int res = mosquitto_publish(mosq.mosq(), nullptr, GetReplyTopic(statistic->idFrom).c_str(), data.size(), data.c_str(), 0, false);
             if (res != MOSQ_ERR_SUCCESS) {
                 spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetReplyTopic(provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
             }
         }
         else {
-            spdlog::error("command {} was exited with code {}", cmd.str(), execRes.first);
+            spdlog::error("command \"{}\" was exited with code {}", cmd.str(), execRes.first);
         }
     }
 }

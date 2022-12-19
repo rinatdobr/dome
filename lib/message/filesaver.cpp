@@ -43,7 +43,9 @@ void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::Provider &p
                 case dome::config::Source::DataType::Path: {
                     if (!CheckJsonMessageForKeys(jMessage, { source.id })) continue;
                     dome::utils::Dir dir(source.id);
-                    dir.copyFile(jMessage[source.id].get<std::string>());
+                    if (dir.isValid()) {
+                        dir.copyFile(jMessage[source.id].get<std::string>());
+                    }
                 }
                 break;
             }

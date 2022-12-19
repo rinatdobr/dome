@@ -13,7 +13,6 @@ set(SOURCE_FILES
     config/ipcamera.cpp
     config/provider.cpp
     config/telegram.cpp
-    data/provider.cpp
     db/writer.cpp
     message/dbsaver.cpp
     message/filesaver.cpp

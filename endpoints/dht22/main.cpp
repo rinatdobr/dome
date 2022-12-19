@@ -42,24 +42,24 @@ int main(int argc, char *argv[]) {
                 spdlog::info("Unsupported option was passed");
         }
     }
-    spdlog::debug("configPath={}", configPath);
+    spdlog::debug("configPath=\"{}\"", configPath);
 
     dome::config::Provider config(configPath);
     if (!config.isValid()) {
-        spdlog::error("Can't setup DHT22");
+        spdlog::error("Can't setup DHT22 [1]");
         return EXIT_FAILURE;
     }
 
     dome::data::Dht22 dht22(config);
     if (!dht22.isValid()) {
-        spdlog::error("Can't setup DHT22");
+        spdlog::error("Can't setup DHT22 [2]");
         return EXIT_FAILURE;
     }
 
     dome::mosq::Sender::Trigger trigger;
     dome::mosq::Sender sender(config.id(), config, dht22, trigger);
     if (!sender.isValid()) {
-        spdlog::error("Can't setup DHT22");
+        spdlog::error("Can't setup DHT22 [3]");
         return EXIT_FAILURE;
     }
     std::vector<dome::message::Processor*> processors;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     dome::topic::Request topicRequest(config, processors);
     dome::mosq::Reciever reciever(GetRequestTopic(config.id()), topicRequest);
     if (!reciever.isValid()) {
-        spdlog::error("Can't setup DHT22");
+        spdlog::error("Can't setup DHT22 [4]");
         return EXIT_FAILURE;
     }
 

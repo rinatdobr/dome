@@ -149,8 +149,8 @@ bool Provider::parse()
 
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
-    if (!CheckJsonMessageForKeys(jConfig, { "id", "location", "period", "save_period", "max_frequence", "sources", "commands" })) {
-        spdlog::error("Invalid provider JSON: \" {} \"", jConfig.dump());
+    if (!CheckJsonMessageForKeys(jConfig, { "id", "location", "period", "save_period", "max_frequence", "sources", "requests" })) {
+        spdlog::error("Invalid provider JSON: [{}]", jConfig.dump());
         return false;   
     }
 
@@ -165,7 +165,7 @@ bool Provider::parse()
     auto jSources = jConfig["sources"];
     for (const auto &jSource : jSources) {
         if (!CheckJsonMessageForKeys(jSource, { "id", "type", "data_type" })) {
-            spdlog::error("Invalid source JSON: \" {} \"", jSource.dump());
+            spdlog::error("Invalid source JSON: [{}]", jSource.dump());
             continue;
         }
 
@@ -179,7 +179,7 @@ bool Provider::parse()
         m_sources.push_back(source);
     }
 
-    auto jRequests = jConfig["commands"];
+    auto jRequests = jConfig["requests"];
     for (const auto &jRequest : jRequests) {
         Request request;
         request.name = jRequest;

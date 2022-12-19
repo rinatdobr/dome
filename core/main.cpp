@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
                 spdlog::info("Unsupported option was passed");
         }
     }
-    spdlog::debug("configPath={}", configPath);
+    spdlog::debug("configPath=\"{}\"", configPath);
 
     dome::config::Core config(configPath);
     if (!config.isValid()) {
@@ -54,6 +54,11 @@ int main(int argc, char *argv[]) {
     }
 
     dome::message::DbSaver dbSaver(config.database().path);
+    if (!dbSaver.isValid()) {
+        spdlog::error("Can't setup core");
+        return EXIT_FAILURE;
+    }
+
     dome::message::FileSaver fileSaver;
     dome::message::Info info(config.providers());
     dome::message::Statistic statistic(config.database().path, config.providers());

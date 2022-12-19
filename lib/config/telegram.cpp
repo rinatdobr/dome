@@ -18,7 +18,7 @@ Telegram::Telegram(const std::string &path)
     }
 
     if (!parse()) {
-        spdlog::error("Can't parse IP camera config file: {}", path);
+        spdlog::error("Can't parse telegram config file: {}", path);
         I_am_not_valid();
         return;
     }
@@ -82,13 +82,13 @@ bool Telegram::parse()
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
     if (!CheckJsonMessageForKeys(jConfig, { "telegram" })) {
-        spdlog::error("Invalid telegram main JSON: \" {} \"", jConfig.dump());
+        spdlog::error("Invalid telegram main JSON: [{}]", jConfig.dump());
         return false;
     }
 
     nlohmann::json jTelegram = jConfig["telegram"];
     if (!CheckJsonMessageForKeys(jTelegram, { "app_id", "app_hash", "login", "pass", "log_level", "refresh_period", "chat_ids" })) {
-        spdlog::error("Invalid telegram JSON: \" {} \"", jTelegram.dump());
+        spdlog::error("Invalid telegram JSON: [{}]", jTelegram.dump());
         return false;
     }
 
@@ -105,6 +105,8 @@ bool Telegram::parse()
 
     spdlog::info("Telegram: appId={} appHash={} chatIds.size()={} login={} pass={} logLevel={} refreshPeriodSec={}",
                             m_appId, m_appHash, m_chatIds.size(), m_login, m_pass, m_logLevel, m_refreshPeriodSec);
+
+    return true;
 }
 
 }

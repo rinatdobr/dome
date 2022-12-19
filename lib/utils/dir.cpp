@@ -8,18 +8,17 @@ namespace utils {
 
 Dir::Dir(const std::string &path)
     : m_path(path)
-    , m_isValid(false)
 {
-    spdlog::trace("{}:{} {} path={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
 
     if (!checkIfExists()) {
-        spdlog::info("directory '{}' doesn't exist", path);
+        spdlog::info("directory \"{}\" doesn't exist", path);
         if (!create()) {
             return;
         }
     }
 
-    m_isValid = true;
+    I_am_valid();
 }
 
 Dir::~Dir()
@@ -29,7 +28,13 @@ Dir::~Dir()
 
 void Dir::copyFile(const std::string &filePath)
 {
-    spdlog::trace("{}:{} {} filePath={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, filePath);
+    spdlog::trace("{}:{} {} filePath=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            filePath);
+
+    if (!isValid()) {
+        spdlog::error("Invalid dir: \"{}\"", m_path);
+        return;
+    }
 
     if (!m_isValid) {
         spdlog::error("Invalid directory to write");
@@ -40,7 +45,7 @@ void Dir::copyFile(const std::string &filePath)
     std::filesystem::path destFile(m_path);
     destFile /= srcFile.filename();
     std::error_code ec;
-    spdlog::debug("copying '{}' to '{}'", srcFile.string(), destFile.string());
+    spdlog::debug("copying \"{}\" to \"{}\"", srcFile.string(), destFile.string());
 
     std::filesystem::copy(srcFile, destFile, ec);
 }
@@ -57,7 +62,7 @@ bool Dir::create()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     if (!std::filesystem::create_directory(m_path)) {
-        spdlog::error("can't create '{}' directory", m_path);
+        spdlog::error("can't create \"{}\" directory", m_path);
         return false;
     }
 

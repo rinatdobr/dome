@@ -3,10 +3,12 @@
 
 #include <string>
 
+#include "validatable.h"
+
 namespace dome {
 namespace utils {
 
-class Dir
+class Dir : public Validatable
 {
 public:
     Dir(const std::string &path);
@@ -16,7 +18,6 @@ public:
 
 private:
     std::string m_path;
-    bool m_isValid;
 
     bool checkIfExists();
     bool create();
