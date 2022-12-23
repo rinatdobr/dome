@@ -8,7 +8,7 @@ namespace dome {
 namespace mosq {
 
 Reciever::Reciever(const std::string &mosqClientId, dome::topic::Processor &processor)
-    : m_mosq(mosqClientId, this)
+    : m_mosq(mosqClientId, processor.topics(), this)
     , m_topicProcessor(processor)
 {
     spdlog::trace("{}:{} {} mosqClientId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, mosqClientId);
@@ -32,7 +32,7 @@ void Reciever::setup()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    mosquitto_message_callback_set(m_mosq.mosq(), [](struct mosquitto *mosq, void *userData, const struct mosquitto_message *mosqMessage){
+    m_mosq.setCallback([](struct mosquitto *mosq, void *userData, const struct mosquitto_message *mosqMessage){
         auto _this = static_cast<Reciever*>(userData);
 
         spdlog::debug("got a message [{}] from \"{}\" on \"{}\"", static_cast<char*>(mosqMessage->payload), mosqMessage->topic, _this->m_mosq.clientId());
@@ -53,30 +53,6 @@ void Reciever::setup()
     });
 }
 
-void Reciever::subscribe()
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-    if (!isValid()) {
-        spdlog::error("Invalid reciever");
-        return;
-    }
-
-    m_topicProcessor.subscribe(m_mosq);
-}
-
-void Reciever::unsubscribe()
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-    if (!isValid()) {
-        spdlog::error("Invalid reciever");
-        return;
-    }
-
-    m_topicProcessor.unsubscribe(m_mosq);
-}
-
 void Reciever::backgroundWork()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -85,8 +61,6 @@ void Reciever::backgroundWork()
         spdlog::error("Invalid reciever");
         return;
     }
-
-    subscribe();
 
     while (m_isWorking) {
         spdlog::debug("recieving on \"{}\"...", m_mosq.clientId());
@@ -100,8 +74,6 @@ void Reciever::backgroundWork()
             m_topicProcessor.sendPingMessage(m_mosq, message);
         }
     }
-
-    unsubscribe();
 }
 
 }

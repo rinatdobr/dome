@@ -11,10 +11,11 @@ namespace utils {
 File::File(const std::string &path)
     : m_path(path)
 {
-    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            path);
 
     if (!std::filesystem::exists(m_path)) {
-        spdlog::error("Path does not exists: \"{}\"", m_path);
+        spdlog::error("File does not exists: \"{}\"", m_path);
         return;
     }
 
@@ -30,16 +31,16 @@ std::string File::read()
         return {};
     }
 
-    std::ifstream configFile(m_path);
-    if (!configFile.is_open()) {
-        spdlog::error("Can't open config file: \"{}\"", m_path);
+    std::ifstream file(m_path);
+    if (!file.is_open()) {
+        spdlog::error("Can't open file: \"{}\"", m_path);
         return {};
     }
 
-    std::ostringstream configFileStream;
-    configFileStream << configFile.rdbuf();
+    std::ostringstream fileStream;
+    fileStream << file.rdbuf();
 
-    return configFileStream.str();
+    return fileStream.str();
 }
 
 }

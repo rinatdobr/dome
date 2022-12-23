@@ -3,6 +3,7 @@
 
 #include "mosquitto/mosq.h"
 
+#include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
 
@@ -12,8 +13,7 @@ namespace topic {
 class Processor
 {
 public:
-    virtual void subscribe(dome::mosq::Mosquitto &mosq) = 0;
-    virtual void unsubscribe(dome::mosq::Mosquitto &mosq) = 0;
+    virtual std::vector<std::string> topics() = 0;
     virtual void process(dome::mosq::Mosquitto &mosq, const std::string &topic, nlohmann::json &jMessage) = 0;
     virtual void sendPingMessage(dome::mosq::Mosquitto &mosq, const std::string &message) = 0;
 };

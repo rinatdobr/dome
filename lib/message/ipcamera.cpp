@@ -47,7 +47,7 @@ void IpCamera::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider
 
         auto args = ParseArgs(std::string(text, delimetr + 1));
         if (args.size() != 1 && args.size() != 2) {
-            spdlog::error("invalid number of args");
+            spdlog::error("Invalid number of args");
             return;
         }
         std::string ipCameraName;
@@ -93,10 +93,7 @@ void IpCamera::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
             spdlog::debug("requesting \"get\" on \"{}\" from \"{}\"...", GetRequestTopic(providerId), mosq.clientId());
-            int res = mosquitto_publish(mosq.mosq(), nullptr, GetRequestTopic(providerId).c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetRequestTopic(providerId), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            mosq.publish(GetRequestTopic(providerId), data);
         }
     }
     else if (jMessage["type"] == "data") {
@@ -130,10 +127,7 @@ void IpCamera::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider
         if (gotAllData) {
             std::string data = ipCameraRequest->reply.dump();
             spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(ipCameraRequest->idFrom), mosq.clientId());
-            int res = mosquitto_publish(mosq.mosq(), nullptr, GetReplyTopic(ipCameraRequest->idFrom).c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetReplyTopic(provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            mosq.publish(GetReplyTopic(ipCameraRequest->idFrom), data);
             m_messages.pop_front();
         }
     }

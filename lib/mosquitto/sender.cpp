@@ -10,7 +10,7 @@ namespace dome {
 namespace mosq {
 
 Sender::Sender(const std::string &mosqClientId, const dome::config::Provider &config, dome::data::Provider &provider, Trigger &trigger)
-    : m_mosq(mosqClientId, this)
+    : m_mosq(mosqClientId, {}, this)
     , m_config(config)
     , m_provider(provider)
     , m_trigger(trigger)
@@ -60,7 +60,7 @@ void Sender::backgroundWork()
                 prepareDataTsSec = now;
             }
             else {
-                spdlog::warn("data preparation is too often in \"{}\", sending old values...", m_mosq.clientId());
+                spdlog::warn("Data preparation is too often in \"{}\", sending old values...", m_mosq.clientId());
             }
 
             if (isDataPrepared) {
@@ -69,10 +69,7 @@ void Sender::backgroundWork()
                     nlohmann::json jData = m_provider.getData();
                     std::string data = jData.dump();
                     spdlog::debug("sending message [{}] to \"{}\" from \"{}\"", data, m_config.id(), m_mosq.clientId());
-                    int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), data.size(), data.c_str(), 0, false);
-                    if (res != MOSQ_ERR_SUCCESS) {
-                        spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-                    }
+                    m_mosq.publish(m_config.id(), data);
 
                     isFirstGet = false;
                 }
@@ -89,21 +86,18 @@ void Sender::backgroundWork()
         
         auto status = m_trigger.cv.wait_for(ul, std::chrono::seconds(1));
         if (status == std::cv_status::timeout) {
-            spdlog::trace("{}:{} {} cv timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+            spdlog::trace("cv timeout");
             --leftSec;
         }
         else {
-            spdlog::trace("{}:{} {} cv no timeout", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+            spdlog::trace("cv no timeout");
             triggered = true;
         }
 
         if (m_mosq.decrementKeepAlive()) {
             auto message = PingMessage();
             spdlog::debug("sending ping message \"{}\" from \"{}\"", message, m_mosq.clientId());
-            int res = mosquitto_publish(m_mosq.mosq(), nullptr, m_config.id().c_str(), message.size(), message.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish ping to \"{}\" error[{}]: {}", m_config.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            m_mosq.publish(m_config.id(), message);
         }
     }
 }

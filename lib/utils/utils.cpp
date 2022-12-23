@@ -8,7 +8,8 @@
 
 uint PeriodToSeconds(const std::string &period)
 {
-    spdlog::trace("{}:{} {} period={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, period);
+    spdlog::trace("{}:{} {} period={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            period);
 
     std::istringstream parser(period);
     unsigned int result;
@@ -66,7 +67,8 @@ std::pair<int, std::string> Exec(const std::string cmdLine)
 
 std::string GetTmpName(const std::string id)
 {
-    spdlog::trace("{}:{} {} id={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, id);
+    spdlog::trace("{}:{} {} id={}", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            id);
 
     std::string tmpDir("/tmp/dome." + id + ".XXXXXX");
     char *tmpDirRaw = mkdtemp(&tmpDir[0]);

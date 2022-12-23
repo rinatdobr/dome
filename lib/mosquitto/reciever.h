@@ -22,8 +22,6 @@ private:
     dome::mosq::Mosquitto m_mosq;
 
     void setup();
-    void subscribe();
-    void unsubscribe();
     void backgroundWork() override;
 };
 

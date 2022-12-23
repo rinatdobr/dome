@@ -50,7 +50,7 @@ bool IpCamera::prepareData()
         return true;
     }
     else {
-        spdlog::error("command \"{}\" was exited with code {}", cmd.str(), execRes.first);
+        spdlog::error("Command \"{}\" was exited with code {}", cmd.str(), execRes.first);
         return false;
     }
 }

@@ -118,13 +118,10 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
             statistic->reply["path"] = execRes.second;
             std::string data = statistic->reply.dump();
             spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(statistic->idFrom), mosq.clientId());
-            int res = mosquitto_publish(mosq.mosq(), nullptr, GetReplyTopic(statistic->idFrom).c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetReplyTopic(provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            mosq.publish(GetReplyTopic(statistic->idFrom), data);
         }
         else {
-            spdlog::error("command \"{}\" was exited with code {}", cmd.str(), execRes.first);
+            spdlog::error("Command \"{}\" was exited with code {}", cmd.str(), execRes.first);
         }
     }
 }

@@ -9,10 +9,11 @@ namespace utils {
 Dir::Dir(const std::string &path)
     : m_path(path)
 {
-    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, path);
+    spdlog::trace("{}:{} {} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__,
+                            path);
 
     if (!checkIfExists()) {
-        spdlog::info("directory \"{}\" doesn't exist", path);
+        spdlog::error("Directory \"{}\" doesn't exist", m_path);
         if (!create()) {
             return;
         }
@@ -62,7 +63,7 @@ bool Dir::create()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     if (!std::filesystem::create_directory(m_path)) {
-        spdlog::error("can't create \"{}\" directory", m_path);
+        spdlog::error("Can't create \"{}\" directory", m_path);
         return false;
     }
 

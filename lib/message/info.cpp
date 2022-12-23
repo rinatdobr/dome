@@ -72,10 +72,7 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
         std::string data = jData.dump();
         for (const auto &providerId : providerIds) {
             spdlog::debug("requesting \"get\" on \"{}\" from \"{}\"...", GetRequestTopic(providerId), mosq.clientId());
-            int res = mosquitto_publish(mosq.mosq(), nullptr, GetRequestTopic(providerId).c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetRequestTopic(providerId), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            mosq.publish(GetRequestTopic(providerId), data);
         }
     }
     else if (jMessage["type"] == "data") {
@@ -109,10 +106,7 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
         if (gotAllData) {
             std::string data = info->reply.dump();
             spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(info->idFrom), mosq.clientId());
-            int res = mosquitto_publish(mosq.mosq(), nullptr, GetReplyTopic(info->idFrom).c_str(), data.size(), data.c_str(), 0, false);
-            if (res != MOSQ_ERR_SUCCESS) {
-                spdlog::error("mosquitto_publish to \"{}\" error[{}]: {}", GetReplyTopic(provider.id()), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-            }
+            mosq.publish(GetReplyTopic(info->idFrom), data);
             m_messages.pop_front();
         }
     }

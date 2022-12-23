@@ -19,34 +19,16 @@ Provider::~Provider()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void Provider::subscribe(dome::mosq::Mosquitto &mosq)
+std::vector<std::string> Provider::topics()
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    std::vector<std::string> out;
     for (const auto &provider : m_providers) {
-        int res = mosquitto_subscribe(mosq.mosq(), NULL, provider.id().c_str(), 0);
-        if (res == MOSQ_ERR_SUCCESS) {
-            spdlog::debug("subscribed on the \"{}\"", provider.id());
-        }
-        else {
-            spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-        }
+        out.push_back(provider.id());
     }
-}
 
-void Provider::unsubscribe(dome::mosq::Mosquitto &mosq)
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-    for (const auto &provider : m_providers) {
-        int res = mosquitto_unsubscribe(mosq.mosq(), NULL, provider.id().c_str());
-        if (res == MOSQ_ERR_SUCCESS) {
-            spdlog::debug("unsubscribed from the \"{}\"", provider.id());
-        }
-        else {
-            spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", provider.id(), res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
-        }
-    }
+    return out;
 }
 
 void Provider::process(dome::mosq::Mosquitto &mosq, const std::string &topic, nlohmann::json &jMessage)
