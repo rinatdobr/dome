@@ -1,0 +1,27 @@
+{
+    "id": "93de8e4c-828c-11ed-914a-cb6e786ac624",
+    "period": "10m",
+    "save_period": "10m",
+    "max_frequence": "1m",
+    "location": "outside",
+    "sources": [
+        {
+            "id": "b1c2e55c-828c-11ed-96f4-ffa51e40b05c",
+            "type": "temperature",
+            "data_type": "float"
+        },
+        {
+            "id": "b2c35cac-828c-11ed-8a22-b71d72221925",
+            "type": "humidity",
+            "data_type": "float"
+        } 
+    ],
+    "requests": [
+        "get"
+    ],
+    "openweather": {
+        "api_key": "_",
+        "latitude": "_",
+        "longitude": "_"
+    }
+}

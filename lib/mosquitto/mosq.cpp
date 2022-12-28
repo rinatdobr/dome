@@ -189,12 +189,12 @@ bool Mosquitto::subscribe()
 void Mosquitto::unsubscribe()
 {
     for (const auto &topic : m_topics) {
-        int res = mosquitto_subscribe(m_mosq, NULL, topic.c_str(), 0);
+        int res = mosquitto_unsubscribe(m_mosq, NULL, topic.c_str());
         if (res == MOSQ_ERR_SUCCESS) {
-            spdlog::debug("subscribed on the \"{}\"", topic);
+            spdlog::debug("unsubscribed from the \"{}\"", topic);
         }
         else {
-            spdlog::error("mosquitto_subscribe on \"{}\" error[{}]: {}", topic, res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
+            spdlog::error("mosquitto_unsubscribe from \"{}\" error[{}]: {}", topic, res, res == MOSQ_ERR_ERRNO ? std::strerror(errno) : mosquitto_strerror(res));
         }
     }
 }

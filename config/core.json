@@ -11,10 +11,12 @@
         },
         {
             "path": "/home/pi/dome/ipcamera.json"
-        }
-        ,
+        },
         {
             "path": "/home/pi/dome/s8.json"
+        },
+        {
+            "path": "/home/pi/dome/openweather.json"
         }
     ]
 }

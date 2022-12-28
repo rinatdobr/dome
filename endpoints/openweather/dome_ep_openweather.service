@@ -1,0 +1,13 @@
+[Unit]
+Description=Dome Open Weather endpoint
+Requires=dome_core.service
+After=dome_core.service
+
+[Install]
+RequiredBy=dome.target
+
+[Service]
+Type=simple
+Environment=LD_LIBRARY_PATH=%h/workspace/dome/3rdparty/cpr/build/root/lib
+WorkingDirectory=%h/dome
+ExecStart=/usr/bin/dome_openweather -c /home/pi/dome/openweather.json -l d

@@ -11,6 +11,7 @@ pkg_check_modules(mosquitto REQUIRED libmosquitto)
 set(SOURCE_FILES
     config/core.cpp
     config/ipcamera.cpp
+    config/openweather.cpp
     config/provider.cpp
     config/telegram.cpp
     db/writer.cpp

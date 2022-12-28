@@ -43,15 +43,16 @@ void Reply::process(dome::mosq::Mosquitto &, const dome::config::Provider &provi
             reply << location.key() << ":";
             for (const auto &data : location.value().items()) {
                 if (data.key() == "temperature") {
-                    reply << "\nТемпература: " << std::setprecision(3) << data.value().get<double>();
+                    reply << "\n  Температура: " << std::setprecision(3) << data.value().get<double>();
                 }
                 else if (data.key() == "humidity") {
-                    reply << "\nВлажность: " << std::setprecision(3) << data.value().get<double>();
+                    reply << "\n  Влажность: " << std::setprecision(3) << data.value().get<double>();
                 }
                 else if (data.key() == "co2") {
-                    reply << "\nCO2: " << data.value().get<int>();
+                    reply << "\n  CO2: " << data.value().get<int>();
                 }
             }
+            reply << "\n";
         }
 
         m_tdClient.sendTextMessage(
