@@ -8,7 +8,7 @@
         {
             "id": "08eb287a-5ddb-11ed-ab84-67bbbade1374",
             "type": "request",
-            "data_type": "string"
+            "data_type": "json"
         }
     ],
     "requests": [

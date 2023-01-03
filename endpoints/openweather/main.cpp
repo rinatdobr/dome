@@ -6,7 +6,7 @@
 #include <config/openweather.h>
 #include <message/get.h>
 #include <mosquitto/reciever.h>
-#include <topic/request.h>
+#include <topic/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "openweather.h"
@@ -69,11 +69,16 @@ int main(int argc, char *argv[]) {
         spdlog::error("Can't setup OpenWeather [4]");
         return EXIT_FAILURE;
     }
+
     std::vector<dome::message::Processor*> processors;
     dome::message::Get get(trigger);
     processors.push_back(&get);
-    dome::topic::Request topicRequest(config, processors);
-    dome::mosq::Reciever reciever(GetRequestTopic(config.id()), topicRequest);
+
+    dome::mosq::Reciever reciever(
+        GetRequestTopic(config.id()),
+        { GetRequestTopic(config.id()) },
+        { dome::topic::Topic(GetRequestTopic(config.id()), config, processors) }
+    );
     if (!reciever.isValid()) {
         spdlog::error("Can't setup OpenWeather [5]");
         return EXIT_FAILURE;

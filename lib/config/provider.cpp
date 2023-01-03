@@ -18,6 +18,9 @@ Source::DataType StrToDataType(const std::string& str)
     else if (str == "int") {
         return Source::DataType::Int;
     }
+    else if (str == "string") {
+        return Source::DataType::Int;
+    }
 
     return Source::DataType::Undefined;
 }

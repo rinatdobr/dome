@@ -45,6 +45,13 @@ std::string GetReplyTopic(const std::string &providerId)
     return std::string(providerId + "/reply");
 }
 
+std::string GetExecTopic(const std::string &providerId)
+{
+    spdlog::trace("{}:{} {} providerId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, providerId);
+
+    return std::string(providerId + "/exec");
+}
+
 std::pair<int, std::string> Exec(const std::string cmdLine)
 {
     spdlog::trace("{}:{} {} cmdLine=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, cmdLine);

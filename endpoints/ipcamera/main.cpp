@@ -6,7 +6,7 @@
 #include <config/ipcamera.h>
 #include <message/get.h>
 #include <mosquitto/reciever.h>
-#include <topic/request.h>
+#include <topic/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "ipcamera.h"
@@ -58,19 +58,29 @@ int main(int argc, char *argv[]) {
     }
 
     dome::data::IpCamera ipCamera(providerConfig, ipCameraConfig);
-    dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
-    if (!sender.isValid()) {
+    if (!ipCamera.isValid()) {
         spdlog::error("Can't setup IP camera [3]");
         return EXIT_FAILURE;
     }
+
+    dome::mosq::Sender::Trigger trigger;
+    dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
+    if (!sender.isValid()) {
+        spdlog::error("Can't setup IP camera [4]");
+        return EXIT_FAILURE;
+    }
+
     std::vector<dome::message::Processor*> processors;
     dome::message::Get get(trigger);
     processors.push_back(&get);
-    dome::topic::Request topicRequest(providerConfig, processors);
-    dome::mosq::Reciever reciever(GetRequestTopic(providerConfig.id()), topicRequest);
+
+    dome::mosq::Reciever reciever(
+        GetRequestTopic(providerConfig.id()),
+        { GetRequestTopic(providerConfig.id()) },
+        { dome::topic::Topic(GetRequestTopic(providerConfig.id()), providerConfig, processors) }
+    );
     if (!reciever.isValid()) {
-        spdlog::error("Can't setup IP camera [4]");
+        spdlog::error("Can't setup IP camera [5]");
         return EXIT_FAILURE;
     }
 

@@ -34,18 +34,18 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &pr
         if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
 
         nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
-        if (!CheckJsonMessageForKeys(jSource, { "request" })) return;
+        if (!CheckJsonMessageForKeys(jSource, { "body" })) return;
 
-        std::string text = jSource["request"].get<std::string>();
-        std::size_t delimetr = text.find(' ');
-        std::string name(text, 0, delimetr);
+        std::string body = jSource["body"].get<std::string>();
+        std::size_t delimetr = body.find(' ');
+        std::string name(body, 0, delimetr);
         if (InfoRequestStr != name) {
             spdlog::trace("ignore...");
             return;
         }
         if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
-        auto args = ParseArgs(std::string(text, delimetr + 1));
+        auto args = ParseArgs(std::string(body, delimetr + 1));
         auto info = std::make_shared<InfoMessage>();
         info->type = Message::Type::Info;
         info->idFrom = provider.id();

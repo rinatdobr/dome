@@ -25,9 +25,7 @@ set(SOURCE_FILES
     mosquitto/mosq.cpp
     mosquitto/reciever.cpp
     mosquitto/sender.cpp
-    topic/provider.cpp
-    topic/reply.cpp
-    topic/request.cpp
+    topic/topic.cpp
     utils/dir.cpp
     utils/file.cpp
     utils/threader.cpp

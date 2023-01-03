@@ -14,7 +14,12 @@
             "id": "b2c35cac-828c-11ed-8a22-b71d72221925",
             "type": "humidity",
             "data_type": "float"
-        } 
+        },
+        {
+            "id": "d455702e-8743-11ed-ab42-a3d2d60fc6ee",
+            "type": "weather_forecast",
+            "data_type": "json"
+        }
     ],
     "requests": [
         "get"

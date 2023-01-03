@@ -11,7 +11,7 @@
 #include <message/info.h>
 #include <message/ipcamera.h>
 #include <message/statistic.h>
-#include <topic/provider.h>
+#include <topic/topic.h>
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
@@ -63,14 +63,22 @@ int main(int argc, char *argv[]) {
     dome::message::Info info(config.providers());
     dome::message::Statistic statistic(config.database().path, config.providers());
     dome::message::IpCamera ipCamera(config.providers(), config.ipCameras());
+
     std::vector<dome::message::Processor*> messageProcessors;
     messageProcessors.push_back(&dbSaver);
     messageProcessors.push_back(&fileSaver);
     messageProcessors.push_back(&info);
     messageProcessors.push_back(&statistic);
     messageProcessors.push_back(&ipCamera);
-    dome::topic::Provider topicProvider(config.providers(), messageProcessors);
-    dome::mosq::Reciever reciever("core/reciever", topicProvider);
+
+    std::vector<std::string> topicNames;
+    std::vector<dome::topic::Topic> topics;
+    for (const auto &provider : config.providers()) {
+        topicNames.push_back(provider.id());
+        topics.push_back(dome::topic::Topic(provider.id(), provider, messageProcessors));
+    }
+
+    dome::mosq::Reciever reciever("core/reciever", topicNames, topics);
     if (!reciever.isValid()) {
         spdlog::error("Can't setup core");
         return EXIT_FAILURE;

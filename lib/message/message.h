@@ -20,7 +20,8 @@ enum class Type
 {
     Info,
     Statistic,
-    IpCamera
+    IpCamera,
+    Weather
 };
 
     std::string idFrom;

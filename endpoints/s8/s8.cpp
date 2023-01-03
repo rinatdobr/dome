@@ -11,6 +11,8 @@ S8::S8(const dome::config::Provider &config)
     : m_config(config)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+
+    I_am_valid();
 }
 
 S8::~S8()

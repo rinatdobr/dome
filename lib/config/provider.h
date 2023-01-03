@@ -25,7 +25,7 @@ enum class DataType {
     Undefined,
     Float,
     Path,
-    Int
+    Int,
 };
 
     static std::string TypeToStr(Type type);

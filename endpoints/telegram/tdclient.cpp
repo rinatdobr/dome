@@ -56,6 +56,8 @@ TdClient::TdClient(const dome::config::Telegram &telegramConfig, const dome::con
     m_clientId = m_clientManager->create_client_id();
 
     sendQuery(td::td_api::make_object<td::td_api::getOption>("version"), {});
+
+    I_am_valid();
 }
 
 bool TdClient::prepareData()
@@ -79,6 +81,7 @@ nlohmann::json TdClient::getData()
 
     nlohmann::json jData;
     jData["type"] = "request";
+    jData["request"] = "command";
     jData[m_providerConfig.sources()[0].id] = m_messages.front();
     m_messages.pop();
 
@@ -180,6 +183,7 @@ void TdClient::run() {
 void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::string text)
 {
     spdlog::trace("{}:{} {} chatId={} messageId={} text=[{}]", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, text);
+    spdlog::debug("sending text...");
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;
@@ -194,6 +198,7 @@ void TdClient::sendTextMessage(int64_t chatId, int64_t messageId, const std::str
 void TdClient::sendPhoto(int64_t chatId, int64_t messageId, const std::string path)
 {
     spdlog::trace("{}:{} {} chatId={} messageId={} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
+    spdlog::debug("sending photo...");
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;
@@ -208,6 +213,7 @@ void TdClient::sendPhoto(int64_t chatId, int64_t messageId, const std::string pa
 void TdClient::sendImage(int64_t chatId, int64_t messageId, const std::string path)
 {
     spdlog::trace("{}:{} {} chatId={} messageId={} path=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, chatId, messageId, path);
+    spdlog::debug("sending image...");
 
     auto send_message = td::td_api::make_object<td::td_api::sendMessage>();
     send_message->chat_id_ = chatId;
@@ -309,7 +315,7 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
 
                         std::cout << "SEND" << std::endl;
                         nlohmann::json jMessage;
-                        jMessage["request"] = text;
+                        jMessage["body"] = text;
                         jMessage["message_id"] = update_new_message.message_->id_;
                         jMessage["chat_id"] = chatId;
                         m_messages.push(jMessage.dump());
