@@ -33,6 +33,7 @@ set(SOURCE_FILES
     utils/threader.cpp
     utils/utils.cpp
     utils/validatable.cpp
+    endpoint.cpp
 )
 
 add_library(dome_lib SHARED ${SOURCE_FILES})

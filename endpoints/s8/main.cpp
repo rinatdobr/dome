@@ -3,11 +3,7 @@
 #include <getopt.h>
 
 #include <config/endpoint.h>
-#include <message/request/get.h>
-#include <mosquitto/receiver.h>
-#include <mosquitto/topic.h>
-#include <mosquitto/sender.h>
-#include <utils/utils.h>
+#include <endpoint.h>
 #include "s8.h"
 
 int main(int argc, char *argv[]) {
@@ -56,33 +52,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(endPointConfig.id(), endPointConfig, s8, trigger);
-    if (!sender.isValid()) {
-        spdlog::error("Can't setup S8 [3]");
-        return EXIT_FAILURE;
-    }
-
-    std::vector<dome::message::Processor*> processors;
-    dome::message::Get get(trigger);
-    processors.push_back(&get);
-
-    dome::mosq::Receiver receiver(
-        endPointConfig.id(),
-        { dome::mosq::Topic(GetRequestTopic(endPointConfig.id()), endPointConfig, processors) }
-    );
-    if (!receiver.isValid()) {
-        spdlog::error("Can't setup S8 [4]");
-        return EXIT_FAILURE;
-    }
-
-    receiver.start();
-    sender.start();
-    while (1) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    sender.stop();
-    receiver.stop();
+    dome::endpoint::EndPoint endPoint(endPointConfig, s8);
+    endPoint.start();
 
     return EXIT_SUCCESS;
 }

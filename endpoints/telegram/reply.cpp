@@ -25,7 +25,7 @@ void Reply::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPo
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (!CheckJsonMessageForKeys(jMessage, { "type", "command" })) {
+    if (!CheckJsonMessageForKeys(jMessage, { "type", "reply" })) {
         return;
     };
 
@@ -34,7 +34,7 @@ void Reply::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPo
         return;
     }
 
-    if (jMessage["command"] == dome::message::command::Info) {
+    if (jMessage["reply"] == dome::message::command::Info) {
         spdlog::debug("reply processing...");
 
         if (!CheckJsonMessageForKeys(jMessage, { "data", "chat_id", "message_id" })) return;
@@ -64,7 +64,7 @@ void Reply::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPo
 
         return;
     }
-    else if (jMessage["command"] == dome::message::command::Statistic) {
+    else if (jMessage["reply"] == dome::message::command::Statistic) {
         spdlog::debug("reply processing...");
 
         if (!CheckJsonMessageForKeys(jMessage, { "path", "chat_id", "message_id" })) return;
@@ -77,7 +77,7 @@ void Reply::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPo
 
         return;
     }
-    else if (jMessage["command"] == dome::message::command::IpCamera) {
+    else if (jMessage["reply"] == dome::message::command::IpCamera) {
         spdlog::debug("reply processing...");
 
         if (!CheckJsonMessageForKeys(jMessage, { "quality", "path", "chat_id", "message_id" })) return;

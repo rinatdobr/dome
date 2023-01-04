@@ -22,6 +22,11 @@ void Get::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPoin
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
+    if (!endPointConfig.gettable()) {
+        spdlog::trace("{}:{} {} no need to get...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+        return;
+    }
+
     if (!CheckJsonMessageForKeys(jMessage, { "type", "request" })) return;
 
     if (jMessage["type"] == dome::message::type::Request &&

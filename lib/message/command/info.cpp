@@ -25,7 +25,7 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &en
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (!CheckJsonMessageForKeys(jMessage, { "type", "command" })) return;
+    if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
 
     if (jMessage["type"] == dome::message::type::Command) {
         spdlog::debug("command processing...");
@@ -51,6 +51,7 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &en
         reply->body["reply"] = dome::message::command::Info;
         reply->body["message_id"] = jSource["message_id"];
         reply->body["chat_id"] = jSource["chat_id"];
+
         std::set<std::string> endPointIds;
         for (const auto &endPointConfig : m_endPointConfigs) {
             for (const auto &source : endPointConfig.sources()) {
@@ -75,11 +76,11 @@ void Info::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &en
     }
     else if (jMessage["type"] == dome::message::type::Data) {
         if (m_replies.size() == 0) {
-            spdlog::debug("no request to fill");
+            spdlog::debug("no reply to fill");
             return;
         }
         auto request = m_replies.front();
-        spdlog::debug("request filling...");
+        spdlog::debug("reply filling...");
 
         auto reply = static_cast<InfoReply*>(request.get());
         for (const auto &source : endPointConfig.sources()) {

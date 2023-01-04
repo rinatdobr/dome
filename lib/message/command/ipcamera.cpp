@@ -69,6 +69,7 @@ void IpCamera::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint
         reply->body["message_id"] = jSource["message_id"];
         reply->body["chat_id"] = jSource["chat_id"];
         reply->body["quality"] = quality;
+
         std::set<std::string> endPointIds;
         for (const auto &endPointConfig : m_endPointConfigs) {
             for (const auto &source : endPointConfig.sources()) {
@@ -96,11 +97,11 @@ void IpCamera::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint
     }
     else if (jMessage["type"] == dome::message::type::Data) {
         if (m_replies.size() == 0) {
-            spdlog::debug("no request to fill");
+            spdlog::debug("no reply to fill");
             return;
         }
         auto request = m_replies.front();
-        spdlog::debug("request filling...");
+        spdlog::debug("reply filling...");
 
         auto reply = static_cast<IpCameraReply*>(request.get());
         for (const auto &source : endPointConfig.sources()) {

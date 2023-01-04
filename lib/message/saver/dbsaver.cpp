@@ -33,6 +33,7 @@ void DbSaver::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &end
 
     if (!endPointConfig.savable()) {
         spdlog::trace("{}:{} {} no need to save...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+        return;
     }
 
     if (!isValid()) {

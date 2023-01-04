@@ -26,6 +26,7 @@ void FileSaver::process(dome::mosq::Mosquitto &, const dome::config::EndPoint &e
 
     if (!endPointConfig.savable()) {
         spdlog::trace("{}:{} {} no need to save...", __FILE__, __LINE__, __PRETTY_FUNCTION__);
+        return;
     }
 
     if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;

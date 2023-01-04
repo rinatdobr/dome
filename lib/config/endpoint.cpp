@@ -127,7 +127,7 @@ bool EndPoint::parse()
 
     auto configData = read();
     nlohmann::json jConfig = nlohmann::json::parse(configData);
-    if (!CheckJsonMessageForKeys(jConfig, { "id", "period", "sources" })) {
+    if (!CheckJsonMessageForKeys(jConfig, { "id", "sources" })) {
         spdlog::error("Invalid endpoint JSON: [{}]", jConfig.dump());
         return false;   
     }
@@ -157,7 +157,7 @@ bool EndPoint::parse()
         m_isRequestable = true;
         auto jRequestable = jConfig["requestable"];
         if (CheckJsonMessageForKeys(jRequestable, { "get" })) {
-            m_isGettable = jConfig["get"].get<bool>();
+            m_isGettable = jRequestable["get"].get<bool>();
         }
     }
 

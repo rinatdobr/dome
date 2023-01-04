@@ -70,8 +70,9 @@ void Receiver::backgroundWork()
         return;
     }
 
+    spdlog::debug("recieving on \"{}\"...", m_mosq.clientId());
     while (m_isWorking) {
-        spdlog::debug("recieving on \"{}\"...", m_mosq.clientId());
+        spdlog::trace("recieving on \"{}\"...", m_mosq.clientId());
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
