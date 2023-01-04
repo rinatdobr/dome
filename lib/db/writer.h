@@ -5,7 +5,7 @@
 #include <memory>
 #include <sqlite3.h>
 
-#include "config/provider.h"
+#include "config/endpoint.h"
 #include "utils/validatable.h"
 
 namespace dome {

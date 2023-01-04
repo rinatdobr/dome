@@ -1,14 +1,11 @@
-#include "message.h"
+#include "command.h"
 
 #include <spdlog/spdlog.h>
-
-#include "utils/utils.h"
-#include <sstream>
 
 namespace dome {
 namespace message {
 
-std::vector<std::string> ParseArgs(const std::string &args)
+std::vector<std::string> Command::parseArgs(const std::string &args)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 

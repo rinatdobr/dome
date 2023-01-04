@@ -1,5 +1,6 @@
 #include "s8.h"
 
+#include <message/message.h>
 #include <spdlog/spdlog.h>
 #include <utils/utils.h>
 #include <sstream>
@@ -7,8 +8,8 @@
 namespace dome {
 namespace data {
 
-S8::S8(const dome::config::Provider &config)
-    : m_config(config)
+S8::S8(const dome::config::EndPoint &endPointConfig)
+    : m_endPointConfig(endPointConfig)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -45,10 +46,10 @@ nlohmann::json S8::getData()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jData;
-    jData["type"] = "data";
-    for (const auto &source : m_config.sources()) {
-        if (source.type == dome::config::Source::Type::Co2) {
-            jData[source.id] = m_co2;
+    jData["type"] = dome::message::type::Data;
+    for (const auto &source : m_endPointConfig.sources()) {
+        if (source.type() == dome::config::Source::Type::Co2) {
+            jData[source.id()] = m_co2;
         }
     }
 

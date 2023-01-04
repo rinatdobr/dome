@@ -6,7 +6,7 @@
 #include <condition_variable>
 
 #include "utils/threader.h"
-#include "config/provider.h"
+#include "config/endpoint.h"
 #include "data/provider.h"
 #include "mosq.h"
 #include "utils/validatable.h"
@@ -25,13 +25,13 @@ public:
     std::condition_variable cv;
 };
 
-    explicit Sender(const std::string &mosqClientId, const dome::config::Provider &config, dome::data::Provider &provider, Trigger &trigger);
+    explicit Sender(const std::string &mosqClientId, const dome::config::EndPoint &endPointConfig, dome::data::Provider &provider, Trigger &trigger);
     ~Sender();
 
     Trigger &trigger();
 
 private:
-    const dome::config::Provider &m_config;
+    const dome::config::EndPoint &m_endPointConfig;
     dome::data::Provider &m_provider;
     dome::mosq::Mosquitto m_mosq;
     Trigger &m_trigger;

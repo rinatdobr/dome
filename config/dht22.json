@@ -1,9 +1,16 @@
 {
     "id": "721ff13a-53c3-11ed-8219-43af54afa26b",
-    "period": "30s",
-    "save_period": "1m",
-    "max_frequence": "10s",
     "location": "room1",
+    "requestable": {
+        "get": true
+    },
+    "savable": {
+        "period": "1m"
+    },
+    "providerable": {
+        "period": "30s",
+        "max_frequence": "10s"
+    },
     "sources": [
         {
             "id": "aaed98aa-535a-11ed-84c0-4f35a8d3364f",
@@ -15,8 +22,5 @@
             "type": "humidity",
             "data_type": "float"
         } 
-    ],
-    "requests": [
-        "get"
     ]
 }

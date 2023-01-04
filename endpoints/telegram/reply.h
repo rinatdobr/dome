@@ -13,7 +13,7 @@ public:
     explicit Reply(dome::data::TdClient &tdClient);
     ~Reply();
 
-    void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
+    void process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &endPointConfig, nlohmann::json &jMessage) override;
 
 private:
     dome::data::TdClient &m_tdClient;

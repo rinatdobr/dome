@@ -2,11 +2,11 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <config/provider.h>
+#include <config/endpoint.h>
 #include <config/ipcamera.h>
-#include <message/get.h>
-#include <mosquitto/reciever.h>
-#include <topic/topic.h>
+#include <message/request/get.h>
+#include <mosquitto/receiver.h>
+#include <mosquitto/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "ipcamera.h"
@@ -45,8 +45,8 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath=\"{}\"", configPath);
 
-    dome::config::Provider providerConfig(configPath);
-    if (!providerConfig.isValid()) {
+    dome::config::EndPoint endPointConfig(configPath);
+    if (!endPointConfig.isValid()) {
         spdlog::error("Can't setup IP camera [1]");
         return EXIT_FAILURE;
     }
@@ -57,14 +57,14 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    dome::data::IpCamera ipCamera(providerConfig, ipCameraConfig);
+    dome::data::IpCamera ipCamera(endPointConfig, ipCameraConfig);
     if (!ipCamera.isValid()) {
         spdlog::error("Can't setup IP camera [3]");
         return EXIT_FAILURE;
     }
 
     dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(providerConfig.id(), providerConfig, ipCamera, trigger);
+    dome::mosq::Sender sender(endPointConfig.id(), endPointConfig, ipCamera, trigger);
     if (!sender.isValid()) {
         spdlog::error("Can't setup IP camera [4]");
         return EXIT_FAILURE;
@@ -74,23 +74,22 @@ int main(int argc, char *argv[]) {
     dome::message::Get get(trigger);
     processors.push_back(&get);
 
-    dome::mosq::Reciever reciever(
-        GetRequestTopic(providerConfig.id()),
-        { GetRequestTopic(providerConfig.id()) },
-        { dome::topic::Topic(GetRequestTopic(providerConfig.id()), providerConfig, processors) }
+    dome::mosq::Receiver receiver(
+        endPointConfig.id(),
+        { dome::mosq::Topic(GetRequestTopic(endPointConfig.id()), endPointConfig, processors) }
     );
-    if (!reciever.isValid()) {
+    if (!receiver.isValid()) {
         spdlog::error("Can't setup IP camera [5]");
         return EXIT_FAILURE;
     }
 
-    reciever.start();
+    receiver.start();
     sender.start();
     while (1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     sender.stop();
-    reciever.stop();
+    receiver.stop();
 
     return EXIT_SUCCESS;
 }

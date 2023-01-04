@@ -1,13 +1,14 @@
 #include "dht22.h"
 
+#include <message/message.h>
 #include <spdlog/spdlog.h>
 #include <pigpiod_if2.h>
 
 namespace dome {
 namespace data {
 
-Dht22::Dht22(const dome::config::Provider &config)
-    : m_config(config)
+Dht22::Dht22(const dome::config::EndPoint &endPointConfig)
+    : m_endPointConfig(endPointConfig)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -71,13 +72,13 @@ nlohmann::json Dht22::getData()
     }
 
     nlohmann::json jData;
-    jData["type"] = "data";
-    for (const auto &source : m_config.sources()) {
-        if (source.type == dome::config::Source::Type::Temperature) {
-            jData[source.id] = m_tempreature;
+    jData["type"] = dome::message::type::Data;
+    for (const auto &source : m_endPointConfig.sources()) {
+        if (source.type() == dome::config::Source::Type::Temperature) {
+            jData[source.id()] = m_tempreature;
         }
-        else if (source.type == dome::config::Source::Type::Humidity) {
-            jData[source.id] = m_humidity;
+        else if (source.type() == dome::config::Source::Type::Humidity) {
+            jData[source.id()] = m_humidity;
         }
     }
 

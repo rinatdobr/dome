@@ -2,10 +2,10 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <config/provider.h>
-#include <message/get.h>
-#include <mosquitto/reciever.h>
-#include <topic/topic.h>
+#include <config/endpoint.h>
+#include <message/request/get.h>
+#include <mosquitto/receiver.h>
+#include <mosquitto/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "s8.h"
@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     spdlog::info("Start dome_s8");
 
     option longOptions[] = {
-        {"config", required_argument, 0, 'c'}, 
+        {"endPointConfig", required_argument, 0, 'c'}, 
         {"loglevel", required_argument, 0, 'l'}, 
         { 0 }
     };
@@ -44,20 +44,20 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath=\"{}\"", configPath);
 
-    dome::config::Provider config(configPath);
-    if (!config.isValid()) {
+    dome::config::EndPoint endPointConfig(configPath);
+    if (!endPointConfig.isValid()) {
         spdlog::error("Can't setup S8 [1]");
         return EXIT_FAILURE;
     }
 
-    dome::data::S8 s8(config);
+    dome::data::S8 s8(endPointConfig);
     if (!s8.isValid()) {
         spdlog::error("Can't setup S8 [2]");
         return EXIT_FAILURE;
     }
 
     dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(config.id(), config, s8, trigger);
+    dome::mosq::Sender sender(endPointConfig.id(), endPointConfig, s8, trigger);
     if (!sender.isValid()) {
         spdlog::error("Can't setup S8 [3]");
         return EXIT_FAILURE;
@@ -67,23 +67,22 @@ int main(int argc, char *argv[]) {
     dome::message::Get get(trigger);
     processors.push_back(&get);
 
-    dome::mosq::Reciever reciever(
-        GetRequestTopic(config.id()),
-        { GetRequestTopic(config.id()) },
-        { dome::topic::Topic(GetRequestTopic(config.id()), config, processors) }
+    dome::mosq::Receiver receiver(
+        endPointConfig.id(),
+        { dome::mosq::Topic(GetRequestTopic(endPointConfig.id()), endPointConfig, processors) }
     );
-    if (!reciever.isValid()) {
+    if (!receiver.isValid()) {
         spdlog::error("Can't setup S8 [4]");
         return EXIT_FAILURE;
     }
 
-    reciever.start();
+    receiver.start();
     sender.start();
     while (1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     sender.stop();
-    reciever.stop();
+    receiver.stop();
 
     return EXIT_SUCCESS;
 }

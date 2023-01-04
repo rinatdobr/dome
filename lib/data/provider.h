@@ -5,13 +5,11 @@
 #include <functional>
 #include <nlohmann/json.hpp>
 
-#include "config/provider.h"
+#include "config/endpoint.h"
 #include "utils/validatable.h"
 
 namespace dome {
 namespace data {
-
-class Provider;
 
 class Provider : public dome::utils::Validatable
 {

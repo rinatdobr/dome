@@ -26,18 +26,11 @@ Core::Core(const std::string &path)
     I_am_valid();
 }
 
-Database Core::database() const
+const std::vector<dome::config::EndPoint> &Core::endPoints() const
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_database;
-}
-
-const std::vector<dome::config::Provider> &Core::providers() const
-{
-    spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
-
-    return m_providers;
+    return m_endPoints;
 }
 
 const std::vector<dome::config::IpCamera> &Core::ipCameras() const
@@ -58,16 +51,6 @@ bool Core::parse()
         return false;
     }
 
-    auto jDatabase = jConfig["database"];
-    if (!CheckJsonMessageForKeys(jDatabase, { "path" })) {
-        spdlog::error("Invalid core database JSON: [{}]", jDatabase.dump());
-        return false;
-    }
-
-    m_database.path = jDatabase["path"].get<std::string>();
-    spdlog::info("Core database: path={}",
-                                 m_database.path);
-
     auto jConfigFiles = jConfig["config_files"];
     for(const auto &jConfigFile : jConfigFiles) {
         if (!CheckJsonMessageForKeys(jConfigFile, { "path" })) {
@@ -79,10 +62,10 @@ bool Core::parse()
         spdlog::info("Core config file: path={}",
                                         path);
 
-        Provider provider(path);
+        EndPoint endPoint(path);
         IpCamera ipCamera(path);
 
-        m_providers.push_back(provider);
+        m_endPoints.push_back(endPoint);
         m_ipCameras.push_back(ipCamera);
     }
 

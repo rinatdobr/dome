@@ -1,10 +1,10 @@
 #include <getopt.h>
 #include <spdlog/spdlog.h>
 
-#include <config/provider.h>
+#include <config/endpoint.h>
 #include <config/telegram.h>
-#include <mosquitto/reciever.h>
-#include <topic/topic.h>
+#include <mosquitto/receiver.h>
+#include <mosquitto/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "reply.h"
@@ -44,26 +44,26 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath=\"{}\"", configPath);
 
-    dome::config::Telegram telegramConfig(configPath);
-    if (!telegramConfig.isValid()) {
+    dome::config::EndPoint endPointConfig(configPath);
+    if (!endPointConfig.isValid()) {
         spdlog::error("Can't setup Telegram [1]");
         return EXIT_FAILURE;
     }
 
-    dome::config::Provider providerConfig(configPath);
-    if (!providerConfig.isValid()) {
+    dome::config::Telegram telegramConfig(configPath);
+    if (!telegramConfig.isValid()) {
         spdlog::error("Can't setup Telegram [2]");
         return EXIT_FAILURE;
     }
 
     dome::mosq::Sender::Trigger trigger;
-    dome::data::TdClient tdClient(telegramConfig, providerConfig, trigger);
+    dome::data::TdClient tdClient(endPointConfig, telegramConfig, trigger);
     if (!tdClient.isValid()) {
         spdlog::error("Can't setup Telegram [3]");
         return EXIT_FAILURE;
     }
 
-    dome::mosq::Sender sender(providerConfig.id(), providerConfig, tdClient, trigger);
+    dome::mosq::Sender sender(endPointConfig.id(), endPointConfig, tdClient, trigger);
     if (!sender.isValid()) {
         spdlog::error("Can't setup Telegram [4]");
         return EXIT_FAILURE;
@@ -73,18 +73,17 @@ int main(int argc, char *argv[]) {
     dome::message::Reply reply(tdClient);
     processors.push_back(&reply);
 
-    dome::mosq::Reciever reciever(
-        GetReplyTopic(providerConfig.id()),
-        { GetReplyTopic(providerConfig.id()) },
-        { dome::topic::Topic(GetReplyTopic(providerConfig.id()), providerConfig, processors) }
+    dome::mosq::Receiver receiver(
+        endPointConfig.id(),
+        { dome::mosq::Topic(GetReplyTopic(endPointConfig.id()), endPointConfig, processors) }
     );
-    if (!reciever.isValid()) {
+    if (!receiver.isValid()) {
         spdlog::error("Can't setup Telegram [5]");
         return EXIT_FAILURE;
     }
 
     sender.start();
-    reciever.start();
+    receiver.start();
     tdClient.run();
 
     // while (1) {

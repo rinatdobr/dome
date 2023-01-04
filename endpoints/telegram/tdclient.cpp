@@ -1,5 +1,6 @@
 #include "tdclient.h"
 
+#include <message/message.h>
 #include <chrono>
 #include <thread>
 #include <spdlog/spdlog.h>
@@ -34,8 +35,8 @@ auto overloaded(F... f) {
   return detail::overload<F...>(f...);
 }
 
-TdClient::TdClient(const dome::config::Telegram &telegramConfig, const dome::config::Provider &providerConfig, dome::mosq::Sender::Trigger &senderTrigger)
-    : m_providerConfig(providerConfig)
+TdClient::TdClient(const dome::config::EndPoint &endPointConfig, const dome::config::Telegram &telegramConfig, dome::mosq::Sender::Trigger &senderTrigger)
+    : m_endPointConfig(endPointConfig)
     , m_senderTrigger(senderTrigger)
     , m_clientId(0)
     , m_refreshPeriodSec(telegramConfig.refreshPeriodSec())
@@ -66,7 +67,7 @@ bool TdClient::prepareData()
 
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    if (m_messages.size()) {
+    if (m_replies.size()) {
         return true;
     }
 
@@ -80,10 +81,9 @@ nlohmann::json TdClient::getData()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jData;
-    jData["type"] = "request";
-    jData["request"] = "command";
-    jData[m_providerConfig.sources()[0].id] = m_messages.front();
-    m_messages.pop();
+    jData["type"] = dome::message::type::Command;
+    jData[m_endPointConfig.sources()[0].id()] = m_replies.front();
+    m_replies.pop();
 
     return jData;
 }
@@ -94,7 +94,7 @@ bool TdClient::isDataLeft()
 
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
-    return m_messages.size() == 0 ? false : true;
+    return m_replies.size() == 0 ? false : true;
 }
 
 void TdClient::run() {
@@ -318,7 +318,7 @@ void TdClient::processUpdate(td::td_api::object_ptr<td::td_api::Object> update) 
                         jMessage["body"] = text;
                         jMessage["message_id"] = update_new_message.message_->id_;
                         jMessage["chat_id"] = chatId;
-                        m_messages.push(jMessage.dump());
+                        m_replies.push(jMessage.dump());
                         m_senderTrigger.cv.notify_one();
                     }
                 }

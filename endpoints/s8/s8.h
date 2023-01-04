@@ -1,7 +1,7 @@
 #ifndef ENDPOINTS_S8_H
 #define ENDPOINTS_S8_H
 
-#include <config/provider.h>
+#include <config/endpoint.h>
 #include <data/provider.h>
 
 namespace dome {
@@ -11,7 +11,7 @@ class S8 : public dome::data::Provider
 {
 public:
 
-    explicit S8(const dome::config::Provider &config);
+    explicit S8(const dome::config::EndPoint &endPointConfig);
     ~S8();
 
 protected:
@@ -22,7 +22,7 @@ protected:
 
 private:
 
-    const dome::config::Provider &m_config;
+    const dome::config::EndPoint &m_endPointConfig;
     int m_co2;
 };
 

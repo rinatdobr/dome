@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "message/message.h"
 #include "utils/utils.h"
 #include <sstream>
 #include <set>
@@ -9,11 +10,9 @@
 namespace dome {
 namespace message {
 
-const std::string StatisticRequestStr("/statistic");
-
-Statistic::Statistic(const std::string &dbPath, const std::vector<dome::config::Provider> &providers)
+Statistic::Statistic(const std::string &dbPath, const std::vector<dome::config::EndPoint> &endPointConfigs)
     : m_dbPath(dbPath)
-    , m_providers(providers)
+    , m_endPointConfigs(endPointConfigs)
 {
     spdlog::trace("{}:{} {} dbPath=\"{}\"", __FILE__, __LINE__, __PRETTY_FUNCTION__, dbPath);
 }
@@ -23,37 +22,36 @@ Statistic::~Statistic()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 }
 
-void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage)
+void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &endPointConfig, nlohmann::json &jMessage)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     if (!CheckJsonMessageForKeys(jMessage, { "type" })) return;
 
-    if (jMessage["type"] == "request") {
-        spdlog::debug("request processing...");
+    if (jMessage["type"] == dome::message::type::Command) {
+        spdlog::debug("command processing...");
 
-        if (!CheckJsonMessageForKeys(jMessage, { provider.sources()[0].id })) return;
-        nlohmann::json jSource = nlohmann::json::parse(jMessage[provider.sources()[0].id].get<std::string>());
+        if (!CheckJsonMessageForKeys(jMessage, { endPointConfig.sources()[0].id() })) return;
+        nlohmann::json jSource = nlohmann::json::parse(jMessage[endPointConfig.sources()[0].id()].get<std::string>());
 
         if (!CheckJsonMessageForKeys(jSource, { "body" })) return;
         std::string body = jSource["body"].get<std::string>();
         std::size_t delimetr = body.find(' ');
         std::string name(body, 0, delimetr);
-        if (StatisticRequestStr != name) {
+        if (dome::message::command::Statistic != name) {
             spdlog::trace("ignore...");
             return;
         }
         if (!CheckJsonMessageForKeys(jSource, { "message_id", "chat_id" })) return;
 
-        auto args = ParseArgs(std::string(body, delimetr + 1));
+        auto args = parseArgs(std::string(body, delimetr + 1));
 
-        auto statistic = std::make_shared<StatisticMessage>();
-        statistic->type = Message::Type::Statistic;
-        statistic->idFrom = provider.id();
-        statistic->args = args;
-        statistic->reply["type"] = StatisticRequestStr;
-        statistic->reply["message_id"] = jSource["message_id"];
-        statistic->reply["chat_id"] = jSource["chat_id"];
+        auto reply = std::make_shared<StatisticReply>();
+        reply->idFrom = endPointConfig.id();
+        reply->body["type"] = dome::message::type::Reply;
+        reply->body["reply"] = dome::message::command::Statistic;
+        reply->body["message_id"] = jSource["message_id"];
+        reply->body["chat_id"] = jSource["chat_id"];
 
         uint periodSec = 3600;
         std::string location;
@@ -83,17 +81,17 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
             }
         }
 
-        for (const auto &provider : m_providers) {
-            if (location.empty() || provider.location() == location) {
-                for (const auto &source : provider.sources()) {
-                    auto type = dome::config::Source::TypeToStr(source.type);
-                    if ((sourceTypes.empty() && (source.type == dome::config::Source::Type::Temperature ||
-                                                source.type == dome::config::Source::Type::Humidity ||
-                                                source.type == dome::config::Source::Type::Co2))
+        for (const auto &endPointConfig : m_endPointConfigs) {
+            if (location.empty() || endPointConfig.location() == location) {
+                for (const auto &source : endPointConfig.sources()) {
+                    auto type = dome::config::Source::TypeToStr(source.type());
+                    if ((sourceTypes.empty() && (source.type() == dome::config::Source::Type::Temperature ||
+                                                source.type() == dome::config::Source::Type::Humidity ||
+                                                source.type() == dome::config::Source::Type::Co2))
                             ||
-                        sourceTypes.count(source.type)
+                        sourceTypes.count(source.type())
                         ) {
-                        tables += source.id + " ";
+                        tables += source.id() + " ";
                         lables += type + " ";
                     }
                 }
@@ -115,10 +113,10 @@ void Statistic::process(dome::mosq::Mosquitto &mosq, const dome::config::Provide
 
         auto execRes = Exec(cmd.str().c_str());
         if (execRes.first == 0) {
-            statistic->reply["path"] = execRes.second;
-            std::string data = statistic->reply.dump();
-            spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(statistic->idFrom), mosq.clientId());
-            mosq.publish(GetReplyTopic(statistic->idFrom), data);
+            reply->body["path"] = execRes.second;
+            std::string data = reply->body.dump();
+            spdlog::debug("replying to \"{}\" from \"{}\"...", GetReplyTopic(reply->idFrom), mosq.clientId());
+            mosq.publish(GetReplyTopic(reply->idFrom), data);
         }
         else {
             spdlog::error("Command \"{}\" was exited with code {}", cmd.str(), execRes.first);

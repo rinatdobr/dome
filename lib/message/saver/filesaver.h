@@ -4,7 +4,7 @@
 #include <map>
 #include <chrono>
 
-#include "processor.h"
+#include "message/processor.h"
 
 namespace dome {
 namespace message {
@@ -15,7 +15,7 @@ public:
     explicit FileSaver();
     ~FileSaver();
 
-    void process(dome::mosq::Mosquitto &, const dome::config::Provider &provider, nlohmann::json &jMessage) override;
+    void process(dome::mosq::Mosquitto &, const dome::config::EndPoint &endPointConfig, nlohmann::json &jMessage) override;
 private:
     std::map<std::string, std::chrono::seconds> m_timestamps;
 };

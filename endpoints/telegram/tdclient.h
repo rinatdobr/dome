@@ -15,7 +15,7 @@
 #include <queue>
 #include <mutex>
 
-#include <config/provider.h>
+#include <config/endpoint.h>
 #include <data/provider.h>
 #include <config/telegram.h>
 #include <mosquitto/sender.h>
@@ -26,7 +26,7 @@ namespace data {
 class TdClient : public dome::data::Provider {
 public:
 
-    TdClient(const dome::config::Telegram &telegramConfig, const dome::config::Provider &providerConfig, dome::mosq::Sender::Trigger &senderTrigger);
+    TdClient(const dome::config::EndPoint &endPointConfig, const dome::config::Telegram &telegramConfig, dome::mosq::Sender::Trigger &senderTrigger);
 
     void run();
     void sendTextMessage(int64_t chatId, int64_t messageId, const std::string text);
@@ -39,9 +39,9 @@ protected:
     virtual bool isDataLeft() override;
 
 private:
-    const dome::config::Provider &m_providerConfig;
+    const dome::config::EndPoint &m_endPointConfig;
     dome::mosq::Sender::Trigger &m_senderTrigger;
-    std::queue<std::string> m_messages;
+    std::queue<std::string> m_replies;
     std::mutex m_messagesMutex;
 
     uint m_refreshPeriodSec;

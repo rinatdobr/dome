@@ -1,7 +1,7 @@
 #ifndef ENDPOINTS_DHT22_H
 #define ENDPOINTS_DHT22_H
 
-#include <config/provider.h>
+#include <config/endpoint.h>
 #include <data/provider.h>
 
 #include <memory>
@@ -13,7 +13,7 @@ namespace data {
 class Dht22 : public dome::data::Provider
 {
 public:
-    explicit Dht22(const dome::config::Provider &config);
+    explicit Dht22(const dome::config::EndPoint &endPointConfig);
     ~Dht22();
 
 protected:
@@ -22,7 +22,7 @@ protected:
     virtual bool isDataLeft() override;
 
 private:
-    const dome::config::Provider &m_config;
+    const dome::config::EndPoint &m_endPointConfig;
     int m_pi;
     DHTXXD_t *m_dht;
     double m_tempreature;

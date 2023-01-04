@@ -3,7 +3,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "config/provider.h"
+#include "config/endpoint.h"
 #include "mosquitto/mosq.h"
 
 namespace dome {
@@ -12,7 +12,7 @@ namespace message {
 class Processor
 {
 public:
-    virtual void process(dome::mosq::Mosquitto &mosq, const dome::config::Provider &provider, nlohmann::json &jMessage) = 0;
+    virtual void process(dome::mosq::Mosquitto &mosq, const dome::config::EndPoint &endPointConfig, nlohmann::json &jMessage) = 0;
 };
 
 }

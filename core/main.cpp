@@ -4,14 +4,15 @@
 
 #include <mosquitto.h>
 #include <config/core.h>
+#include <config/database.h>
 #include <mosquitto/mosq.h>
-#include <mosquitto/reciever.h>
-#include <message/dbsaver.h>
-#include <message/filesaver.h>
-#include <message/info.h>
-#include <message/ipcamera.h>
-#include <message/statistic.h>
-#include <topic/topic.h>
+#include <mosquitto/receiver.h>
+#include <message/command/info.h>
+#include <message/command/ipcamera.h>
+#include <message/command/statistic.h>
+#include <message/saver/dbsaver.h>
+#include <message/saver/filesaver.h>
+#include <mosquitto/topic.h>
 
 int main(int argc, char *argv[]) {
     spdlog::set_level(spdlog::level::info);
@@ -47,22 +48,28 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath=\"{}\"", configPath);
 
-    dome::config::Core config(configPath);
-    if (!config.isValid()) {
-        spdlog::error("Can't setup core");
+    dome::config::Core coreConfig(configPath);
+    if (!coreConfig.isValid()) {
+        spdlog::error("Can't setup core [1]");
         return EXIT_FAILURE;
     }
 
-    dome::message::DbSaver dbSaver(config.database().path);
+    dome::config::Database dbConfig(configPath);
+    if (!dbConfig.isValid()) {
+        spdlog::error("Can't setup core [2]");
+        return EXIT_FAILURE;
+    }
+
+    dome::message::DbSaver dbSaver(dbConfig);
     if (!dbSaver.isValid()) {
-        spdlog::error("Can't setup core");
+        spdlog::error("Can't setup core [3]");
         return EXIT_FAILURE;
     }
 
     dome::message::FileSaver fileSaver;
-    dome::message::Info info(config.providers());
-    dome::message::Statistic statistic(config.database().path, config.providers());
-    dome::message::IpCamera ipCamera(config.providers(), config.ipCameras());
+    dome::message::Info info(coreConfig.endPoints());
+    dome::message::Statistic statistic(dbConfig.path(), coreConfig.endPoints());
+    dome::message::IpCamera ipCamera(coreConfig.endPoints(), coreConfig.ipCameras());
 
     std::vector<dome::message::Processor*> messageProcessors;
     messageProcessors.push_back(&dbSaver);
@@ -71,24 +78,22 @@ int main(int argc, char *argv[]) {
     messageProcessors.push_back(&statistic);
     messageProcessors.push_back(&ipCamera);
 
-    std::vector<std::string> topicNames;
-    std::vector<dome::topic::Topic> topics;
-    for (const auto &provider : config.providers()) {
-        topicNames.push_back(provider.id());
-        topics.push_back(dome::topic::Topic(provider.id(), provider, messageProcessors));
+    std::vector<dome::mosq::Topic> topics;
+    for (const auto &endPoint : coreConfig.endPoints()) {
+        topics.push_back(dome::mosq::Topic(endPoint.id(), endPoint, messageProcessors));
     }
 
-    dome::mosq::Reciever reciever("core/reciever", topicNames, topics);
-    if (!reciever.isValid()) {
-        spdlog::error("Can't setup core");
+    dome::mosq::Receiver receiver("core", topics);
+    if (!receiver.isValid()) {
+        spdlog::error("Can't setup core [4]");
         return EXIT_FAILURE;
     }
-    reciever.start();
+    receiver.start();
 
     while (1) {    
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    reciever.stop();
+    receiver.stop();
 
     return EXIT_SUCCESS;
 }

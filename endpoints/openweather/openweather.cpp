@@ -1,5 +1,6 @@
 #include "openweather.h"
 
+#include <message/message.h>
 #include <spdlog/spdlog.h>
 #include <cpr/cpr.h>
 #include <utils/utils.h>
@@ -7,9 +8,9 @@
 namespace dome {
 namespace data {
 
-OpenWeather::OpenWeather(const dome::config::OpenWeather &openWeatherConfig, const dome::config::Provider &providerConfig)
-    : m_openWeatherConfig(openWeatherConfig)
-    , m_providerConfig(providerConfig)
+OpenWeather::OpenWeather(const dome::config::EndPoint &endPointConfig, const dome::config::OpenWeather &openWeatherConfig)
+    : m_endPointConfig(endPointConfig)
+    , m_openWeatherConfig(openWeatherConfig)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
@@ -71,13 +72,13 @@ nlohmann::json OpenWeather::getData()
     }
 
     nlohmann::json jData;
-    jData["type"] = "data";
-    for (const auto &source : m_providerConfig.sources()) {
-        if (source.type == dome::config::Source::Type::Temperature) {
-            jData[source.id] = m_tempreature;
+    jData["type"] = dome::message::type::Data;
+    for (const auto &source : m_endPointConfig.sources()) {
+        if (source.type() == dome::config::Source::Type::Temperature) {
+            jData[source.id()] = m_tempreature;
         }
-        else if (source.type == dome::config::Source::Type::Humidity) {
-            jData[source.id] = m_humidity;
+        else if (source.type() == dome::config::Source::Type::Humidity) {
+            jData[source.id()] = m_humidity;
         }
     }
 

@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "message/message.h"
 
 #include <sstream>
 #include <spdlog/spdlog.h>
@@ -31,25 +32,18 @@ uint PeriodToSeconds(const std::string &period)
     return result;
 }
 
-std::string GetRequestTopic(const std::string &providerId)
+std::string GetRequestTopic(const std::string &endPointId)
 {
-    spdlog::trace("{}:{} {} providerId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, providerId);
+    spdlog::trace("{}:{} {} endPointId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, endPointId);
 
-    return std::string(providerId + "/request");
+    return std::string(endPointId + "/request");
 }
 
-std::string GetReplyTopic(const std::string &providerId)
+std::string GetReplyTopic(const std::string &endPointId)
 {
-    spdlog::trace("{}:{} {} providerId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, providerId);
+    spdlog::trace("{}:{} {} endPointId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, endPointId);
 
-    return std::string(providerId + "/reply");
-}
-
-std::string GetExecTopic(const std::string &providerId)
-{
-    spdlog::trace("{}:{} {} providerId={}", __FILE__, __LINE__, __PRETTY_FUNCTION__, providerId);
-
-    return std::string(providerId + "/exec");
+    return std::string(endPointId + "/reply");
 }
 
 std::pair<int, std::string> Exec(const std::string cmdLine)
@@ -97,7 +91,7 @@ std::string PingMessage()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jMessage;
-    jMessage["type"] = "ping";
+    jMessage["type"] = dome::message::type::Ping;
     return jMessage.dump();
 }
 
@@ -114,16 +108,4 @@ bool CheckJsonMessageForKeys(const nlohmann::json &jMessage, const std::vector<s
 
     spdlog::trace("JSON message [{}] contains all keys", jMessage.dump());
     return true;
-}
-
-std::string ErrorMessage(ErrorNum errorNum)
-{
-    const static std::map<ErrorNum, std::string> Descriptions {
-        {
-            ErrorNum::JsonKeyNoType,
-            "В ответном сообщении отсутствует поле 'type'"
-        }
-    };
-
-    return Descriptions.at(errorNum);
 }

@@ -1,9 +1,16 @@
 {
     "id": "93de8e4c-828c-11ed-914a-cb6e786ac624",
-    "period": "10m",
-    "save_period": "10m",
-    "max_frequence": "1m",
     "location": "outside",
+    "requestable": {
+        "get": true
+    },
+    "savable": {
+        "period": "10m"
+    },
+    "providerable": {
+        "period": "10m",
+        "max_frequence": "1m"
+    },
     "sources": [
         {
             "id": "b1c2e55c-828c-11ed-96f4-ffa51e40b05c",
@@ -14,15 +21,7 @@
             "id": "b2c35cac-828c-11ed-8a22-b71d72221925",
             "type": "humidity",
             "data_type": "float"
-        },
-        {
-            "id": "d455702e-8743-11ed-ab42-a3d2d60fc6ee",
-            "type": "weather_forecast",
-            "data_type": "json"
         }
-    ],
-    "requests": [
-        "get"
     ],
     "openweather": {
         "api_key": "_",

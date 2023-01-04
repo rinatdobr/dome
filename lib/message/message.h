@@ -2,35 +2,37 @@
 #define MESSAGE_MESSAGE_H
 
 #include <string>
-#include <deque>
-#include <unordered_map>
-#include <memory>
-
-#include "config/provider.h"
-#include "processor.h"
-#include "mosquitto/mosq.h"
 
 namespace dome {
 namespace message {
 
+namespace type {
+
+const static std::string Data = "data";
+const static std::string Command = "command";
+const static std::string Request = "request";
+const static std::string Reply = "reply";
+const static std::string Ping = "ping";
+
+}
+
+namespace command {
+
+const static std::string Info = "/info";
+const static std::string Statistic = "/statistic";
+const static std::string IpCamera = "/ipcamera";
+
+}
+
+namespace request {
+
+const static std::string Get = "get";
+
+}
+
 class Message
 {
-public:
-enum class Type
-{
-    Info,
-    Statistic,
-    IpCamera,
-    Weather
 };
-
-    std::string idFrom;
-    Message::Type type;
-    nlohmann::json reply;
-    std::vector<std::string> args;
-};
-
-std::vector<std::string> ParseArgs(const std::string &args);
 
 }
 }

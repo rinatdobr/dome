@@ -2,10 +2,10 @@
 #include <spdlog/spdlog.h>
 #include <getopt.h>
 
-#include <config/provider.h>
-#include <message/get.h>
-#include <mosquitto/reciever.h>
-#include <topic/topic.h>
+#include <config/endpoint.h>
+#include <message/request/get.h>
+#include <mosquitto/receiver.h>
+#include <mosquitto/topic.h>
 #include <mosquitto/sender.h>
 #include <utils/utils.h>
 #include "dht22.h"
@@ -44,20 +44,20 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("configPath=\"{}\"", configPath);
 
-    dome::config::Provider config(configPath);
-    if (!config.isValid()) {
+    dome::config::EndPoint endPointConfig(configPath);
+    if (!endPointConfig.isValid()) {
         spdlog::error("Can't setup DHT22 [1]");
         return EXIT_FAILURE;
     }
 
-    dome::data::Dht22 dht22(config);
+    dome::data::Dht22 dht22(endPointConfig);
     if (!dht22.isValid()) {
         spdlog::error("Can't setup DHT22 [2]");
         return EXIT_FAILURE;
     }
 
     dome::mosq::Sender::Trigger trigger;
-    dome::mosq::Sender sender(config.id(), config, dht22, trigger);
+    dome::mosq::Sender sender(endPointConfig.id(), endPointConfig, dht22, trigger);
     if (!sender.isValid()) {
         spdlog::error("Can't setup DHT22 [3]");
         return EXIT_FAILURE;
@@ -67,23 +67,22 @@ int main(int argc, char *argv[]) {
     dome::message::Get get(trigger);
     processors.push_back(&get);
 
-    dome::mosq::Reciever reciever(
-        GetRequestTopic(config.id()),
-        { GetRequestTopic(config.id()) },
-        { dome::topic::Topic(GetRequestTopic(config.id()), config, processors) }
+    dome::mosq::Receiver receiver(
+        endPointConfig.id(),
+        { dome::mosq::Topic(GetRequestTopic(endPointConfig.id()), endPointConfig, processors) }
     );
-    if (!reciever.isValid()) {
+    if (!receiver.isValid()) {
         spdlog::error("Can't setup DHT22 [4]");
         return EXIT_FAILURE;
     }
 
-    reciever.start();
+    receiver.start();
     sender.start();
     while (1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     sender.stop();
-    reciever.stop();
+    receiver.stop();
 
     return EXIT_SUCCESS;
 }

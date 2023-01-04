@@ -1,13 +1,14 @@
 #include "ipcamera.h"
 
+#include <message/message.h>
 #include <spdlog/spdlog.h>
 #include <utils/utils.h>
 
 namespace dome {
 namespace data {
 
-IpCamera::IpCamera(const dome::config::Provider &providerConfig, const dome::config::IpCamera &ipCameraConfig)
-    : m_providerConfig(providerConfig)
+IpCamera::IpCamera(const dome::config::EndPoint &endPointConfig, const dome::config::IpCamera &ipCameraConfig)
+    : m_endPointConfig(endPointConfig)
     , m_ipCameraConfig(ipCameraConfig)
 {
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
@@ -60,8 +61,8 @@ nlohmann::json IpCamera::getData()
     spdlog::trace("{}:{} {}", __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
     nlohmann::json jData;
-    jData["type"] = "data";
-    jData[m_providerConfig.sources()[0].id] = m_photoPath;
+    jData["type"] = dome::message::type::Data;
+    jData[m_endPointConfig.sources()[0].id()] = m_photoPath;
 
     return jData;
 }

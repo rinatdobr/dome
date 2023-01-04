@@ -10,22 +10,24 @@ pkg_check_modules(mosquitto REQUIRED libmosquitto)
 
 set(SOURCE_FILES
     config/core.cpp
+    config/database.cpp
+    config/endpoint.cpp
     config/ipcamera.cpp
     config/openweather.cpp
-    config/provider.cpp
+    config/source.cpp
     config/telegram.cpp
     db/writer.cpp
-    message/dbsaver.cpp
-    message/filesaver.cpp
-    message/get.cpp
-    message/info.cpp
-    message/ipcamera.cpp
-    message/message.cpp
-    message/statistic.cpp
+    message/command/command.cpp
+    message/command/info.cpp
+    message/command/ipcamera.cpp
+    message/command/statistic.cpp
+    message/request/get.cpp
+    message/saver/dbsaver.cpp
+    message/saver/filesaver.cpp
     mosquitto/mosq.cpp
-    mosquitto/reciever.cpp
+    mosquitto/receiver.cpp
     mosquitto/sender.cpp
-    topic/topic.cpp
+    mosquitto/topic.cpp
     utils/dir.cpp
     utils/file.cpp
     utils/threader.cpp
